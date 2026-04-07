@@ -5,7 +5,7 @@ namespace App\Entity;
 use App\Repository\BonusRuleRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-##[ORM\Entity(repositoryClass: BonusRuleRepository::class)]
+#[ORM\Entity(repositoryClass: BonusRuleRepository::class)]
 #[ORM\Table(name: 'bonus_rule')]
 class BonusRule
 {

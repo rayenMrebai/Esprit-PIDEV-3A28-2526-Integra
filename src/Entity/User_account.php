@@ -7,7 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-##[ORM\Entity(repositoryClass: UserAccountRepository::class)]
+#[ORM\Entity(repositoryClass: UserAccountRepository::class)]
 #[ORM\Table(name: 'user_account')]
 class UserAccount
 {
