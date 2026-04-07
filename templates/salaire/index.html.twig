@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Liste des Salaires</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #4CAF50; color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        .btn { padding: 6px 12px; text-decoration: none; border-radius: 4px; color: white; }
+        .btn-blue { background-color: #007bff; }
+        .btn-red { background-color: #dc3545; }
+        .btn-green { background-color: #28a745; }
+        .flash-success { background-color: #d4edda; color: #155724; padding: 10px; margin-bottom: 15px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <h1>📋 Liste des Salaires</h1>
+
+    {% for message in app.flashes('success') %}
+        <div class="flash-success">✅ {{ message }}</div>
+    {% endfor %}
+
+    <a href="{{ path('salaire_new') }}" class="btn btn-green">+ Nouveau Salaire</a>
+    <br><br>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Employé</th>
+                <th>Email</th>
+                <th>Salaire de base</th>
+                <th>Bonus</th>
+                <th>Total</th>
+                <th>Statut</th>
+                <th>Date Paiement</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for salaire in salaires %}
+            <tr>
+                <td>{{ salaire.id }}</td>
+                <td>{{ salaire.user.username }}</td>
+                <td>{{ salaire.user.email }}</td>
+                <td>{{ salaire.baseAmount }} DT</td>
+                <td>{{ salaire.bonusAmount ?? 0 }} DT</td>
+                <td>{{ salaire.totalAmount }} DT</td>
+                <td>{{ salaire.status }}</td>
+                <td>{{ salaire.datePaiement ? salaire.datePaiement|date('d/m/Y') : '-' }}</td>
+                <td>
+                    <a href="{{ path('salaire_show', {id: salaire.id}) }}" class="btn btn-blue">👁 Voir</a>
+                    <a href="{{ path('salaire_edit', {id: salaire.id}) }}" class="btn btn-green">✏️ Modifier</a>
+                    <form method="post" action="{{ path('salaire_delete', {id: salaire.id}) }}" style="display:inline"
+                          onsubmit="return confirm('Supprimer ce salaire ?')">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ salaire.id) }}">
+                        <button type="submit" class="btn btn-red">🗑 Supprimer</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="9" style="text-align:center">Aucun salaire trouvé.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</body>
+</html>

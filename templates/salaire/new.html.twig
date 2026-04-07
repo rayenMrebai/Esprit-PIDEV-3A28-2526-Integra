@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Nouveau Salaire</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 300px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        .btn { padding: 8px 16px; text-decoration: none; border-radius: 4px; color: white; border: none; cursor: pointer; }
+        .btn-green { background-color: #28a745; }
+        .btn-grey { background-color: #6c757d; }
+    </style>
+</head>
+<body>
+
+    <h1>➕ Nouveau Salaire</h1>
+
+    <form method="post" action="{{ path('salaire_new') }}">
+
+        <div class="form-group">
+            <label for="userId">Employé</label>
+            <select name="userId" id="userId" required>
+                <option value="">-- Choisir un employé --</option>
+                {% for user in users %}
+                    <option value="{{ user.userId }}">{{ user.username }} ({{ user.email }})</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="baseAmount">Salaire de base (DT)</label>
+            <input type="number" step="0.01" name="baseAmount" id="baseAmount" required placeholder="Ex: 2500.00">
+        </div>
+
+        <div class="form-group">
+            <label for="datePaiement">Date de paiement</label>
+            <input type="date" name="datePaiement" id="datePaiement" required>
+        </div>
+
+        <div class="form-group">
+            <button type="submit" class="btn btn-green">💾 Enregistrer</button>
+            <a href="{{ path('salaire_index') }}" class="btn btn-grey">❌ Annuler</a>
+        </div>
+
+    </form>
+
+</body>
+</html>
