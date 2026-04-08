@@ -4,92 +4,94 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\SkillRepository;
-
 use App\Entity\Training_program;
-use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity(repositoryClass: SkillRepository::class)]
 class Skill
 {
-
     #[ORM\Id]
+    #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    private int $id;
+    private ?int $id = null;
 
     #[ORM\Column(type: "string", length: 100)]
     private string $nom;
 
-    #[ORM\Column(type: "text")]
-    private string $description;
+    #[ORM\Column(type: "text", nullable: true)]
+    private ?string $description = null;
 
-    #[ORM\Column(type: "integer")]
-    private int $level_required;
+    #[ORM\Column(type: "integer", nullable: true)]
+    private ?int $level_required = null;
 
-    #[ORM\Column(type: "string", length: 50)]
-    private string $categorie;
+    #[ORM\Column(type: "string", length: 50, nullable: true)]
+    private ?string $categorie = null;
 
-        #[ORM\ManyToOne(targetEntity: Training_program::class, inversedBy: "skills")]
-    #[ORM\JoinColumn(name: 'trainingprogram_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
-    private ?Training_program $trainingprogram_id;
+    #[ORM\ManyToOne(targetEntity: Training_program::class, inversedBy: "skills")]
+    #[ORM\JoinColumn(name: 'trainingprogram_id', referencedColumnName: 'id', onDelete: 'SET NULL')]
+    private ?Training_program $trainingProgram = null;
 
-    public function getId()
+    // ──────────────────────────────────────────────────────────────
+    // GETTERS & SETTERS
+    // ──────────────────────────────────────────────────────────────
+
+    public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function setId($value)
-    {
-        $this->id = $value;
-    }
-
-    public function getNom()
+    public function getNom(): string
     {
         return $this->nom;
     }
 
-    public function setNom($value)
+    public function setNom(string $nom): self
     {
-        $this->nom = $value;
+        $this->nom = $nom;
+        return $this;
     }
 
-    public function getDescription()
+    public function getDescription(): ?string
     {
         return $this->description;
     }
 
-    public function setDescription($value)
+    public function setDescription(?string $description): self
     {
-        $this->description = $value;
+        $this->description = $description;
+        return $this;
     }
 
-    public function getLevel_required()
-    {
-        return $this->level_required;
-    }
+public function getLevelRequired(): ?int
+{
+    return $this->level_required;
+}
 
-    public function setLevel_required($value)
-    {
-        $this->level_required = $value;
-    }
+public function setLevelRequired(?int $level_required): self
+{
+    $this->level_required = $level_required;
+    return $this;
+}
 
-    public function getCategorie()
+
+    public function getCategorie(): ?string
     {
         return $this->categorie;
     }
 
-    public function setCategorie($value)
+    public function setCategorie(?string $categorie): self
     {
-        $this->categorie = $value;
+        $this->categorie = $categorie;
+        return $this;
     }
 
-    public function getTrainingprogram_id()
+    public function getTrainingProgram(): ?Training_program
     {
-        return $this->trainingprogram_id;
+        return $this->trainingProgram;
     }
 
-    public function setTrainingprogram_id(?Training_program $value)
+    public function setTrainingProgram(?Training_program $trainingProgram): self
     {
-        $this->trainingprogram_id = $value;
+        $this->trainingProgram = $trainingProgram;
+        return $this;
     }
 }
-

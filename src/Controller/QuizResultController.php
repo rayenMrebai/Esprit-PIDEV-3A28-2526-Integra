@@ -32,7 +32,17 @@ class QuizResultController extends AbstractController
             $entityManager->persist($quizResult);
             $entityManager->flush();
 
+            if ($request->isXmlHttpRequest()) {
+                return new Response(json_encode(['success' => true, 'message' => 'Quiz ajouté avec succès']), 200, ['Content-Type' => 'application/json']);
+            }
             return $this->redirectToRoute('app_quiz_result_index', [], Response::HTTP_SEE_OTHER);
+        }
+
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('quiz_result/_form.html.twig', [
+                'quiz_result' => $quizResult,
+                'form' => $form,
+            ]);
         }
 
         return $this->render('quiz_result/new.html.twig', [
@@ -58,7 +68,17 @@ class QuizResultController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
 
+            if ($request->isXmlHttpRequest()) {
+                return new Response(json_encode(['success' => true, 'message' => 'Quiz modifié avec succès']), 200, ['Content-Type' => 'application/json']);
+            }
             return $this->redirectToRoute('app_quiz_result_index', [], Response::HTTP_SEE_OTHER);
+        }
+
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('quiz_result/_form.html.twig', [
+                'quiz_result' => $quizResult,
+                'form' => $form,
+            ]);
         }
 
         return $this->render('quiz_result/edit.html.twig', [

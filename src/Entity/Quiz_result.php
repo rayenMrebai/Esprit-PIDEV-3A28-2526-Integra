@@ -5,115 +5,117 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\Quiz_resultRepository;
 
-use App\Entity\Training_program;
-
 #[ORM\Entity(repositoryClass: Quiz_resultRepository::class)]
 class Quiz_result
 {
-
     #[ORM\Id]
+    #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    private int $id;
+    private ?int $id = null;
+
+    #[ORM\Column(name: "user_id", type: "integer")]
+    private ?int $userId = null;
+
+    #[ORM\ManyToOne(targetEntity: Training_program::class)]
+    #[ORM\JoinColumn(name: "training_id", referencedColumnName: "id")]
+    private ?Training_program $training = null;
 
     #[ORM\Column(type: "integer")]
-    private int $user_id;
+    private ?int $score = null;
 
-        #[ORM\ManyToOne(targetEntity: Training_program::class, inversedBy: "quiz_results")]
-    #[ORM\JoinColumn(name: 'training_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
-    private Training_program $training_id;
-
-    #[ORM\Column(type: "integer")]
-    private int $score;
-
-    #[ORM\Column(type: "integer")]
-    private int $total_questions;
+    #[ORM\Column(name: "total_questions", type: "integer")]
+    private ?int $totalQuestions = null;
 
     #[ORM\Column(type: "float")]
-    private float $percentage;
+    private ?float $percentage = null;
 
     #[ORM\Column(type: "boolean")]
-    private bool $passed;
+    private ?bool $passed = null;
 
-    #[ORM\Column(type: "datetime")]
-    private \DateTimeInterface $completed_at;
+    #[ORM\Column(name: "completed_at", type: "datetime")]
+    private ?\DateTimeInterface $completedAt = null;
 
-    public function getId()
+    // Getters et setters
+
+    public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function setId($value)
+    public function getUserId(): ?int
     {
-        $this->id = $value;
+        return $this->userId;
     }
 
-    public function getUser_id()
+    public function setUserId(?int $userId): self
     {
-        return $this->user_id;
+        $this->userId = $userId;
+        return $this;
     }
 
-    public function setUser_id($value)
+    public function getTraining(): ?Training_program
     {
-        $this->user_id = $value;
+        return $this->training;
     }
 
-    public function getTraining_id()
+    public function setTraining(?Training_program $training): self
     {
-        return $this->training_id;
+        $this->training = $training;
+        return $this;
     }
 
-    public function setTraining_id($value)
-    {
-        $this->training_id = $value;
-    }
-
-    public function getScore()
+    public function getScore(): ?int
     {
         return $this->score;
     }
 
-    public function setScore($value)
+    public function setScore(?int $score): self
     {
-        $this->score = $value;
+        $this->score = $score;
+        return $this;
     }
 
-    public function getTotal_questions()
+    public function getTotalQuestions(): ?int
     {
-        return $this->total_questions;
+        return $this->totalQuestions;
     }
 
-    public function setTotal_questions($value)
+    public function setTotalQuestions(?int $totalQuestions): self
     {
-        $this->total_questions = $value;
+        $this->totalQuestions = $totalQuestions;
+        return $this;
     }
 
-    public function getPercentage()
+    public function getPercentage(): ?float
     {
         return $this->percentage;
     }
 
-    public function setPercentage($value)
+    public function setPercentage(?float $percentage): self
     {
-        $this->percentage = $value;
+        $this->percentage = $percentage;
+        return $this;
     }
 
-    public function getPassed()
+    public function isPassed(): ?bool
     {
         return $this->passed;
     }
 
-    public function setPassed($value)
+    public function setPassed(?bool $passed): self
     {
-        $this->passed = $value;
+        $this->passed = $passed;
+        return $this;
     }
 
-    public function getCompleted_at()
+    public function getCompletedAt(): ?\DateTimeInterface
     {
-        return $this->completed_at;
+        return $this->completedAt;
     }
 
-    public function setCompleted_at($value)
+    public function setCompletedAt(?\DateTimeInterface $completedAt): self
     {
-        $this->completed_at = $value;
+        $this->completedAt = $completedAt;
+        return $this;
     }
 }

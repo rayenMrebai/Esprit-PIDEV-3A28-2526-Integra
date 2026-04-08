@@ -32,7 +32,17 @@ class TrainingProgramController extends AbstractController
             $entityManager->persist($trainingProgram);
             $entityManager->flush();
 
+            if ($request->isXmlHttpRequest()) {
+                return new Response(json_encode(['success' => true, 'message' => 'Programme créé avec succès']), 200, ['Content-Type' => 'application/json']);
+            }
             return $this->redirectToRoute('app_training_program_index', [], Response::HTTP_SEE_OTHER);
+        }
+
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('training_program/_form.html.twig', [
+                'training_program' => $trainingProgram,
+                'form' => $form,
+            ]);
         }
 
         return $this->render('training_program/new.html.twig', [
@@ -58,7 +68,17 @@ class TrainingProgramController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
 
+            if ($request->isXmlHttpRequest()) {
+                return new Response(json_encode(['success' => true, 'message' => 'Programme modifié avec succès']), 200, ['Content-Type' => 'application/json']);
+            }
             return $this->redirectToRoute('app_training_program_index', [], Response::HTTP_SEE_OTHER);
+        }
+
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('training_program/_form.html.twig', [
+                'training_program' => $trainingProgram,
+                'form' => $form,
+            ]);
         }
 
         return $this->render('training_program/edit.html.twig', [

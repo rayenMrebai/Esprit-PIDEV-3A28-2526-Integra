@@ -23,7 +23,7 @@
     <div class="tab-pane fade show active" id="competences">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="mb-0">Compétences</h4>
-        <a href="{{ path('app_skill_new') }}" class="btn btn-primary">Ajouter une compétence</a>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#skillModal" onclick="openSkillModal('new')">Ajouter une compétence</button>
       </div>
       <div class="table-responsive">
         <table class="table table-striped table-bordered align-middle">
@@ -38,18 +38,21 @@
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="skillTableBody">
             {% for skill in skills %}
               <tr>
                 <td>{{ skill.id }}</td>
                 <td>{{ skill.nom }}</td>
                 <td>{{ skill.description|length > 100 ? skill.description|slice(0, 100) ~ '...' : skill.description }}</td>
-                <td>{{ skill.level_required }}</td>
+                <td>{{ skill.levelRequired }}</td>
                 <td>{{ skill.categorie }}</td>
-                <td>{{ skill.trainingprogram_id ? skill.trainingprogram_id.title : 'N/A' }}</td>
+                <td>{{ skill.trainingProgram ? skill.trainingProgram.title : 'N/A' }}</td>
                 <td>
-                  <a href="{{ path('app_skill_edit', {'id': skill.id}) }}" class="btn btn-sm btn-warning me-1">Éditer</a>
-                  {{ include('skill/_delete_form.html.twig', {'skill': skill}) }}
+                  <button class="btn btn-sm btn-warning me-1" data-bs-toggle="modal" data-bs-target="#skillModal" onclick="openSkillModal('edit', {{ skill.id }})">Éditer</button>
+                  <form method="post" action="{{ path('app_skill_delete', {'id': skill.id}) }}" style="display:inline-block;" onsubmit="return confirm('Confirmer la suppression ?');">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ skill.id) }}">
+    <button class="btn btn-sm btn-danger">Supprimer</button>
+</form>
                 </td>
               </tr>
             {% else %}
@@ -65,7 +68,7 @@
     <div class="tab-pane fade" id="programmes">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="mb-0">Programmes de formation</h4>
-        <a href="{{ path('app_training_program_new') }}" class="btn btn-success">Ajouter un programme</a>
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#trainingModal" onclick="openTrainingModal('new')">Ajouter un programme</button>
       </div>
       <div class="table-responsive">
         <table class="table table-striped table-bordered align-middle">
@@ -80,7 +83,7 @@
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="trainingTableBody">
             {% for training in trainingPrograms %}
               <tr>
                 <td>{{ training.id }}</td>
@@ -90,7 +93,7 @@
                 <td>{{ training.type }}</td>
                 <td>{{ training.status }}</td>
                 <td>
-                  <a href="{{ path('app_training_program_edit', {'id': training.id}) }}" class="btn btn-sm btn-warning me-1">Éditer</a>
+                  <button class="btn btn-sm btn-warning me-1" data-bs-toggle="modal" data-bs-target="#trainingModal" onclick="openTrainingModal('edit', {{ training.id }})">Éditer</button>
                   <a href="{{ path('app_training_program_show', {'id': training.id}) }}" class="btn btn-sm btn-info me-1">Voir</a>
                   <form method="post" action="{{ path('app_training_program_delete', {'id': training.id}) }}" style="display:inline-block;" onsubmit="return confirm('Confirmer la suppression ?');">
                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ training.id) }}">
@@ -111,7 +114,7 @@
     <div class="tab-pane fade" id="quiz">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="mb-0">Quiz</h4>
-        <a href="{{ path('app_quiz_result_new') }}" class="btn btn-info">Ajouter un quiz</a>
+        <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#quizModal" onclick="openQuizModal('new')">Ajouter un quiz</button>
       </div>
       <div class="table-responsive">
         <table class="table table-striped table-bordered align-middle">
@@ -128,19 +131,19 @@
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="quizTableBody">
             {% for quiz in quizResults %}
               <tr>
                 <td>{{ quiz.id }}</td>
-                <td>{{ quiz.user_id }}</td>
-                <td>{{ quiz.training_id ? quiz.training_id.title : 'N/A' }}</td>
+                <td>{{ quiz.user_id ?? quiz.userId ?? 'N/A' }}</td>
+                <td>{{ quiz.training ? quiz.training.title : 'N/A' }}</td>
                 <td>{{ quiz.score }}</td>
-                <td>{{ quiz.total_questions }}</td>
+                <td>{{ quiz.totalQuestions }}</td>
                 <td>{{ quiz.percentage }}%</td>
                 <td>{{ quiz.passed ? 'Oui' : 'Non' }}</td>
-                <td>{{ quiz.completed_at ? quiz.completed_at|date('Y-m-d') : 'N/A' }}</td>
+                <td>{{ quiz.completedAt ? quiz.completedAt|date('Y-m-d') : 'N/A' }}</td>
                 <td>
-                  <a href="{{ path('app_quiz_result_edit', {'id': quiz.id}) }}" class="btn btn-sm btn-warning me-1">Éditer</a>
+                  <button class="btn btn-sm btn-warning me-1" data-bs-toggle="modal" data-bs-target="#quizModal" onclick="openQuizModal('edit', {{ quiz.id }})">Éditer</button>
                   <a href="{{ path('app_quiz_result_show', {'id': quiz.id}) }}" class="btn btn-sm btn-info me-1">Voir</a>
                   <form method="post" action="{{ path('app_quiz_result_delete', {'id': quiz.id}) }}" style="display:inline-block;" onsubmit="return confirm('Confirmer la suppression ?');">
                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ quiz.id) }}">
@@ -158,5 +161,260 @@
       </div>
     </div>
   </div>
+
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <!-- MODALS POUR CRÉATION/ÉDITION                                 -->
+  <!-- ════════════════════════════════════════════════════════════ -->
+
+  <!-- Modal Compétences -->
+  <div class="modal fade" id="skillModal" tabindex="-1" aria-labelledby="skillModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="skillModalLabel">Ajouter/Éditer une compétence</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="skillFormContainer"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-primary" onclick="submitSkillForm()">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Programmes de formation -->
+  <div class="modal fade" id="trainingModal" tabindex="-1" aria-labelledby="trainingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="trainingModalLabel">Ajouter/Éditer un programme</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="trainingFormContainer"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-success" onclick="submitTrainingForm()">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Quiz -->
+  <div class="modal fade" id="quizModal" tabindex="-1" aria-labelledby="quizModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="quizModalLabel">Ajouter/Éditer un quiz</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="quizFormContainer"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-info" onclick="submitQuizForm()">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ──────────────────────────────────
+    // FONCTIONS SKILL
+    // ──────────────────────────────────
+    let currentSkillId = null;
+    
+    function openSkillModal(action, id = null) {
+      currentSkillId = id;
+      const url = action === 'new' 
+        ? '{{ path("app_skill_new") }}'
+        : '{{ path("app_skill_edit", {"id": "SKILLID"}) }}'.replace('SKILLID', id);
+      
+      fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.text())
+        .then(html => {
+          document.getElementById('skillFormContainer').innerHTML = html;
+        })
+        .catch(e => console.error('Erreur:', e));
+    }
+
+    function submitSkillForm() {
+      const form = document.querySelector('#skillFormContainer form');
+      if (!form) {
+        alert('Formulaire non trouvé');
+        return;
+      }
+      
+      const formData = new FormData(form);
+      
+      // Déterminer l'URL correcte
+      const url = currentSkillId ? '/skill/' + currentSkillId + '/edit' : '/skill/new';
+      
+      // Désactiver le bouton
+      const submitBtn = document.querySelector('#skillModal .btn-primary');
+      const originalText = submitBtn ? submitBtn.innerHTML : 'Enregistrer';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Enregistrement...';
+      }
+      
+      fetch(url, {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert(data.message);
+          bootstrap.Modal.getInstance(document.getElementById('skillModal')).hide();
+          location.reload();
+        } else {
+          alert(data.message || 'Erreur lors de l\'enregistrement');
+        }
+      })
+      .catch(error => {
+        console.error('Erreur:', error);
+        alert('Erreur lors de l\'enregistrement: ' + error.message);
+      })
+      .finally(() => {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalText;
+        }
+      });
+    }
+
+    // ──────────────────────────────────
+    // FONCTIONS TRAINING PROGRAM
+    // ──────────────────────────────────
+    let currentTrainingId = null;
+    
+    function openTrainingModal(action, id = null) {
+      currentTrainingId = id;
+      const url = action === 'new' 
+        ? '{{ path("app_training_program_new") }}'
+        : '{{ path("app_training_program_edit", {"id": "TRAININGID"}) }}'.replace('TRAININGID', id);
+      
+      fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.text())
+        .then(html => {
+          document.getElementById('trainingFormContainer').innerHTML = html;
+        })
+        .catch(e => console.error('Erreur:', e));
+    }
+
+    function submitTrainingForm() {
+      const form = document.querySelector('#trainingFormContainer form');
+      if (!form) {
+        alert('Formulaire non trouvé');
+        return;
+      }
+      
+      const formData = new FormData(form);
+      const url = currentTrainingId ? '/training_program/' + currentTrainingId + '/edit' : '/training_program/new';
+      
+      const submitBtn = document.querySelector('#trainingModal .btn-success');
+      const originalText = submitBtn ? submitBtn.innerHTML : 'Enregistrer';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Enregistrement...';
+      }
+      
+      fetch(url, {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert(data.message);
+          bootstrap.Modal.getInstance(document.getElementById('trainingModal')).hide();
+          location.reload();
+        } else {
+          alert(data.message || 'Erreur lors de l\'enregistrement');
+        }
+      })
+      .catch(error => {
+        console.error('Erreur:', error);
+        alert('Erreur lors de l\'enregistrement');
+      })
+      .finally(() => {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalText;
+        }
+      });
+    }
+
+    // ──────────────────────────────────
+    // FONCTIONS QUIZ
+    // ──────────────────────────────────
+    let currentQuizId = null;
+    
+    function openQuizModal(action, id = null) {
+      currentQuizId = id;
+      const url = action === 'new' 
+        ? '{{ path("app_quiz_result_new") }}'
+        : '{{ path("app_quiz_result_edit", {"id": "QUIZID"}) }}'.replace('QUIZID', id);
+      
+      fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.text())
+        .then(html => {
+          document.getElementById('quizFormContainer').innerHTML = html;
+        })
+        .catch(e => console.error('Erreur:', e));
+    }
+
+    function submitQuizForm() {
+      const form = document.querySelector('#quizFormContainer form');
+      if (!form) {
+        alert('Formulaire non trouvé');
+        return;
+      }
+      
+      const formData = new FormData(form);
+      const url = currentQuizId ? '/quiz_result/' + currentQuizId + '/edit' : '/quiz_result/new';
+      
+      const submitBtn = document.querySelector('#quizModal .btn-info');
+      const originalText = submitBtn ? submitBtn.innerHTML : 'Enregistrer';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Enregistrement...';
+      }
+      
+      fetch(url, {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert(data.message);
+          bootstrap.Modal.getInstance(document.getElementById('quizModal')).hide();
+          location.reload();
+        } else {
+          alert(data.message || 'Erreur lors de l\'enregistrement');
+        }
+      })
+      .catch(error => {
+        console.error('Erreur:', error);
+        alert('Erreur lors de l\'enregistrement');
+      })
+      .finally(() => {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalText;
+        }
+      });
+    }
+  </script>
 
 {% endblock %}

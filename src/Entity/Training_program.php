@@ -3,176 +3,188 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Quiz_result;
+use App\Entity\Skill;
 use App\Repository\Training_programRepository;
-
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity(repositoryClass: Training_programRepository::class)]
 class Training_program
 {
-
     #[ORM\Id]
+    #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    private int $id;
+    private ?int $id = null;
 
     #[ORM\Column(type: "string", length: 150)]
     private string $title;
 
-    #[ORM\Column(type: "text")]
-    private string $description;
+    #[ORM\Column(type: "text", nullable: true)]
+    private ?string $description = null;
 
-    #[ORM\Column(type: "integer")]
-    private int $duration;
+    #[ORM\Column(type: "integer", nullable: true)]
+    private ?int $duration = null;
 
-    #[ORM\Column(type: "string", length: 50)]
-    private string $type;
+    #[ORM\Column(type: "string", length: 50, nullable: true)]
+    private ?string $type = null;
 
-    #[ORM\Column(type: "date")]
-    private \DateTimeInterface $start_date;
+    #[ORM\Column(type: "date", nullable: true)]
+    private ?\DateTimeInterface $startDate = null;
 
-    #[ORM\Column(type: "date")]
-    private \DateTimeInterface $end_date;
+    #[ORM\Column(type: "date", nullable: true)]
+    private ?\DateTimeInterface $endDate = null;
 
-    #[ORM\Column(type: "string", length: 20)]
-    private string $status;
+    #[ORM\Column(type: "string", length: 20, nullable: true)]
+    private ?string $status = null;
 
-    public function getId()
+    #[ORM\OneToMany(mappedBy: "trainingProgram", targetEntity: Skill::class)]
+    private Collection $skills;
+
+    #[ORM\OneToMany(mappedBy: "training", targetEntity: Quiz_result::class)]
+    private Collection $quizResults;
+
+    public function __construct()
+    {
+        $this->skills = new ArrayCollection();
+        $this->quizResults = new ArrayCollection();
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // GETTERS & SETTERS
+    // ──────────────────────────────────────────────────────────────
+
+    public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function setId($value)
-    {
-        $this->id = $value;
-    }
-
-    public function getTitle()
+    public function getTitle(): ?string
     {
         return $this->title;
     }
 
-    public function setTitle($value)
+    public function setTitle(string $title): self
     {
-        $this->title = $value;
+        $this->title = $title;
+        return $this;
     }
 
-    public function getDescription()
+    public function getDescription(): ?string
     {
         return $this->description;
     }
 
-    public function setDescription($value)
+    public function setDescription(?string $description): self
     {
-        $this->description = $value;
+        $this->description = $description;
+        return $this;
     }
 
-    public function getDuration()
+    public function getDuration(): ?int
     {
         return $this->duration;
     }
 
-    public function setDuration($value)
+    public function setDuration(?int $duration): self
     {
-        $this->duration = $value;
+        $this->duration = $duration;
+        return $this;
     }
 
-    public function getType()
+    public function getType(): ?string
     {
         return $this->type;
     }
 
-    public function setType($value)
+    public function setType(?string $type): self
     {
-        $this->type = $value;
+        $this->type = $type;
+        return $this;
     }
 
-    public function getStart_date()
+    public function getStartDate(): ?\DateTimeInterface
     {
-        return $this->start_date;
+        return $this->startDate;
     }
 
-    public function setStart_date($value)
+    public function setStartDate(?\DateTimeInterface $startDate): self
     {
-        $this->start_date = $value;
+        $this->startDate = $startDate;
+        return $this;
     }
 
-    public function getEnd_date()
+    public function getEndDate(): ?\DateTimeInterface
     {
-        return $this->end_date;
+        return $this->endDate;
     }
 
-    public function setEnd_date($value)
+    public function setEndDate(?\DateTimeInterface $endDate): self
     {
-        $this->end_date = $value;
+        $this->endDate = $endDate;
+        return $this;
     }
 
-    public function getStatus()
+    public function getStatus(): ?string
     {
         return $this->status;
     }
 
-    public function setStatus($value)
+    public function setStatus(?string $status): self
     {
-        $this->status = $value;
+        $this->status = $status;
+        return $this;
     }
 
-    #[ORM\OneToMany(mappedBy: "training_id", targetEntity: Quiz_result::class)]
-    private Collection $quiz_results;
+    // ──────────────────────────────────────────────────────────────
+    // RELATIONS
+    // ──────────────────────────────────────────────────────────────
 
-        public function getQuiz_results(): Collection
-        {
-            return $this->quiz_results;
-        }
-    
-        public function addQuiz_result(Quiz_result $quiz_result): self
-        {
-            if (!$this->quiz_results->contains($quiz_result)) {
-                $this->quiz_results[] = $quiz_result;
-                $quiz_result->setTraining_id($this);
-            }
-    
-            return $this;
-        }
-    
-        public function removeQuiz_result(Quiz_result $quiz_result): self
-        {
-            if ($this->quiz_results->removeElement($quiz_result)) {
-                // set the owning side to null (unless already changed)
-                if ($quiz_result->getTraining_id() === $this) {
-                    $quiz_result->setTraining_id(null);
-                }
-            }
-    
-            return $this;
-        }
+    public function getSkills(): Collection
+    {
+        return $this->skills;
+    }
 
-    #[ORM\OneToMany(mappedBy: "trainingprogram_id", targetEntity: Skill::class)]
-    private Collection $skills;
+    public function addSkill(Skill $skill): self
+    {
+        if (!$this->skills->contains($skill)) {
+            $this->skills[] = $skill;
+            $skill->setTrainingProgram($this);
+        }
+        return $this;
+    }
 
-        public function getSkills(): Collection
-        {
-            return $this->skills;
-        }
-    
-        public function addSkill(Skill $skill): self
-        {
-            if (!$this->skills->contains($skill)) {
-                $this->skills[] = $skill;
-                $skill->setTrainingprogram_id($this);
+    public function removeSkill(Skill $skill): self
+    {
+        if ($this->skills->removeElement($skill)) {
+            if ($skill->getTrainingProgram() === $this) {
+                $skill->setTrainingProgram(null);
             }
-    
-            return $this;
         }
-    
-        public function removeSkill(Skill $skill): self
-        {
-            if ($this->skills->removeElement($skill)) {
-                // set the owning side to null (unless already changed)
-                if ($skill->getTrainingprogram_id() === $this) {
-                    $skill->setTrainingprogram_id(null);
-                }
+        return $this;
+    }
+
+    public function getQuizResults(): Collection
+    {
+        return $this->quizResults;
+    }
+
+    public function addQuizResult(Quiz_result $quizResult): self
+    {
+        if (!$this->quizResults->contains($quizResult)) {
+            $this->quizResults[] = $quizResult;
+            $quizResult->setTraining($this);
+        }
+        return $this;
+    }
+
+    public function removeQuizResult(Quiz_result $quizResult): self
+    {
+        if ($this->quizResults->removeElement($quizResult)) {
+            if ($quizResult->getTraining() === $this) {
+                $quizResult->setTraining(null);
             }
-    
-            return $this;
         }
+        return $this;
+    }
 }
