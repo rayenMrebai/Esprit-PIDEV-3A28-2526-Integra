@@ -1,0 +1,193 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard Recrutement{% endblock %}
+
+{% block body %}
+    <div class="dashboard-container">
+        <!-- HEADER -->
+        <div class="main-header">
+            <div class="logo-area">
+                <div class="logo-icon">IN</div>
+                <div class="logo-text">
+                    <h1>INTEGRA RECRUITMENT</h1>
+                    <p>Gestion des recrutements</p>
+                </div>
+            </div>
+            <div>
+                <div class="user-info">
+                    <strong>Admin User</strong><br>
+                    <span>Administrateur</span>
+                </div>
+            </div>
+        </div>
+
+        {% for message in app.flashes('success') %}
+            <div class="alert-success" style="background: #d1fae5; color: #065f46; padding: 12px; border-radius: 12px; margin-bottom: 20px;">
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        <!-- SECTION OFFRES -->
+        <div class="card-modern">
+            <div class="section-header">
+                <div class="section-title"><i class="fas fa-briefcase"></i> OFFRES D'EMPLOI</div>
+                <div class="actions-bar">
+                    <a href="{{ path('app_recruitment_dashboard', {'modal': 'job_new'}) }}" class="btn btn-primary"><i class="fas fa-plus"></i> Nouvelle offre</a>
+                </div>
+            </div>
+            <div id="jobsList">
+                {% for job in jobs %}
+                    <div class="job-card {{ job.status|lower == 'closed' ? 'closed' : '' }}" data-job-id="{{ job.idJob }}">
+                        <div class="job-accent"></div>
+                        <div class="job-card-content">
+                            <div class="job-icon-id"><span>💼</span><br><span class="job-id">#{{ job.idJob }}</span></div>
+                            <div class="job-title">{{ job.title }}</div>
+                            <div class="job-department"><label>DÉPARTEMENT</label><div>{{ job.departement }}</div></div>
+                            <div class="job-type"><label>TYPE</label><div>{{ job.employeeType }}</div></div>
+                            <div class="job-date"><label>PUBLIÉ LE</label><div>{{ job.postedAt ? job.postedAt|date('Y-m-d') : '' }}</div></div>
+                            <div class="job-stats">
+                                <span class="candidate-badge"><i class="fas fa-users"></i> {{ job.candidats|length }} candidat(s)</span>
+                                <span class="status-badge {{ job.status|lower == 'open' ? 'open' : 'closed' }}">{{ job.status }}</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 5px; margin-right: 16px;">
+                            <!-- LIEN DIRECT VERS L'ÉDITION -->
+                            <a href="{{ path('app_jobposition_edit', {'idJob': job.idJob}) }}" class="btn btn-warning btn-sm">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <form method="post" action="{{ path('app_jobposition_delete', {'idJob': job.idJob}) }}" onsubmit="return confirm('Supprimer cette offre ?');" style="display: inline;">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ job.idJob) }}">
+                                <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </div>
+                    </div>
+                {% else %}
+                    <p>Aucune offre d'emploi.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- SECTION CANDIDATS -->
+        <div class="card-modern">
+            <div class="section-header">
+                <div class="section-title"><i class="fas fa-users"></i> CANDIDATS</div>
+                <div class="actions-bar">
+                    <a href="{{ path('app_recruitment_dashboard', {'modal': 'candidat_new'}) }}" class="btn btn-success"><i class="fas fa-plus"></i> Ajouter</a>
+                </div>
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="data-table">
+                    <thead>
+                    <tr><th>ID</th><th>Nom complet</th><th>Email</th><th>Niveau</th><th>Statut</th><th>Offre</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody>
+                    {% for candidat in candidats %}
+                        <tr data-candidat-id="{{ candidat.id }}">
+                            <td>{{ candidat.id }}</td>
+                            <td>{{ candidat.firstName }} {{ candidat.lastName }}</td>
+                            <td>{{ candidat.email }}</td>
+                            <td>{{ candidat.educationLevel }}</td>
+                            <td><span class="status-badge open" style="background: var(--primary);">{{ candidat.status }}</span></td>
+                            <td>{{ candidat.jobposition ? candidat.jobposition.title : '-' }}</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <!-- LIEN DIRECT VERS L'ÉDITION -->
+                                    <a href="{{ path('app_candidat_edit', {'id': candidat.id}) }}" class="btn btn-warning btn-sm">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="post" action="{{ path('app_candidat_delete', {'id': candidat.id}) }}" onsubmit="return confirm('Supprimer ce candidat ?');" style="display: inline;">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ candidat.id) }}">
+                                        <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="7">Aucun candidat.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE AJOUT OFFRE -->
+    {% if modal == 'job_new' %}
+        <div id="jobModal" class="modal" style="display: flex;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-briefcase"></i> Ajouter une offre</h3>
+                </div>
+                <div class="modal-body">
+                    <form method="post" action="{{ path('app_recruitment_dashboard') }}?modal=job_new">
+                        <div class="form-grid">
+                            <div class="form-group"><label>Titre</label><input type="text" name="jobposition[title]" class="form-control" required></div>
+                            <div class="form-group"><label>Département</label><input type="text" name="jobposition[departement]" class="form-control" required></div>
+                            <div class="form-group"><label>Type d'emploi</label><input type="text" name="jobposition[employeeType]" class="form-control" required></div>
+                            <div class="form-group"><label>Statut</label>
+                                <select name="jobposition[status]" class="form-control">
+                                    <option value="Open">Open</option>
+                                    <option value="Closed">Closed</option>
+                                </select>
+                            </div>
+                            <div class="form-group full"><label>Description</label><textarea name="jobposition[description]" rows="3" class="form-control"></textarea></div>
+                            <div class="form-group"><label>Date de publication</label><input type="date" name="jobposition[postedAt]" class="form-control"></div>
+                        </div>
+                        {{ form_row(jobForm._token) }}
+                        <div class="modal-footer">
+                            <a href="{{ path('app_recruitment_dashboard') }}" class="btn btn-outline">Annuler</a>
+                            <button type="submit" class="btn btn-success">Enregistrer</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- MODALE AJOUT CANDIDAT -->
+    {% if modal == 'candidat_new' %}
+        <div id="candidatModal" class="modal" style="display: flex;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-user-plus"></i> Ajouter un candidat</h3>
+                </div>
+                <div class="modal-body">
+                    <form method="post" action="{{ path('app_recruitment_dashboard') }}?modal=candidat_new">
+                        <div class="form-grid">
+                            <div class="form-group"><label>Prénom</label><input type="text" name="candidat[firstName]" class="form-control" required></div>
+                            <div class="form-group"><label>Nom</label><input type="text" name="candidat[lastName]" class="form-control" required></div>
+                            <div class="form-group"><label>Email</label><input type="email" name="candidat[email]" class="form-control" required></div>
+                            <div class="form-group"><label>Téléphone</label><input type="text" name="candidat[phone]" class="form-control"></div>
+                            <div class="form-group"><label>Niveau d'études</label><input type="text" name="candidat[educationLevel]" class="form-control"></div>
+                            <div class="form-group"><label>Statut</label><input type="text" name="candidat[status]" class="form-control"></div>
+                            <div class="form-group full"><label>Compétences</label><textarea name="candidat[skills]" rows="2" class="form-control"></textarea></div>
+                            <div class="form-group full"><label>Offre associée</label>
+                                <select name="candidat[jobposition]" class="form-control">
+                                    <option value="">-- Aucune --</option>
+                                    {% for job in jobs %}
+                                        <option value="{{ job.idJob }}">{{ job.title }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        {{ form_row(candidatForm._token) }}
+                        <div class="modal-footer">
+                            <a href="{{ path('app_recruitment_dashboard') }}" class="btn btn-outline">Annuler</a>
+                            <button type="submit" class="btn btn-success">Enregistrer</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Script de fermeture des modales (au cas où elles seraient ouvertes) -->
+    <script>
+        // Fermeture des modales en cliquant sur l'arrière-plan
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
+{% endblock %}

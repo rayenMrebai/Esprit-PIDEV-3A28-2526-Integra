@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Jobposition index{% endblock %}
+
+{% block body %}
+    <h1>Jobposition index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>IdJob</th>
+                <th>Title</th>
+                <th>Departement</th>
+                <th>EmployeeType</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>PostedAt</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for jobposition in jobpositions %}
+            <tr>
+                <td>{{ jobposition.idJob }}</td>
+                <td>{{ jobposition.title }}</td>
+                <td>{{ jobposition.departement }}</td>
+                <td>{{ jobposition.employeeType }}</td>
+                <td>{{ jobposition.description }}</td>
+                <td>{{ jobposition.status }}</td>
+                <td>{{ jobposition.postedAt ? jobposition.postedAt|date('Y-m-d') : '' }}</td>
+                <td>
+                    <a href="{{ path('app_jobposition_show', {'idJob': jobposition.idJob}) }}">show</a>
+                    <a href="{{ path('app_jobposition_edit', {'idJob': jobposition.idJob}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="8">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_jobposition_new') }}">Create new</a>
+{% endblock %}
