@@ -16,21 +16,34 @@ class BackofficeSalaireController extends AbstractController
     #[Route('', name: 'index')]
     public function index(
         Request $request,
-        SalaireRepository        $salaireRepo,
-        BonusRuleRepository      $bonusRuleRepo,
+        SalaireRepository $salaireRepo,
+        BonusRuleRepository $bonusRuleRepo,
         CsrfTokenManagerInterface $csrf
     ): Response {
-        // ⭐ Récupérer le terme de recherche
+        // ⭐ RECHERCHE (par nom employé)
         $search = $request->query->get('search', '');
+        $hasSearch = !empty($search);
 
-        // ⭐ Recherche filtrée si terme présent, sinon findAll
-        if (!empty($search)) {
+        // ⭐ FILTRAGE (statut uniquement)
+        $filterStatus = $request->query->get('filter_status', '');
+        $hasFilter = !empty($filterStatus);
+
+        // ⭐ Logique combinée
+        if ($hasSearch && $hasFilter) {
+            // Recherche + Filtrage par statut
+            $salaires = $salaireRepo->findBySearchAndStatus($search, $filterStatus);
+        } elseif ($hasSearch) {
+            // Uniquement recherche
             $salaires = $salaireRepo->findByUsernameSearch($search);
+        } elseif ($hasFilter) {
+            // Uniquement filtrage par statut
+            $salaires = $salaireRepo->findByStatus($filterStatus);
         } else {
+            // Aucun critère - afficher tout
             $salaires = $salaireRepo->findAll();
         }
 
-        // ── bonusRulesMap : { salaireId => [ règles ] } pour le JS ──
+        // ── bonusRulesMap pour le JS ──
         $bonusRulesMap = [];
         foreach ($salaires as $salaire) {
             $rules = $bonusRuleRepo->findBy(['salaire' => $salaire->getId()]);
@@ -40,18 +53,18 @@ class BackofficeSalaireController extends AbstractController
                 'percentage'    => $r->getPercentage(),
                 'conditionText' => $r->getConditionText(),
                 'status'        => $r->getStatus(),
-                'editUrl'       => $this->generateUrl('bonus_rule_edit',   ['id' => $r->getId()]),
+                'editUrl'       => $this->generateUrl('bonus_rule_edit', ['id' => $r->getId()]),
                 'deleteUrl'     => $this->generateUrl('bonus_rule_delete', ['id' => $r->getId()]),
                 'deleteToken'   => $csrf->getToken('delete' . $r->getId())->getValue(),
             ], $rules);
         }
 
-        // ── salaireUrls : { salaireId => { edit, show, delete, deleteToken } } ──
+        // ── salaireUrls pour le JS ──
         $salaireUrls = [];
         foreach ($salaires as $salaire) {
             $salaireUrls[$salaire->getId()] = [
-                'edit'        => $this->generateUrl('salaire_edit',   ['id' => $salaire->getId()]),
-                'show'        => $this->generateUrl('salaire_show',   ['id' => $salaire->getId()]),
+                'edit'        => $this->generateUrl('salaire_edit', ['id' => $salaire->getId()]),
+                'show'        => $this->generateUrl('salaire_show', ['id' => $salaire->getId()]),
                 'delete'      => $this->generateUrl('salaire_delete', ['id' => $salaire->getId()]),
                 'deleteToken' => $csrf->getToken('delete' . $salaire->getId())->getValue(),
             ];
@@ -61,7 +74,10 @@ class BackofficeSalaireController extends AbstractController
             'salaires'      => $salaires,
             'bonusRulesMap' => $bonusRulesMap,
             'salaireUrls'   => $salaireUrls,
-            'search'        => $search, // ⭐ Passer la recherche au template
+            'search'        => $search,
+            'hasSearch'     => $hasSearch,
+            'filterStatus'  => $filterStatus,
+            'hasFilter'     => $hasFilter,
         ]);
     }
 }

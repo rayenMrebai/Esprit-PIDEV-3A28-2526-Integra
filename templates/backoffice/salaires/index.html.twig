@@ -32,43 +32,98 @@
         <h4 class="fw-bold text-dark mb-1">Employee Salaries</h4>
         <p class="text-muted small mb-3">Manage employee compensation</p>
 
-        {# Barre d'outils #}
-        <div class="d-flex gap-2 mb-3 flex-wrap align-items-center">
-            <form method="get" class="d-flex gap-2" style="max-width:240px;">
-                <input type="text" name="search" id="searchInput" class="form-control"
-                    placeholder="Search employee" value="{{ search }}">
-                <button type="submit" class="btn btn-outline-primary">
-                <i class="bi bi-search"></i>
-                </button>
-                {% if search %}
-                <a href="{{ path('app_backoffice_salaires_index') }}" class="btn btn-outline-secondary">
-                    <i class="bi bi-x"></i>
-                </a>
+        {# ══════════════════════════════════════════
+           SECTION RECHERCHE (par nom employé)
+        ═══════════════════════════════════════════ #}
+        <div class="card mb-2 border-0 shadow-sm bg-light">
+          <div class="card-body p-2">
+            <form method="get" action="{{ path('app_backoffice_salaires_index') }}" class="d-flex gap-2 align-items-center">
+              <div class="input-group">
+                <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                <input type="text" name="search" class="form-control" placeholder="Rechercher un employé..." 
+                       value="{{ search|default('') }}">
+                {% if hasSearch|default(false) %}
+                  <a href="{{ path('app_backoffice_salaires_index') }}" class="btn btn-outline-danger" title="Effacer la recherche">
+                    <i class="bi bi-x-lg"></i>
+                  </a>
                 {% endif %}
+                <button type="submit" class="btn btn-primary">
+                  <i class="bi bi-search me-1"></i> Rechercher
+                </button>
+              </div>
             </form>
-            <a href="{{ path('salaire_new') }}" class="btn btn-success">
-                <i class="bi bi-plus-lg me-1"></i> Add Salary
-            </a>
+            {% if hasSearch|default(false) %}
+              <small class="text-muted mt-1 d-block">
+                <i class="bi bi-check-circle me-1"></i> Recherche : "{{ search }}"
+              </small>
+            {% endif %}
+          </div>
+        </div>
+
+        {# ══════════════════════════════════════════
+           SECTION FILTRAGE (statut uniquement)
+        ═══════════════════════════════════════════ #}
+        <div class="card mb-3 border-0 shadow-sm">
+          <div class="card-body p-2">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <small class="text-muted fw-bold"><i class="bi bi-funnel me-1"></i> Filtrer par statut :</small>
+              {% if hasFilter|default(false) %}
+                <a href="{{ path('app_backoffice_salaires_index', {'search': search}) }}" class="btn btn-sm btn-outline-danger">
+                  <i class="bi bi-x-circle me-1"></i> Effacer filtre
+                </a>
+              {% endif %}
+            </div>
+            
+            <form method="get" action="{{ path('app_backoffice_salaires_index') }}" class="d-flex gap-2">
+              {# Conserver la recherche si présente #}
+              {% if hasSearch|default(false) %}
+                <input type="hidden" name="search" value="{{ search }}">
+              {% endif %}
+              
+              <select name="filter_status" class="form-select">
+                <option value="">-- Tous les statuts --</option>
+                <option value="CREÉ" {% if filterStatus|default('') == 'CREÉ' %}selected{% endif %}>CRÉÉ</option>
+                <option value="EN_COURS" {% if filterStatus|default('') == 'EN_COURS' %}selected{% endif %}>EN COURS</option>
+                <option value="PAYÉ" {% if filterStatus|default('') == 'PAYÉ' %}selected{% endif %}>PAYÉ</option>
+              </select>
+
+              <button type="submit" class="btn btn-outline-primary">
+                <i class="bi bi-funnel-fill me-1"></i> Filtrer
+              </button>
+            </form>
+            
+            {% if hasFilter|default(false) %}
+              <small class="text-muted mt-2 d-block">
+                <i class="bi bi-info-circle me-1"></i> Filtre actif : 
+                <span class="badge bg-info">{{ filterStatus }}</span>
+              </small>
+            {% endif %}
+          </div>
+        </div>
+
+        {# Bouton Ajouter #}
+        <div class="mb-3">
+          <a href="{{ path('salaire_new') }}" class="btn btn-success w-100">
+            <i class="bi bi-plus-lg me-1"></i> Add Salary
+          </a>
         </div>
 
         <hr>
 
         {# En-têtes #}
         <div class="row px-2 mb-2">
-          <div class="col-1  text-muted fw-bold" style="font-size:11px;">ID</div>
-          <div class="col-3  text-muted fw-bold" style="font-size:11px;">Employee</div>
-          <div class="col-2  text-muted fw-bold" style="font-size:11px;">Base</div>
-          <div class="col-2  text-muted fw-bold" style="font-size:11px;">Bonus</div>
-          <div class="col-2  text-muted fw-bold" style="font-size:11px;">Total</div>
-          <div class="col-2  text-muted fw-bold" style="font-size:11px;">Status</div>
+          <div class="col-1 text-muted fw-bold" style="font-size:11px;">ID</div>
+          <div class="col-3 text-muted fw-bold" style="font-size:11px;">Employee</div>
+          <div class="col-2 text-muted fw-bold" style="font-size:11px;">Base</div>
+          <div class="col-2 text-muted fw-bold" style="font-size:11px;">Bonus</div>
+          <div class="col-2 text-muted fw-bold" style="font-size:11px;">Total</div>
+          <div class="col-2 text-muted fw-bold" style="font-size:11px;">Status</div>
         </div>
 
         {# Lignes #}
         <div id="salaryRows">
           {% if salaires|length > 0 %}
             {% for salaire in salaires %}
-
-              {# Badge statut #}
               {% if salaire.status == 'EN_COURS' %}
                 {% set badgeClass = 'text-bg-info' %}
               {% elseif salaire.status == 'PAYÉ' %}
@@ -81,15 +136,7 @@
                    style="cursor:pointer; transition:background .15s;"
                    onmouseover="if(!this.classList.contains('active-row')) this.style.background='#f7fafc'"
                    onmouseout="if(!this.classList.contains('active-row')) this.style.background=''"
-                   onclick="showDetails(this,
-                     {{ salaire.id }},
-                     '{{ salaire.user.username | e('js') }}',
-                     {{ salaire.baseAmount }},
-                     {{ salaire.bonusAmount }},
-                     {{ salaire.totalAmount }},
-                     '{{ salaire.datePaiement | date('Y-m-d') }}',
-                     '{{ salaire.status }}'
-                   )"
+                   onclick="showDetails(this, {{ salaire.id }}, '{{ salaire.user.username | e('js') }}', {{ salaire.baseAmount }}, {{ salaire.bonusAmount }}, {{ salaire.totalAmount }}, '{{ salaire.datePaiement | date('Y-m-d') }}', '{{ salaire.status }}')"
                    data-id="{{ salaire.id }}">
 
                 <div class="col-1 fw-bold text-secondary" style="font-size:13px;">
@@ -112,17 +159,19 @@
                     {{ salaire.status }}
                   </span>
                 </div>
-
               </div>
             {% endfor %}
           {% else %}
             <div class="text-center text-muted py-5">
               <i class="bi bi-inbox fs-2 d-block mb-2"></i>
-              Aucun salaire enregistré.
+              {% if hasSearch|default(false) or hasFilter|default(false) %}
+                Aucun résultat ne correspond aux critères.
+              {% else %}
+                Aucun salaire enregistré.
+              {% endif %}
             </div>
           {% endif %}
         </div>
-
       </div>
     </div>
   </div>
@@ -133,30 +182,23 @@
   <div class="col-lg-7" id="rightPanel" style="display:none;">
     <div class="card h-100">
       <div class="card-body">
-
-        {# Header #}
         <div class="d-flex align-items-start justify-content-between mb-3 flex-wrap gap-2">
           <div>
             <h4 class="fw-bold text-dark mb-0">Salary Details</h4>
             <p class="text-muted small mb-0">Complete salary breakdown</p>
           </div>
           <div class="d-flex gap-2 flex-wrap">
-            {# Générer PDF — lien dynamique mis à jour par JS #}
             <a id="btnPdf" href="#" class="btn btn-sm text-white" style="background:#9f7aea;">
               <i class="bi bi-file-earmark-pdf me-1"></i> Générer PDF
             </a>
-            {# Update — lien dynamique mis à jour par JS #}
             <a id="btnEdit" href="#" class="btn btn-sm btn-primary">Update</a>
-            {# Delete — form POST #}
-            <form id="deleteForm" method="POST" action="#"
-                  onsubmit="return confirm('Supprimer ce salaire ?')">
+            <form id="deleteForm" method="POST" action="#" onsubmit="return confirm('Supprimer ce salaire ?')">
               <input type="hidden" name="_token" id="deleteToken" value="">
               <button type="submit" class="btn btn-sm btn-danger">Delete</button>
             </form>
           </div>
         </div>
 
-        {# Carte résumé #}
         <div class="rounded-3 p-4 mb-3" style="background:#e0e7ff;">
           <h3 class="fw-bold mb-3" id="detailName">—</h3>
           <div class="d-flex gap-5 mb-3">
@@ -176,7 +218,6 @@
           </div>
         </div>
 
-        {# Grille infos #}
         <div class="rounded-3 p-3 mb-3" style="background:#f7fafc;">
           <div class="row mb-2 align-items-center">
             <div class="col-5 text-muted fw-bold" style="font-size:13px;">Payment Date</div>
@@ -192,25 +233,22 @@
 
         <hr>
 
-        {# Bonus Rules #}
         <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
           <div>
             <h5 class="fw-bold mb-0">Bonus Rules</h5>
             <p class="text-muted small mb-0">Manage bonus calculation rules</p>
           </div>
-          <a id="btnAddRule" href="{{ path('bonus_rule_new') }}"
-             class="btn btn-sm text-white" style="background:#9f7aea;">
+          <a id="btnAddRule" href="{{ path('bonus_rule_new') }}" class="btn btn-sm text-white" style="background:#9f7aea;">
             <i class="bi bi-plus-lg me-1"></i> Add Bonus Rule
           </a>
         </div>
 
-        {# En-têtes bonus rules #}
         <div class="row px-2 mb-1">
-          <div class="col-1  text-muted fw-bold" style="font-size:11px;">ID</div>
-          <div class="col-3  text-muted fw-bold" style="font-size:11px;">Rule Name</div>
-          <div class="col-2  text-muted fw-bold" style="font-size:11px;">Percentage</div>
-          <div class="col-3  text-muted fw-bold" style="font-size:11px;">Conditions</div>
-          <div class="col-3  text-muted fw-bold" style="font-size:11px;">Actions</div>
+          <div class="col-1 text-muted fw-bold" style="font-size:11px;">ID</div>
+          <div class="col-3 text-muted fw-bold" style="font-size:11px;">Rule Name</div>
+          <div class="col-2 text-muted fw-bold" style="font-size:11px;">Percentage</div>
+          <div class="col-3 text-muted fw-bold" style="font-size:11px;">Conditions</div>
+          <div class="col-3 text-muted fw-bold" style="font-size:11px;">Actions</div>
         </div>
 
         <div id="bonusRulesList">
@@ -218,25 +256,19 @@
             Cliquez sur un salaire pour voir ses règles.
           </div>
         </div>
-
       </div>
     </div>
   </div>
-
 </div>
 
 {# ── Données JSON pour le JS ── #}
-{# bonusRulesMap : { salaireId: [ {id, nomRegle, percentage, conditionText, status, editUrl, deleteUrl, deleteToken} ] } #}
-{# ── Données JSON pour le JS ── #}
 <script>
-// ⭐ Utiliser json_encode avec JSON_THROW_ON_ERROR et raw filter
 const bonusRulesMap = {{ bonusRulesMap | json_encode(constant('JSON_THROW_ON_ERROR')) | raw }};
 const salaireUrls   = {{ salaireUrls   | json_encode(constant('JSON_THROW_ON_ERROR')) | raw }};
 
 let activeRow = null;
 
 function showDetails(row, id, name, base, bonus, total, date, status) {
-  // Surbrillance
   if (activeRow) {
     activeRow.style.background = '';
     activeRow.classList.remove('active-row');
@@ -247,7 +279,6 @@ function showDetails(row, id, name, base, bonus, total, date, status) {
 
   document.getElementById('rightPanel').style.display = '';
 
-  // Détails
   document.getElementById('detailName').textContent  = name;
   document.getElementById('detailBase').textContent  = formatDT(base);
   document.getElementById('detailBonus').textContent = formatDT(bonus);
@@ -258,13 +289,9 @@ function showDetails(row, id, name, base, bonus, total, date, status) {
   badge.textContent = status;
   badge.className   = 'badge rounded-pill ' + getStatusClass(status);
 
-  // Boutons dynamiques via salaireUrls
   const urls = salaireUrls[id] || {};
-  
-  // ⭐ GRISER LES BOUTONS SI PAYÉ
   const isPaid = (status === 'PAYÉ');
   
-  // Bouton Update
   const btnEdit = document.getElementById('btnEdit');
   btnEdit.href = urls.edit || '#';
   if (isPaid) {
@@ -279,10 +306,8 @@ function showDetails(row, id, name, base, bonus, total, date, status) {
     btnEdit.style.opacity = '';
   }
   
-  // Bouton PDF (toujours actif)
   document.getElementById('btnPdf').href = urls.show || '#';
   
-  // Bouton Delete
   const deleteForm = document.getElementById('deleteForm');
   const deleteBtn = deleteForm.querySelector('button');
   deleteForm.action = urls.delete || '#';
@@ -296,7 +321,6 @@ function showDetails(row, id, name, base, bonus, total, date, status) {
     deleteBtn.classList.add('btn-danger');
   }
 
-  // Bouton Add Bonus Rule
   const btnAddRule = document.getElementById('btnAddRule');
   if (isPaid) {
     btnAddRule.classList.add('disabled');
@@ -308,13 +332,12 @@ function showDetails(row, id, name, base, bonus, total, date, status) {
     btnAddRule.style.opacity = '';
   }
 
-  // Bonus rules
   loadBonusRules(id, status);
 }
 
 function loadBonusRules(salaireId, salaireStatus) {
   const container = document.getElementById('bonusRulesList');
-  const rules     = bonusRulesMap[salaireId] || [];
+  const rules = bonusRulesMap[salaireId] || [];
 
   if (rules.length === 0) {
     container.innerHTML = '<div class="text-center text-muted py-3 small">Aucune règle de bonus pour ce salaire.</div>';
@@ -322,7 +345,6 @@ function loadBonusRules(salaireId, salaireStatus) {
   }
 
   container.innerHTML = rules.map(rule => {
-    // ⭐ Bloquer si règle ACTIVE ou salaire PAYÉ
     const isLocked = rule.status === 'ACTIVE' || salaireStatus === 'PAYÉ';
 
     const editBtn = isLocked
@@ -331,15 +353,13 @@ function loadBonusRules(salaireId, salaireStatus) {
 
     const delBtn = isLocked
       ? `<button class="btn btn-sm btn-secondary" style="opacity:.5;font-size:11px;" disabled>Delete</button>`
-      : `<form method="POST" action="${rule.deleteUrl}" style="display:inline"
-              onsubmit="return confirm('Supprimer cette règle ?')">
+      : `<form method="POST" action="${rule.deleteUrl}" style="display:inline" onsubmit="return confirm('Supprimer cette règle ?')">
            <input type="hidden" name="_token" value="${rule.deleteToken}">
            <button type="submit" class="btn btn-sm btn-danger" style="font-size:11px;">Delete</button>
          </form>`;
 
     return `
-      <div class="row align-items-center px-2 py-2 mb-1 rounded border"
-           style="background:white; font-size:13px;">
+      <div class="row align-items-center px-2 py-2 mb-1 rounded border" style="background:white; font-size:13px;">
         <div class="col-1 fw-bold text-muted">${rule.id}</div>
         <div class="col-3">${rule.nomRegle}</div>
         <div class="col-2 fw-semibold text-success">${rule.percentage}%</div>
@@ -357,11 +377,9 @@ function formatDT(amount) {
 
 function getStatusClass(status) {
   if (status === 'EN_COURS') return 'text-bg-info';
-  if (status === 'PAYÉ')     return 'text-bg-success';
+  if (status === 'PAYÉ') return 'text-bg-success';
   return 'text-bg-warning text-dark';
 }
 </script>
-
-
 
 {% endblock %}
