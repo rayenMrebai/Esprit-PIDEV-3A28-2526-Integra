@@ -12,4 +12,15 @@ class SalaireRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Salaire::class);
     }
+
+    public function findByUsernameSearch(string $search): array
+    {
+        return $this->createQueryBuilder('s')
+            ->join('s.user', 'u')                    // Jointure avec UserAccount
+            ->where('u.username LIKE :search')        // Filtre sur username
+            ->setParameter('search', '%' . $search . '%')
+            ->orderBy('u.username', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

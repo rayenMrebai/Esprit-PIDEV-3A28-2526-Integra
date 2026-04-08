@@ -34,11 +34,21 @@
 
         {# Barre d'outils #}
         <div class="d-flex gap-2 mb-3 flex-wrap align-items-center">
-          <input type="text" id="searchInput" class="form-control"
-                 placeholder="Search employee" style="max-width:240px;">
-          <a href="{{ path('salaire_new') }}" class="btn btn-success">
-            <i class="bi bi-plus-lg me-1"></i> Add Salary
-          </a>
+            <form method="get" class="d-flex gap-2" style="max-width:240px;">
+                <input type="text" name="search" id="searchInput" class="form-control"
+                    placeholder="Search employee" value="{{ search }}">
+                <button type="submit" class="btn btn-outline-primary">
+                <i class="bi bi-search"></i>
+                </button>
+                {% if search %}
+                <a href="{{ path('app_backoffice_salaires_index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x"></i>
+                </a>
+                {% endif %}
+            </form>
+            <a href="{{ path('salaire_new') }}" class="btn btn-success">
+                <i class="bi bi-plus-lg me-1"></i> Add Salary
+            </a>
         </div>
 
         <hr>
@@ -217,9 +227,11 @@
 
 {# ── Données JSON pour le JS ── #}
 {# bonusRulesMap : { salaireId: [ {id, nomRegle, percentage, conditionText, status, editUrl, deleteUrl, deleteToken} ] } #}
+{# ── Données JSON pour le JS ── #}
 <script>
-const bonusRulesMap = {{ bonusRulesMap | json_encode | raw }};
-const salaireUrls   = {{ salaireUrls   | json_encode | raw }};
+// ⭐ Utiliser json_encode avec JSON_THROW_ON_ERROR et raw filter
+const bonusRulesMap = {{ bonusRulesMap | json_encode(constant('JSON_THROW_ON_ERROR')) | raw }};
+const salaireUrls   = {{ salaireUrls   | json_encode(constant('JSON_THROW_ON_ERROR')) | raw }};
 
 let activeRow = null;
 
@@ -348,14 +360,8 @@ function getStatusClass(status) {
   if (status === 'PAYÉ')     return 'text-bg-success';
   return 'text-bg-warning text-dark';
 }
-
-// Recherche live
-document.getElementById('searchInput').addEventListener('keyup', function () {
-  const filter = this.value.toLowerCase();
-  document.querySelectorAll('.salary-row').forEach(row => {
-    row.style.display = row.textContent.toLowerCase().includes(filter) ? '' : 'none';
-  });
-});
 </script>
+
+
 
 {% endblock %}

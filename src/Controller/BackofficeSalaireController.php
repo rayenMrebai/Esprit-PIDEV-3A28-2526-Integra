@@ -1,13 +1,11 @@
 <?php
-// src/Controller/BackofficeSalaireController.php
-// Ce controller gère UNIQUEMENT la page backoffice/salaires (affichage)
-// Le vrai CRUD reste dans SalaireController.php et BonusRuleController.php
 
 namespace App\Controller;
 
 use App\Repository\SalaireRepository;
 use App\Repository\BonusRuleRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
@@ -17,11 +15,20 @@ class BackofficeSalaireController extends AbstractController
 {
     #[Route('', name: 'index')]
     public function index(
+        Request $request,
         SalaireRepository        $salaireRepo,
         BonusRuleRepository      $bonusRuleRepo,
         CsrfTokenManagerInterface $csrf
     ): Response {
-        $salaires = $salaireRepo->findAll();
+        // ⭐ Récupérer le terme de recherche
+        $search = $request->query->get('search', '');
+
+        // ⭐ Recherche filtrée si terme présent, sinon findAll
+        if (!empty($search)) {
+            $salaires = $salaireRepo->findByUsernameSearch($search);
+        } else {
+            $salaires = $salaireRepo->findAll();
+        }
 
         // ── bonusRulesMap : { salaireId => [ règles ] } pour le JS ──
         $bonusRulesMap = [];
@@ -54,6 +61,7 @@ class BackofficeSalaireController extends AbstractController
             'salaires'      => $salaires,
             'bonusRulesMap' => $bonusRulesMap,
             'salaireUrls'   => $salaireUrls,
+            'search'        => $search, // ⭐ Passer la recherche au template
         ]);
     }
 }
