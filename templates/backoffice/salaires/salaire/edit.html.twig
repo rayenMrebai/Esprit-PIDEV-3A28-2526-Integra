@@ -1,0 +1,127 @@
+{% extends 'backoffice/base_backoffice.html.twig' %}
+
+{% block title %}Modifier le Salaire{% endblock %}
+{% block page_title %}Modifier le Salaire{% endblock %}
+{% block breadcrumb %}Salaires / Modifier{% endblock %}
+
+{% block admin_content %}
+
+{# Messages flash #}
+{% for msg in app.flashes('success') %}
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="bi bi-check-circle me-2"></i>{{ msg }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+{% endfor %}
+{% for msg in app.flashes('error') %}
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-circle me-2"></i>{{ msg }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+{% endfor %}
+
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0 text-center"><i class="bi bi-pencil-square me-2"></i>Modifier le Salaire</h5>
+      </div>
+      <div class="card-body p-4">
+        
+        {# ═══════════════════════════════════════════════════════════
+           SECTION INFORMATIONS NON MODIFIABLES (comme votre interface Java)
+        ═══════════════════════════════════════════════════════════ #}
+        <div class="alert alert-secondary mb-4">
+          <h6 class="fw-bold text-dark mb-3 border-bottom pb-2">Informations du Salaire (non modifiables)</h6>
+          
+          <table class="table table-sm table-borderless mb-0">
+            <tbody>
+              <tr>
+                <td style="width: 35%;" class="fw-bold text-muted">Nom d'utilisateur:</td>
+                <td style="width: 65%;" class="text-dark">{{ salaire.user.username }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold text-muted">Salaire de Base:</td>
+                <td class="text-primary">{{ salaire.baseAmount|number_format(2, ',', ' ') }} DT</td>
+              </tr>
+              <tr>
+                <td class="fw-bold text-muted">Bonus:</td>
+                <td class="text-success">{{ salaire.bonusAmount|number_format(2, ',', ' ') }} DT</td>
+              </tr>
+              <tr>
+                <td class="fw-bold text-muted">Total:</td>
+                <td class="fw-bold text-danger" style="font-size: 1.1em;">
+                  {{ salaire.totalAmount|number_format(2, ',', ' ') }} DT
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <hr class="my-4">
+        
+        {# ═══════════════════════════════════════════════════════════
+           SECTION CHAMPS MODIFIABLES
+        ═══════════════════════════════════════════════════════════ #}
+        <h6 class="fw-bold text-center mb-4 text-dark">Champs Modifiables</h6>
+        
+        {# Formulaire avec validation côté serveur uniquement #}
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class': 'needs-validation'}}) }}
+        
+        <table class="table table-borderless align-middle">
+          <tbody>
+            {# Champ Statut #}
+            <tr>
+              <td style="width: 35%;" class="text-end pe-3 align-middle">
+                {{ form_label(form.status, "Statut", {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                <span class="text-danger">*</span>
+              </td>
+              <td style="width: 40%;">
+                {{ form_widget(form.status, {'attr': {'class': 'form-select'}}) }}
+              </td>
+              <td style="width: 25%;" class="align-middle">
+                {{ form_errors(form.status, {'attr': {'class': 'text-danger small d-block'}}) }}
+              </td>
+            </tr>
+            
+            {# Champ Date de Paiement #}
+            <tr>
+              <td class="text-end pe-3 align-middle">
+                {{ form_label(form.datePaiement, "Date de Paiement", {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                <span class="text-danger">*</span>
+              </td>
+              <td>
+                {{ form_widget(form.datePaiement, {'attr': {'class': 'form-control'}}) }}
+              </td>
+              <td class="align-middle">
+                {{ form_errors(form.datePaiement, {'attr': {'class': 'text-danger small d-block'}}) }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        {# Messages d'aide spécifiques #}
+        <div class="alert alert-info small py-2 px-3 mb-3">
+          <i class="bi bi-info-circle me-1"></i>
+          <strong>Note:</strong> Si le statut est "PAYÉ", la date de paiement doit être aujourd'hui.
+        </div>
+        
+        {# Boutons d'action #}
+        <div class="d-flex justify-content-center gap-3 mt-4">
+          {{ form_widget(form.save, {'attr': {'class': 'btn btn-primary px-4'}}) }}
+          <a href="{{ path('salaire_index') }}" class="btn btn-outline-secondary px-4">
+            <i class="bi bi-x-circle me-1"></i> Annuler
+          </a>
+        </div>
+        
+        {# Rendu des champs cachés #}
+        {{ form_rest(form) }}
+        
+        {{ form_end(form) }}
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

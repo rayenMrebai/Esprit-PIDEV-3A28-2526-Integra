@@ -1,0 +1,102 @@
+{% extends 'backoffice/base_backoffice.html.twig' %}
+
+{% block title %}Ajouter un Salaire{% endblock %}
+{% block page_title %}Ajouter un Salaire{% endblock %}
+{% block breadcrumb %}Salaires / Ajouter{% endblock %}
+
+{% block admin_content %}
+
+{# Messages flash #}
+{% for msg in app.flashes('success') %}
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="bi bi-check-circle me-2"></i>{{ msg }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+{% endfor %}
+{% for msg in app.flashes('error') %}
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-circle me-2"></i>{{ msg }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+{% endfor %}
+
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-header bg-success text-white">
+        <h5 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Nouveau Salaire</h5>
+      </div>
+      <div class="card-body p-4">
+        
+        {# Formulaire avec validation côté serveur uniquement (novalidate) #}
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class': 'needs-validation'}}) }}
+        
+        <table class="table table-borderless align-middle">
+          <tbody>
+            {# Champ Employé #}
+            <tr>
+              <td style="width: 30%;" class="text-end pe-3">
+                {{ form_label(form.user, "Employé", {'label_attr': {'class': 'form-label fw-bold'}}) }}
+              </td>
+              <td style="width: 50%;">
+                {{ form_widget(form.user, {'attr': {'class': 'form-select'}}) }}
+              </td>
+              <td style="width: 20%;">
+                {{ form_errors(form.user, {'attr': {'class': 'text-danger small'}}) }}
+              </td>
+            </tr>
+            
+            {# Champ Salaire de Base #}
+            <tr>
+              <td class="text-end pe-3">
+                {{ form_label(form.baseAmount, "Salaire de Base (DT)", {'label_attr': {'class': 'form-label fw-bold'}}) }}
+              </td>
+              <td>
+                {{ form_widget(form.baseAmount, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 3000.00'}}) }}
+              </td>
+              <td>
+                {{ form_errors(form.baseAmount, {'attr': {'class': 'text-danger small'}}) }}
+              </td>
+            </tr>
+            
+            {# Champ Date de Paiement #}
+            <tr>
+              <td class="text-end pe-3">
+                {{ form_label(form.datePaiement, "Date de Paiement", {'label_attr': {'class': 'form-label fw-bold'}}) }}
+              </td>
+              <td>
+                {{ form_widget(form.datePaiement, {'attr': {'class': 'form-control'}}) }}
+              </td>
+              <td>
+                {{ form_errors(form.datePaiement, {'attr': {'class': 'text-danger small'}}) }}
+              </td>
+            </tr>
+            
+            {# Bouton Submit #}
+            <tr>
+              <td></td>
+              <td>
+                {{ form_widget(form.save, {'attr': {'class': 'btn btn-success w-100'}}) }}
+              </td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+        
+        {# Rendu des champs cachés (CSRF token, etc.) #}
+        {{ form_rest(form) }}
+        
+        {{ form_end(form) }}
+        
+        <div class="mt-3 text-center">
+          <a href="{{ path('salaire_index') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Retour à la liste
+          </a>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
