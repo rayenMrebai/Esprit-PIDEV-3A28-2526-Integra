@@ -32,6 +32,17 @@ class SalaireController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Validation supplémentaire : date doit être >= aujourd'hui
+            $datePaiement = $salaire->getDatePaiement();
+            $aujourdhui = new \DateTime('today');
+            
+            if ($datePaiement < $aujourdhui) {
+                $this->addFlash('error', 'La date de paiement ne peut pas être dans le passé.');
+                return $this->render('backoffice/salaires/salaire/new.html.twig', [
+                    'form' => $form->createView(),
+                ]);
+            }
+            
             // Calcul du total
             $salaire->setTotalAmount($salaire->getBaseAmount() + $salaire->getBonusAmount());
             $salaire->setStatus('CREÉ');
@@ -46,7 +57,7 @@ class SalaireController extends AbstractController
         return $this->render('backoffice/salaires/salaire/new.html.twig', [
             'form' => $form->createView(),
         ]);
-    }
+}
 
     #[Route('/{id}', name: 'salaire_show', methods: ['GET'])]
     public function show(Salaire $salaire): Response

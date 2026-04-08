@@ -224,7 +224,6 @@ const salaireUrls   = {{ salaireUrls   | json_encode | raw }};
 let activeRow = null;
 
 function showDetails(row, id, name, base, bonus, total, date, status) {
-
   // Surbrillance
   if (activeRow) {
     activeRow.style.background = '';
@@ -249,13 +248,53 @@ function showDetails(row, id, name, base, bonus, total, date, status) {
 
   // Boutons dynamiques via salaireUrls
   const urls = salaireUrls[id] || {};
-  document.getElementById('btnEdit').href         = urls.edit  || '#';
-  document.getElementById('btnPdf').href          = urls.show  || '#';
-  document.getElementById('deleteForm').action    = urls.delete || '#';
-  document.getElementById('deleteToken').value    = urls.deleteToken || '';
+  
+  // ⭐ GRISER LES BOUTONS SI PAYÉ
+  const isPaid = (status === 'PAYÉ');
+  
+  // Bouton Update
+  const btnEdit = document.getElementById('btnEdit');
+  btnEdit.href = urls.edit || '#';
+  if (isPaid) {
+    btnEdit.classList.add('disabled', 'btn-secondary');
+    btnEdit.classList.remove('btn-primary');
+    btnEdit.style.pointerEvents = 'none';
+    btnEdit.style.opacity = '0.5';
+  } else {
+    btnEdit.classList.remove('disabled', 'btn-secondary');
+    btnEdit.classList.add('btn-primary');
+    btnEdit.style.pointerEvents = '';
+    btnEdit.style.opacity = '';
+  }
+  
+  // Bouton PDF (toujours actif)
+  document.getElementById('btnPdf').href = urls.show || '#';
+  
+  // Bouton Delete
+  const deleteForm = document.getElementById('deleteForm');
+  const deleteBtn = deleteForm.querySelector('button');
+  deleteForm.action = urls.delete || '#';
+  document.getElementById('deleteToken').value = urls.deleteToken || '';
+  deleteBtn.disabled = isPaid;
+  if (isPaid) {
+    deleteBtn.classList.add('btn-secondary');
+    deleteBtn.classList.remove('btn-danger');
+  } else {
+    deleteBtn.classList.remove('btn-secondary');
+    deleteBtn.classList.add('btn-danger');
+  }
 
-  // Désactiver Delete si PAYÉ
-  document.querySelector('#deleteForm button').disabled = (status === 'PAYÉ');
+  // Bouton Add Bonus Rule
+  const btnAddRule = document.getElementById('btnAddRule');
+  if (isPaid) {
+    btnAddRule.classList.add('disabled');
+    btnAddRule.style.pointerEvents = 'none';
+    btnAddRule.style.opacity = '0.5';
+  } else {
+    btnAddRule.classList.remove('disabled');
+    btnAddRule.style.pointerEvents = '';
+    btnAddRule.style.opacity = '';
+  }
 
   // Bonus rules
   loadBonusRules(id, status);
@@ -271,6 +310,7 @@ function loadBonusRules(salaireId, salaireStatus) {
   }
 
   container.innerHTML = rules.map(rule => {
+    // ⭐ Bloquer si règle ACTIVE ou salaire PAYÉ
     const isLocked = rule.status === 'ACTIVE' || salaireStatus === 'PAYÉ';
 
     const editBtn = isLocked
