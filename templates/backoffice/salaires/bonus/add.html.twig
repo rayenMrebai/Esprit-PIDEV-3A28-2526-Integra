@@ -4,29 +4,252 @@
 
 {% block admin_content %}
 
-<h4 class="mb-3">Ajouter une règle de bonus</h4>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
 
-{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+  .br-wrapper {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    font-family: 'DM Sans', sans-serif;
+  }
 
-<div class="mb-3">
-    {{ form_label(form.nomRegle) }}
-    {{ form_widget(form.nomRegle, {'attr': {'class': 'form-control'}}) }}
-    {{ form_errors(form.nomRegle) }}
+  .br-card {
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 20px 60px -10px rgba(0,0,0,0.12);
+    width: 100%;
+    max-width: 520px;
+    overflow: hidden;
+  }
+
+  .br-card-header {
+    background: linear-gradient(135deg, #0f2027 0%, #0d3b4f 60%, #064e3b 100%);
+    padding: 2rem 2.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .br-card-header::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+
+  .br-card-header::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: -20px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(52,211,153,0.08);
+  }
+
+  .br-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(52,211,153,0.15);
+    border: 1px solid rgba(52,211,153,0.3);
+    color: #6ee7b7;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-bottom: 0.75rem;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .br-card-title {
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.02em;
+    position: relative;
+    z-index: 1;
+  }
+
+  .br-card-subtitle {
+    color: rgba(255,255,255,0.45);
+    font-size: 0.82rem;
+    margin: 0.35rem 0 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .br-card-body {
+    padding: 2rem 2.5rem 2.5rem;
+  }
+
+  .br-field {
+    margin-bottom: 1.4rem;
+  }
+
+  .br-label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #6b7280;
+    margin-bottom: 0.45rem;
+  }
+
+  .br-input {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.92rem;
+    color: #111827;
+    background: #fafafa;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    outline: none;
+    box-sizing: border-box;
+  }
+
+  .br-input:focus {
+    border-color: #059669;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(5,150,105,0.08);
+  }
+
+  .br-input.is-invalid {
+    border-color: #ef4444;
+  }
+
+  .br-error {
+    color: #ef4444;
+    font-size: 0.75rem;
+    margin-top: 0.3rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .br-divider {
+    height: 1px;
+    background: #f3f4f6;
+    margin: 1.75rem 0;
+  }
+
+  .br-actions {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .br-btn-primary {
+    flex: 1;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #0f2027, #064e3b);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .br-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(6,78,59,0.35);
+  }
+
+  .br-btn-primary:active { transform: translateY(0); }
+
+  .br-btn-cancel {
+    padding: 0.75rem 1.25rem;
+    background: transparent;
+    color: #6b7280;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  .br-btn-cancel:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+    color: #374151;
+  }
+</style>
+
+<div class="br-wrapper">
+  <div class="br-card">
+
+    <div class="br-card-header">
+      <div class="br-badge">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Nouvelle règle
+      </div>
+      <h2 class="br-card-title">Ajouter une règle de bonus</h2>
+      <p class="br-card-subtitle">Définissez les paramètres de calcul du bonus</p>
+    </div>
+
+    <div class="br-card-body">
+      {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+      <div class="br-field">
+        <label class="br-label">{{ form_label(form.nomRegle)|striptags }}</label>
+        {{ form_widget(form.nomRegle, {'attr': {'class': 'br-input', 'placeholder': 'Ex : Bonus ancienneté'}}) }}
+        {% if form.nomRegle.vars.errors|length %}
+          <div class="br-error">⚠ {{ form_errors(form.nomRegle)|striptags }}</div>
+        {% endif %}
+      </div>
+
+      <div class="br-field">
+        <label class="br-label">{{ form_label(form.percentage)|striptags }}</label>
+        {{ form_widget(form.percentage, {'attr': {'class': 'br-input', 'placeholder': 'Ex : 10'}}) }}
+        {% if form.percentage.vars.errors|length %}
+          <div class="br-error">⚠ {{ form_errors(form.percentage)|striptags }}</div>
+        {% endif %}
+      </div>
+
+      <div class="br-field">
+        <label class="br-label">{{ form_label(form.conditionText)|striptags }}</label>
+        {{ form_widget(form.conditionText, {'attr': {'class': 'br-input', 'placeholder': 'Ex : Si ancienneté > 3 ans', 'rows': '3'}}) }}
+      </div>
+
+      <div class="br-divider"></div>
+
+      <div class="br-actions">
+        <a href="{{ path('app_backoffice_salaires_index') }}" class="br-btn-cancel">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7-7"/></svg>
+          Annuler
+        </a>
+        <button type="submit" class="br-btn-primary">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+          Ajouter la règle
+        </button>
+      </div>
+
+      {{ form_end(form) }}
+    </div>
+
+  </div>
 </div>
-
-<div class="mb-3">
-    {{ form_label(form.percentage) }}
-    {{ form_widget(form.percentage, {'attr': {'class': 'form-control'}}) }}
-    {{ form_errors(form.percentage) }}
-</div>
-
-<div class="mb-3">
-    {{ form_label(form.conditionText) }}
-    {{ form_widget(form.conditionText, {'attr': {'class': 'form-control'}}) }}
-</div>
-
-<button class="btn btn-success">Ajouter</button>
-
-{{ form_end(form) }}
 
 {% endblock %}

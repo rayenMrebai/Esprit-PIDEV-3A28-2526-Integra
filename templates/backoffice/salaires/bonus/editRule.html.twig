@@ -4,34 +4,337 @@
 
 {% block admin_content %}
 
-<h4 class="mb-3">Modifier la règle</h4>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
 
-{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+  .br-wrapper {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    font-family: 'DM Sans', sans-serif;
+  }
 
-<div class="mb-3">
-    {{ form_label(form.nomRegle) }}
-    {{ form_widget(form.nomRegle, {'attr': {'class': 'form-control'}}) }}
-    {{ form_errors(form.nomRegle) }}
+  .br-card {
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 20px 60px -10px rgba(0,0,0,0.12);
+    width: 100%;
+    max-width: 520px;
+    overflow: hidden;
+  }
+
+  .br-card-header {
+    background: linear-gradient(135deg, #0f2027 0%, #1a3a2a 60%, #0d4a2f 100%);
+    padding: 2rem 2.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .br-card-header::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.03);
+  }
+
+  .br-card-header::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: -20px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(52,211,153,0.07);
+  }
+
+  .br-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(52,211,153,0.15);
+    border: 1px solid rgba(52,211,153,0.3);
+    color: #6ee7b7;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-bottom: 0.75rem;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .br-card-title {
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.02em;
+    position: relative;
+    z-index: 1;
+  }
+
+  .br-card-subtitle {
+    color: rgba(255,255,255,0.4);
+    font-size: 0.82rem;
+    margin: 0.35rem 0 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .br-card-body {
+    padding: 2rem 2.5rem 2.5rem;
+  }
+
+  .br-field {
+    margin-bottom: 1.4rem;
+  }
+
+  .br-label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #6b7280;
+    margin-bottom: 0.45rem;
+  }
+
+  .br-input {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.92rem;
+    color: #111827;
+    background: #fafafa;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    outline: none;
+    box-sizing: border-box;
+  }
+
+  .br-input:focus {
+    border-color: #059669;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(5,150,105,0.08);
+  }
+
+  .br-error {
+    color: #ef4444;
+    font-size: 0.75rem;
+    margin-top: 0.3rem;
+  }
+
+  .br-status-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+  }
+
+  .br-status-option {
+    position: relative;
+  }
+
+  .br-status-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0; height: 0;
+  }
+
+  .br-status-option label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0.85rem;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #9ca3af;
+    background: #fafafa;
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .br-status-option input[type="radio"]:checked + label {
+    border-color: #10b981;
+    background: #ecfdf5;
+    color: #065f46;
+    box-shadow: 0 0 0 3px rgba(16,185,129,0.1);
+  }
+
+  .br-status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.6;
+  }
+
+  .br-divider {
+    height: 1px;
+    background: #f3f4f6;
+    margin: 1.75rem 0;
+  }
+
+  .br-actions {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .br-btn-primary {
+    flex: 1;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #0f2027, #065f46);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .br-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(6,95,70,0.35);
+  }
+
+  .br-btn-primary:active { transform: translateY(0); }
+
+  .br-btn-cancel {
+    padding: 0.75rem 1.25rem;
+    background: transparent;
+    color: #6b7280;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  .br-btn-cancel:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+    color: #374151;
+  }
+</style>
+
+<div class="br-wrapper">
+  <div class="br-card">
+
+    <div class="br-card-header">
+      <div class="br-badge">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Édition
+      </div>
+      <h2 class="br-card-title">Modifier la règle</h2>
+      <p class="br-card-subtitle">Mettez à jour les paramètres de cette règle de bonus</p>
+    </div>
+
+    <div class="br-card-body">
+      {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+      <div class="br-field">
+        <label class="br-label">{{ form_label(form.nomRegle)|striptags }}</label>
+        {{ form_widget(form.nomRegle, {'attr': {'class': 'br-input'}}) }}
+        {% if form.nomRegle.vars.errors|length %}
+          <div class="br-error">⚠ {{ form_errors(form.nomRegle)|striptags }}</div>
+        {% endif %}
+      </div>
+
+      <div class="br-field">
+        <label class="br-label">{{ form_label(form.percentage)|striptags }}</label>
+        {{ form_widget(form.percentage, {'attr': {'class': 'br-input'}}) }}
+        {% if form.percentage.vars.errors|length %}
+          <div class="br-error">⚠ {{ form_errors(form.percentage)|striptags }}</div>
+        {% endif %}
+      </div>
+
+      <div class="br-field">
+        <label class="br-label">{{ form_label(form.conditionText)|striptags }}</label>
+        {{ form_widget(form.conditionText, {'attr': {'class': 'br-input', 'rows': '3'}}) }}
+      </div>
+
+      <div class="br-field">
+        <span class="br-label">Statut</span>
+        <div class="br-status-grid">
+          <div class="br-status-option">
+            <input type="radio" name="status_ui" id="status_cree" value="CRÉE"
+              {% if form.status.vars.value == 'CRÉE' %}checked{% endif %}>
+            <label for="status_cree">
+              <span class="br-status-dot" style="color:#6b7280"></span>
+              Créé
+            </label>
+          </div>
+          <div class="br-status-option">
+            <input type="radio" name="status_ui" id="status_active" value="ACTIVE"
+              {% if form.status.vars.value == 'ACTIVE' %}checked{% endif %}>
+            <label for="status_active">
+              <span class="br-status-dot" style="color:#10b981"></span>
+              Active
+            </label>
+          </div>
+        </div>
+        {# Select Symfony caché — mis à jour par le JS #}
+        <div style="display:none">{{ form_widget(form.status) }}</div>
+      </div>
+
+      <div class="br-divider"></div>
+
+      <div class="br-actions">
+        <a href="{{ path('app_backoffice_salaires_index') }}" class="br-btn-cancel">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7-7"/></svg>
+          Annuler
+        </a>
+        <button type="submit" class="br-btn-primary">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Mettre à jour
+        </button>
+      </div>
+
+      {{ form_end(form) }}
+    </div>
+
+  </div>
 </div>
 
-<div class="mb-3">
-    {{ form_label(form.percentage) }}
-    {{ form_widget(form.percentage, {'attr': {'class': 'form-control'}}) }}
-    {{ form_errors(form.percentage) }}
-</div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const radios = document.querySelectorAll('input[name="status_ui"]');
+    const select = document.querySelector('select[name="{{ form.status.vars.full_name }}"]');
 
-<div class="mb-3">
-    {{ form_label(form.conditionText) }}
-    {{ form_widget(form.conditionText, {'attr': {'class': 'form-control'}}) }}
-</div>
+    if (!select) return;
 
-<div class="mb-3">
-    {{ form_label(form.status) }}
-    {{ form_widget(form.status, {'attr': {'class': 'form-select'}}) }}
-</div>
-
-<button class="btn btn-primary">Mettre à jour</button>
-
-{{ form_end(form) }}
+    // Init : synchronise le radio avec la valeur actuelle du select
+    radios.forEach(function(radio) {
+        if (radio.value === select.value) {
+            radio.checked = true;
+        }
+        // À chaque changement de radio → mettre à jour le select
+        radio.addEventListener('change', function () {
+            select.value = this.value;
+        });
+    });
+});
+</script>
 
 {% endblock %}
