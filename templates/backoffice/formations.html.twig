@@ -290,68 +290,68 @@
       });
     }
 
-    // ──────────────────────────────────
-    // FONCTIONS TRAINING PROGRAM
-    // ──────────────────────────────────
-    let currentTrainingId = null;
-    
-    function openTrainingModal(action, id = null) {
-      currentTrainingId = id;
-      const url = action === 'new' 
+// ──────────────────────────────────
+// FONCTIONS TRAINING PROGRAM
+// ──────────────────────────────────
+let currentTrainingId = null;
+
+function openTrainingModal(action, id = null) {
+    currentTrainingId = id;
+    const url = action === 'new' 
         ? '{{ path("app_training_program_new") }}'
         : '{{ path("app_training_program_edit", {"id": "TRAININGID"}) }}'.replace('TRAININGID', id);
-      
-      fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+    
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
         .then(r => r.text())
         .then(html => {
-          document.getElementById('trainingFormContainer').innerHTML = html;
+            document.getElementById('trainingFormContainer').innerHTML = html;
         })
         .catch(e => console.error('Erreur:', e));
-    }
+}
 
-    function submitTrainingForm() {
-      const form = document.querySelector('#trainingFormContainer form');
-      if (!form) {
+function submitTrainingForm() {
+    const form = document.querySelector('#trainingFormContainer form');
+    if (!form) {
         alert('Formulaire non trouvé');
         return;
-      }
-      
-      const formData = new FormData(form);
-      const url = currentTrainingId ? '/training_program/' + currentTrainingId + '/edit' : '/training_program/new';
-      
-      const submitBtn = document.querySelector('#trainingModal .btn-success');
-      const originalText = submitBtn ? submitBtn.innerHTML : 'Enregistrer';
-      if (submitBtn) {
+    }
+    
+    const formData = new FormData(form);
+    const url = currentTrainingId ? '/training-program/' + currentTrainingId + '/edit' : '/training-program/new';
+    
+    const submitBtn = document.querySelector('#trainingModal .btn-success');
+    const originalText = submitBtn ? submitBtn.innerHTML : 'Enregistrer';
+    if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Enregistrement...';
-      }
-      
-      fetch(url, {
+    }
+    
+    fetch(url, {
         method: 'POST',
         body: formData,
         headers: { 'X-Requested-With': 'XMLHttpRequest' }
-      })
-      .then(response => response.json())
-      .then(data => {
+    })
+    .then(response => response.json())
+    .then(data => {
         if (data.success) {
-          alert(data.message);
-          bootstrap.Modal.getInstance(document.getElementById('trainingModal')).hide();
-          location.reload();
+            alert(data.message);
+            bootstrap.Modal.getInstance(document.getElementById('trainingModal')).hide();
+            location.reload();
         } else {
-          alert(data.message || 'Erreur lors de l\'enregistrement');
+            alert(data.message || 'Erreur lors de l\'enregistrement');
         }
-      })
-      .catch(error => {
+    })
+    .catch(error => {
         console.error('Erreur:', error);
         alert('Erreur lors de l\'enregistrement');
-      })
-      .finally(() => {
+    })
+    .finally(() => {
         if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
         }
-      });
-    }
+    });
+}
 
     // ──────────────────────────────────
     // FONCTIONS QUIZ

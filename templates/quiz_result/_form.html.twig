@@ -1,4 +1,38 @@
-{{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn" style="display: none;">{{ button_label|default('Save') }}</button>
+{{ form_start(form, {'attr': {'id': 'quiz-form'}})}}
+    <div class="mb-3">
+        {{ form_label(form.userId, 'ID Utilisateur', {'label_attr': {'class': 'form-label'}})}}
+        {{ form_widget(form.userId, {'attr': {'class': 'form-control'}})}}
+        {{ form_errors(form.userId) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.training, 'Formation', {'label_attr': {'class': 'form-label'}})}}
+        {{ form_widget(form.training, {'attr': {'class': 'form-select'}})}}
+        {{ form_errors(form.training) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.score, 'Score', {'label_attr': {'class': 'form-label'}})}}
+        {{ form_widget(form.score, {'attr': {'class': 'form-control'}})}}
+        {{ form_errors(form.score) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.totalQuestions, 'Total questions', {'label_attr': {'class': 'form-label'}})}}
+        {{ form_widget(form.totalQuestions, {'attr': {'class': 'form-control'}})}}
+        {{ form_errors(form.totalQuestions) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.percentage, 'Pourcentage', {'label_attr': {'class': 'form-label'}})}}
+        {{ form_widget(form.percentage, {'attr': {'class': 'form-control'}})}}
+        {{ form_errors(form.percentage) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.passed, 'Réussi', {'label_attr': {'class': 'form-check-label'}})}}
+        {{ form_widget(form.passed, {'attr': {'class': 'form-check-input'}})}}
+        {{ form_errors(form.passed) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.completedAt, 'Date de complétion', {'label_attr': {'class': 'form-label'}})}}
+        {{ form_widget(form.completedAt, {'attr': {'class': 'form-control'}})}}
+        {{ form_errors(form.completedAt) }}
+    </div>
+    {{ form_rest(form) }}
 {{ form_end(form) }}

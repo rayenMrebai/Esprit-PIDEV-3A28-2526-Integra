@@ -1,4 +1,38 @@
-{{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn" style="display: none;">{{ button_label|default('Save') }}</button>
+{{ form_start(form, {'attr': {'id': 'training-form'}})}}
+    <div class="mb-3">
+        {{ form_label(form.title, 'Titre', {'label_attr': {'class': 'form-label'}})}}
+        {{ form_widget(form.title, {'attr': {'class': 'form-control'}})}}
+        {{ form_errors(form.title) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label'}})}}
+        {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 4}})}}
+        {{ form_errors(form.description) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.duration, 'Durée (heures)', {'label_attr': {'class': 'form-label'}})}}
+        {{ form_widget(form.duration, {'attr': {'class': 'form-control'}})}}
+        {{ form_errors(form.duration) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.type, 'Type', {'label_attr': {'class': 'form-label'}})}}
+        {{ form_widget(form.type, {'attr': {'class': 'form-control'}})}}
+        {{ form_errors(form.type) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.startDate, 'Date de début', {'label_attr': {'class': 'form-label'}})}}
+        {{ form_widget(form.startDate, {'attr': {'class': 'form-control'}})}}
+        {{ form_errors(form.startDate) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.endDate, 'Date de fin', {'label_attr': {'class': 'form-label'}})}}
+        {{ form_widget(form.endDate, {'attr': {'class': 'form-control'}})}}
+        {{ form_errors(form.endDate) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.status, 'Statut', {'label_attr': {'class': 'form-label'}})}}
+        {{ form_widget(form.status, {'attr': {'class': 'form-control'}})}}
+        {{ form_errors(form.status) }}
+    </div>
+    {{ form_rest(form) }}
 {{ form_end(form) }}
