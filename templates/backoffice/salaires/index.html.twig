@@ -25,103 +25,83 @@
   {# ══════════════════════════════════════════
      COLONNE GAUCHE — Liste des salaires
   ══════════════════════════════════════════ #}
-  <div class="col-lg-5" id="leftPanel">
+  <div class="col-lg-6" id="leftPanel">
     <div class="card h-100">
-      <div class="card-body">
+      <div class="card-body d-flex flex-column" style="gap:0;">
 
-        <h4 class="fw-bold text-dark mb-1">Employee Salaries</h4>
-        <p class="text-muted small mb-3">Manage employee compensation</p>
-
-        {# ══════════════════════════════════════════
-           SECTION RECHERCHE (par nom employé)
-        ═══════════════════════════════════════════ #}
-        <div class="card mb-2 border-0 shadow-sm bg-light">
-          <div class="card-body p-2">
-            <form method="get" action="{{ path('app_backoffice_salaires_index') }}" class="d-flex gap-2 align-items-center">
-              <div class="input-group">
-                <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
-                <input type="text" name="search" class="form-control" placeholder="Rechercher un employé..." 
-                       value="{{ search|default('') }}">
-                {% if hasSearch|default(false) %}
-                  <a href="{{ path('app_backoffice_salaires_index') }}" class="btn btn-outline-danger" title="Effacer la recherche">
-                    <i class="bi bi-x-lg"></i>
-                  </a>
-                {% endif %}
-                <button type="submit" class="btn btn-primary">
-                  <i class="bi bi-search me-1"></i> Rechercher
-                </button>
-              </div>
-            </form>
-            {% if hasSearch|default(false) %}
-              <small class="text-muted mt-1 d-block">
-                <i class="bi bi-check-circle me-1"></i> Recherche : "{{ search }}"
-              </small>
-            {% endif %}
+        {# ── Header + barre d'outils inline ── #}
+        <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
+          <div>
+            <h5 class="fw-bold text-dark mb-0" style="font-size:15px;">Employee Salaries</h5>
+            <span class="text-muted" style="font-size:11px;">Manage employee compensation</span>
           </div>
-        </div>
-
-        {# ══════════════════════════════════════════
-           SECTION FILTRAGE (statut uniquement)
-        ═══════════════════════════════════════════ #}
-        <div class="card mb-3 border-0 shadow-sm">
-          <div class="card-body p-2">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <small class="text-muted fw-bold"><i class="bi bi-funnel me-1"></i> Filtrer par statut :</small>
-              {% if hasFilter|default(false) %}
-                <a href="{{ path('app_backoffice_salaires_index', {'search': search}) }}" class="btn btn-sm btn-outline-danger">
-                  <i class="bi bi-x-circle me-1"></i> Effacer filtre
-                </a>
-              {% endif %}
-            </div>
-            
-            <form method="get" action="{{ path('app_backoffice_salaires_index') }}" class="d-flex gap-2">
-              {# Conserver la recherche si présente #}
-              {% if hasSearch|default(false) %}
-                <input type="hidden" name="search" value="{{ search }}">
-              {% endif %}
-              
-              <select name="filter_status" class="form-select">
-                <option value="">-- Tous les statuts --</option>
-                <option value="CREÉ" {% if filterStatus|default('') == 'CREÉ' %}selected{% endif %}>CRÉÉ</option>
-                <option value="EN_COURS" {% if filterStatus|default('') == 'EN_COURS' %}selected{% endif %}>EN COURS</option>
-                <option value="PAYÉ" {% if filterStatus|default('') == 'PAYÉ' %}selected{% endif %}>PAYÉ</option>
-              </select>
-
-              <button type="submit" class="btn btn-outline-primary">
-                <i class="bi bi-funnel-fill me-1"></i> Filtrer
-              </button>
-            </form>
-            
-            {% if hasFilter|default(false) %}
-              <small class="text-muted mt-2 d-block">
-                <i class="bi bi-info-circle me-1"></i> Filtre actif : 
-                <span class="badge bg-info">{{ filterStatus }}</span>
-              </small>
-            {% endif %}
-          </div>
-        </div>
-
-        {# Bouton Ajouter #}
-        <div class="mb-3">
-          <a href="{{ path('salaire_new') }}" class="btn btn-success w-100">
-            <i class="bi bi-plus-lg me-1"></i> Add Salary
+          <a href="{{ path('salaire_new') }}" class="btn btn-success btn-sm">
+            <i class="bi bi-plus-lg me-1"></i> Ajouter
           </a>
         </div>
 
-        <hr>
+        {# ── Recherche + filtre sur une seule ligne ── #}
+        <div class="d-flex gap-2 mb-2 align-items-center flex-wrap" style="background:#f8fafc; border-radius:8px; padding:8px 10px; border:0.5px solid #e2e8f0;">
 
-        {# En-têtes #}
-        <div class="row px-2 mb-2">
-          <div class="col-1 text-muted fw-bold" style="font-size:11px;">ID</div>
-          <div class="col-3 text-muted fw-bold" style="font-size:11px;">Employee</div>
-          <div class="col-2 text-muted fw-bold" style="font-size:11px;">Base</div>
-          <div class="col-2 text-muted fw-bold" style="font-size:11px;">Bonus</div>
-          <div class="col-2 text-muted fw-bold" style="font-size:11px;">Total</div>
-          <div class="col-2 text-muted fw-bold" style="font-size:11px;">Status</div>
+          {# Recherche #}
+          <form method="get" action="{{ path('app_backoffice_salaires_index') }}" class="d-flex gap-1 align-items-center flex-grow-1" style="min-width:160px;">
+            <div class="input-group input-group-sm" style="max-width:220px;">
+              <span class="input-group-text bg-white px-2"><i class="bi bi-search" style="font-size:11px;"></i></span>
+              <input type="text" name="search" class="form-control form-control-sm" placeholder="Rechercher..." value="{{ search|default('') }}" style="font-size:12px;">
+              {% if hasSearch|default(false) %}
+                <a href="{{ path('app_backoffice_salaires_index') }}" class="btn btn-outline-danger btn-sm px-2" title="Effacer"><i class="bi bi-x" style="font-size:12px;"></i></a>
+              {% endif %}
+              <button type="submit" class="btn btn-primary btn-sm px-2" style="font-size:11px;">OK</button>
+            </div>
+          </form>
+
+          {# Séparateur #}
+          <div style="width:1px; height:24px; background:#e2e8f0;"></div>
+
+          {# Filtre statut #}
+          <form method="get" action="{{ path('app_backoffice_salaires_index') }}" class="d-flex gap-1 align-items-center">
+            {% if hasSearch|default(false) %}
+              <input type="hidden" name="search" value="{{ search }}">
+            {% endif %}
+            <select name="filter_status" class="form-select form-select-sm" style="font-size:11px; width:auto; min-width:120px;">
+              <option value="">Tous les statuts</option>
+              <option value="CREÉ" {% if filterStatus|default('') == 'CREÉ' %}selected{% endif %}>CRÉÉ</option>
+              <option value="EN_COURS" {% if filterStatus|default('') == 'EN_COURS' %}selected{% endif %}>EN COURS</option>
+              <option value="PAYÉ" {% if filterStatus|default('') == 'PAYÉ' %}selected{% endif %}>PAYÉ</option>
+            </select>
+            <button type="submit" class="btn btn-outline-primary btn-sm px-2" style="font-size:11px;"><i class="bi bi-funnel-fill"></i></button>
+            {% if hasFilter|default(false) %}
+              <a href="{{ path('app_backoffice_salaires_index', {'search': search}) }}" class="btn btn-outline-danger btn-sm px-2" title="Effacer filtre"><i class="bi bi-x" style="font-size:12px;"></i></a>
+            {% endif %}
+          </form>
         </div>
 
-        {# Lignes #}
-        <div id="salaryRows">
+        {# Badges actifs #}
+        {% if hasSearch|default(false) or hasFilter|default(false) %}
+          <div class="d-flex gap-2 mb-2 flex-wrap" style="font-size:11px;">
+            {% if hasSearch|default(false) %}
+              <span class="badge bg-secondary fw-normal"><i class="bi bi-search me-1"></i>{{ search }}</span>
+            {% endif %}
+            {% if hasFilter|default(false) %}
+              <span class="badge bg-info text-dark fw-normal"><i class="bi bi-funnel me-1"></i>{{ filterStatus }}</span>
+            {% endif %}
+          </div>
+        {% endif %}
+
+        <hr class="my-2">
+
+        {# En-têtes #}
+        <div class="row px-2 mb-1" style="font-size:10px; text-transform:uppercase; letter-spacing:.04em; color:#94a3b8; font-weight:700;">
+          <div class="col-1">ID</div>
+          <div class="col-3">Employé</div>
+          <div class="col-2">Base</div>
+          <div class="col-2">Bonus</div>
+          <div class="col-2">Total</div>
+          <div class="col-2">Statut</div>
+        </div>
+
+        {# Lignes — scrollable si nécessaire #}
+        <div id="salaryRows" style="overflow-y:auto; flex:1;">
           {% if salaires|length > 0 %}
             {% for salaire in salaires %}
               {% if salaire.status == 'EN_COURS' %}
@@ -132,32 +112,20 @@
                 {% set badgeClass = 'text-bg-warning text-dark' %}
               {% endif %}
 
-              <div class="salary-row row align-items-center px-2 py-3 rounded mb-1"
-                   style="cursor:pointer; transition:background .15s;"
+              <div class="salary-row row align-items-center px-2 py-2 rounded mb-1"
+                   style="cursor:pointer; transition:background .15s; font-size:12px;"
                    onmouseover="if(!this.classList.contains('active-row')) this.style.background='#f7fafc'"
                    onmouseout="if(!this.classList.contains('active-row')) this.style.background=''"
                    onclick="showDetails(this, {{ salaire.id }}, '{{ salaire.user.username | e('js') }}', {{ salaire.baseAmount }}, {{ salaire.bonusAmount }}, {{ salaire.totalAmount }}, '{{ salaire.datePaiement | date('Y-m-d') }}', '{{ salaire.status }}')"
                    data-id="{{ salaire.id }}">
 
-                <div class="col-1 fw-bold text-secondary" style="font-size:13px;">
-                  {{ salaire.user.userId }}
-                </div>
-                <div class="col-3" style="font-size:13px; color:#2d3748;">
-                  {{ salaire.user.username }}
-                </div>
-                <div class="col-2" style="font-size:13px; color:#2b6cb0;">
-                  {{ salaire.baseAmount | number_format(2, ',', ' ') }} DT
-                </div>
-                <div class="col-2 fw-semibold" style="font-size:13px; color:#38a169;">
-                  {{ salaire.bonusAmount | number_format(2, ',', ' ') }} DT
-                </div>
-                <div class="col-2 fw-bold" style="font-size:14px; color:#5a67d8;">
-                  {{ salaire.totalAmount | number_format(2, ',', ' ') }} DT
-                </div>
+                <div class="col-1 fw-bold text-secondary" style="font-size:11px;">{{ salaire.user.userId }}</div>
+                <div class="col-3" style="color:#2d3748; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ salaire.user.username }}</div>
+                <div class="col-2" style="color:#2b6cb0;">{{ salaire.baseAmount | number_format(2, ',', ' ') }} DT</div>
+                <div class="col-2 fw-semibold" style="color:#38a169;">{{ salaire.bonusAmount | number_format(2, ',', ' ') }} DT</div>
+                <div class="col-2 fw-bold" style="color:#5a67d8;">{{ salaire.totalAmount | number_format(2, ',', ' ') }} DT</div>
                 <div class="col-2">
-                  <span class="badge rounded-pill {{ badgeClass }}" style="font-size:11px;">
-                    {{ salaire.status }}
-                  </span>
+                  <span class="badge rounded-pill {{ badgeClass }}" style="font-size:10px;">{{ salaire.status }}</span>
                 </div>
               </div>
             {% endfor %}
@@ -172,6 +140,7 @@
             </div>
           {% endif %}
         </div>
+
       </div>
     </div>
   </div>
@@ -179,7 +148,7 @@
   {# ══════════════════════════════════════════
      COLONNE DROITE — Détails + Bonus Rules
   ══════════════════════════════════════════ #}
-  <div class="col-lg-7" id="rightPanel" style="display:none;">
+  <div class="col-lg-6" id="rightPanel" style="display:none;">
     <div class="card h-100">
       <div class="card-body">
         <div class="d-flex align-items-start justify-content-between mb-3 flex-wrap gap-2">
@@ -238,7 +207,11 @@
             <h5 class="fw-bold mb-0">Bonus Rules</h5>
             <p class="text-muted small mb-0">Manage bonus calculation rules</p>
           </div>
-          <a id="btnAddRule" href="{{ path('bonus_rule_new') }}" class="btn btn-sm text-white" style="background:#9f7aea;">
+          <a id="btnAddRule"
+            href="#"
+            onclick="goToAddRule()"
+            class="btn btn-sm text-white"
+            style="background:#9f7aea;">
             <i class="bi bi-plus-lg me-1"></i> Add Bonus Rule
           </a>
         </div>
@@ -269,31 +242,41 @@ const salaireUrls   = {{ salaireUrls   | json_encode(constant('JSON_THROW_ON_ERR
 let activeRow = null;
 
 function showDetails(row, id, name, base, bonus, total, date, status) {
+  // 🔹 gérer sélection ligne
   if (activeRow) {
     activeRow.style.background = '';
     activeRow.classList.remove('active-row');
   }
+
   row.style.background = '#ebf4ff';
   row.classList.add('active-row');
   activeRow = row;
 
+  // 🔹 afficher panel
   document.getElementById('rightPanel').style.display = '';
 
+  // 🔹 afficher données
   document.getElementById('detailName').textContent  = name;
   document.getElementById('detailBase').textContent  = formatDT(base);
   document.getElementById('detailBonus').textContent = formatDT(bonus);
   document.getElementById('detailTotal').textContent = formatDT(total);
   document.getElementById('detailDate').textContent  = date;
 
+  // 🔹 statut badge
   const badge = document.getElementById('detailStatus');
   badge.textContent = status;
   badge.className   = 'badge rounded-pill ' + getStatusClass(status);
 
+  // 🔹 urls
   const urls = salaireUrls[id] || {};
   const isPaid = (status === 'PAYÉ');
-  
+
+  // ========================
+  // 🔹 bouton EDIT
+  // ========================
   const btnEdit = document.getElementById('btnEdit');
   btnEdit.href = urls.edit || '#';
+
   if (isPaid) {
     btnEdit.classList.add('disabled', 'btn-secondary');
     btnEdit.classList.remove('btn-primary');
@@ -305,14 +288,23 @@ function showDetails(row, id, name, base, bonus, total, date, status) {
     btnEdit.style.pointerEvents = '';
     btnEdit.style.opacity = '';
   }
-  
+
+  // ========================
+  // 🔹 bouton PDF
+  // ========================
   document.getElementById('btnPdf').href = urls.show || '#';
-  
+
+  // ========================
+  // 🔹 bouton DELETE
+  // ========================
   const deleteForm = document.getElementById('deleteForm');
   const deleteBtn = deleteForm.querySelector('button');
+
   deleteForm.action = urls.delete || '#';
   document.getElementById('deleteToken').value = urls.deleteToken || '';
+
   deleteBtn.disabled = isPaid;
+
   if (isPaid) {
     deleteBtn.classList.add('btn-secondary');
     deleteBtn.classList.remove('btn-danger');
@@ -321,17 +313,30 @@ function showDetails(row, id, name, base, bonus, total, date, status) {
     deleteBtn.classList.add('btn-danger');
   }
 
+  // ========================
+  // 🔥 bouton ADD BONUS RULE (corrigé)
+  // ========================
   const btnAddRule = document.getElementById('btnAddRule');
+
+  // 👉 lien dynamique avec salaireId
+  btnAddRule.href = `/bonus-rule/new?salaireId=${id}`;
+
+  // 👉 désactivation si payé
   if (isPaid) {
     btnAddRule.classList.add('disabled');
     btnAddRule.style.pointerEvents = 'none';
     btnAddRule.style.opacity = '0.5';
+    btnAddRule.title = "Impossible d'ajouter (salaire payé)";
   } else {
     btnAddRule.classList.remove('disabled');
     btnAddRule.style.pointerEvents = '';
     btnAddRule.style.opacity = '';
+    btnAddRule.title = "Ajouter une règle";
   }
 
+  // ========================
+  // 🔹 charger bonus rules
+  // ========================
   loadBonusRules(id, status);
 }
 
@@ -379,6 +384,16 @@ function getStatusClass(status) {
   if (status === 'EN_COURS') return 'text-bg-info';
   if (status === 'PAYÉ') return 'text-bg-success';
   return 'text-bg-warning text-dark';
+}
+
+function goToAddRule() {
+  if (!activeRow) {
+    alert("Veuillez sélectionner un salaire");
+    return;
+  }
+
+  const salaireId = activeRow.dataset.id;
+  window.location.href = `/bonus-rule/new?salaireId=${salaireId}`;
 }
 </script>
 

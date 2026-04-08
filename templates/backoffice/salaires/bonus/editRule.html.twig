@@ -1,10 +1,10 @@
 {% extends 'backoffice/base_backoffice.html.twig' %}
 
-{% block title %}Ajouter Bonus Rule{% endblock %}
+{% block title %}Modifier Bonus Rule{% endblock %}
 
 {% block admin_content %}
 
-<h4 class="mb-3">Ajouter une règle de bonus</h4>
+<h4 class="mb-3">Modifier la règle</h4>
 
 {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
 
@@ -25,7 +25,12 @@
     {{ form_widget(form.conditionText, {'attr': {'class': 'form-control'}}) }}
 </div>
 
-<button class="btn btn-success">Ajouter</button>
+<div class="mb-3">
+    {{ form_label(form.status) }}
+    {{ form_widget(form.status, {'attr': {'class': 'form-select'}}) }}
+</div>
+
+<button class="btn btn-primary">Mettre à jour</button>
 
 {{ form_end(form) }}
 

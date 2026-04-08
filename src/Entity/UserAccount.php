@@ -49,7 +49,12 @@ class UserAccount
     )]
     private ?string $accountStatus = 'ACTIVE';
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Salaire::class)]
+    #[ORM\OneToMany(
+    mappedBy: 'user', 
+    targetEntity: Salaire::class, 
+    orphanRemoval: true, 
+    cascade: ['persist', 'remove']
+    )]
     private Collection $salaires;
 
     public function __construct()

@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\BonusRuleRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: BonusRuleRepository::class)]
 #[ORM\Table(name: 'bonus_rule')]
@@ -14,10 +15,14 @@ class BonusRule
     #[ORM\Column(name: 'id', type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\Column(name: 'nomRegle', type: 'string', length: 150)]
+    #[ORM\Column(name: 'nomRegle', type: 'string', length: 100)]
+    #[Assert\NotBlank(message: "Le nom est obligatoire")]
+    #[Assert\Length(min: 3, max: 100)]
     private ?string $nomRegle = null;
 
     #[ORM\Column(name: 'percentage', type: 'float', options: ['default' => 0])]
+    #[Assert\NotBlank(message: "Le pourcentage est obligatoire")]
+    #[Assert\Positive(message: "Le pourcentage doit être positif")]
     private ?float $percentage = 0;
 
     #[ORM\Column(name: 'bonus', type: 'float', options: ['default' => 0])]

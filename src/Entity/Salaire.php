@@ -6,6 +6,7 @@ use App\Repository\SalaireRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: SalaireRepository::class)]
 #[ORM\Table(name: 'salaire')]
@@ -17,6 +18,8 @@ class Salaire
     private ?int $id = null;
 
     #[ORM\Column(name: 'baseAmount', type: 'float')]
+    #[Assert\NotBlank(message: "Le salaire de base est obligatoire.")]
+    #[Assert\Positive(message: "Le salaire de base doit être supérieur à 0.")]
     private ?float $baseAmount = null;
 
     #[ORM\Column(name: 'bonusAmount', type: 'float', nullable: true, options: ['default' => 0])]
@@ -30,9 +33,13 @@ class Salaire
         type: 'string',
         columnDefinition: "ENUM('CREÉ', 'EN_COURS', 'PAYÉ') DEFAULT 'CREÉ'"
     )]
+    #[Assert\NotBlank(message: "Le statut est obligatoire.")]
+    #[Assert\Choice(choices: ['CREÉ', 'EN_COURS', 'PAYÉ'], message: "Le statut sélectionné n'est pas valide.")]
     private ?string $status = 'CREÉ';
 
     #[ORM\Column(name: 'datePaiement', type: 'date', nullable: true)]
+    #[Assert\NotBlank(message: "La date de paiement est obligatoire.")]
+    #[Assert\GreaterThanOrEqual("today", message: "La date de paiement ne peut pas être dans le passé.")]
     private ?\DateTimeInterface $datePaiement = null;
 
     #[ORM\Column(name: 'createdAt', type: 'datetime', options: ['default' => 'CURRENT_TIMESTAMP'])]
@@ -43,9 +50,10 @@ class Salaire
 
     #[ORM\ManyToOne(inversedBy: 'salaires')]
     #[ORM\JoinColumn(name: 'userId', referencedColumnName: 'userId', nullable: false)]
+    #[Assert\NotBlank(message: "L'employé est obligatoire.")]
     private ?UserAccount $user = null;
 
-    #[ORM\OneToMany(mappedBy: 'salaire', targetEntity: BonusRule::class)]
+    #[ORM\OneToMany(mappedBy: 'salaire', targetEntity: BonusRule::class, orphanRemoval: true, cascade: ['persist'])]
     private Collection $bonusRules;
 
     public function __construct()
