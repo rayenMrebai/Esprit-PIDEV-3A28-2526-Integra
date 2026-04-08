@@ -6,7 +6,6 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Repository\Training_programRepository;
 
 use Doctrine\Common\Collections\Collection;
-use App\Entity\Training_program_skill;
 
 #[ORM\Entity(repositoryClass: Training_programRepository::class)]
 class Training_program
@@ -171,36 +170,6 @@ class Training_program
                 // set the owning side to null (unless already changed)
                 if ($skill->getTrainingprogram_id() === $this) {
                     $skill->setTrainingprogram_id(null);
-                }
-            }
-    
-            return $this;
-        }
-
-    #[ORM\OneToMany(mappedBy: "training_program_id", targetEntity: Training_program_skill::class)]
-    private Collection $training_program_skills;
-
-        public function getTraining_program_skills(): Collection
-        {
-            return $this->training_program_skills;
-        }
-    
-        public function addTraining_program_skill(Training_program_skill $training_program_skill): self
-        {
-            if (!$this->training_program_skills->contains($training_program_skill)) {
-                $this->training_program_skills[] = $training_program_skill;
-                $training_program_skill->setTraining_program_id($this);
-            }
-    
-            return $this;
-        }
-    
-        public function removeTraining_program_skill(Training_program_skill $training_program_skill): self
-        {
-            if ($this->training_program_skills->removeElement($training_program_skill)) {
-                // set the owning side to null (unless already changed)
-                if ($training_program_skill->getTraining_program_id() === $this) {
-                    $training_program_skill->setTraining_program_id(null);
                 }
             }
     

@@ -1,98 +1,173 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>{% block title %}Backoffice{% endblock %}</title>
-//les liens css et fonts
-  {% block stylesheets %}
-    {# ── Google Font ── #}
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css"
-          crossorigin="anonymous" media="print" onload="this.media='all'"/>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>{% block title %}Backoffice{% endblock %}</title>
+    
+    {% block stylesheets %}
+        {# ── Google Font ── #}
+        <link rel="stylesheet"
+              href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css"
+              crossorigin="anonymous" media="print" onload="this.media='all'"/>
 
-    {# ── OverlayScrollbars ── #}
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/styles/overlayscrollbars.min.css"
-          crossorigin="anonymous"/>
+        {# ── OverlayScrollbars ── #}
+        <link rel="stylesheet"
+              href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/styles/overlayscrollbars.min.css"
+              crossorigin="anonymous"/>
 
-    {# ── Bootstrap Icons ── #}
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
-          crossorigin="anonymous"/>
+        {# ── Bootstrap Icons ── #}
+        <link rel="stylesheet"
+              href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+              crossorigin="anonymous"/>
 
-    {# ── AdminLTE CSS (copié dans public/adminlte/css/) ── #}
-    <link rel="stylesheet" href="{{ asset('adminlte/css/adminlte.min.css') }}"/>
-  {% endblock %}
+        {# ── AdminLTE CSS (copié dans public/adminlte/css/) ── #}
+        <link rel="stylesheet" href="{{ asset('adminlte/css/adminlte.min.css') }}"/>
+        
+        <style>
+            /* Ajustements supplémentaires pour les dimensions */
+            .app-content-header {
+                padding: 0.5rem 0;
+            }
+            
+            .app-content-header h3 {
+                font-size: 1.3rem;
+                font-weight: 500;
+            }
+            
+            .breadcrumb {
+                background: transparent;
+                padding: 0;
+                margin: 0;
+            }
+            
+            .breadcrumb-item a {
+                text-decoration: none;
+                color: #007bff;
+            }
+            
+            .breadcrumb-item.active {
+                color: #6c757d;
+            }
+            
+            /* Tables responsives */
+            .table-responsive {
+                overflow-x: auto;
+                width: 100%;
+            }
+            
+            .table {
+                width: 100%;
+                margin-bottom: 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .table th, 
+            .table td {
+                padding: 0.75rem;
+                vertical-align: middle;
+            }
+            
+            /* Cartes */
+            .card {
+                margin-bottom: 1rem;
+                box-shadow: 0 0 5px rgba(0,0,0,0.05);
+            }
+            
+            .card-header {
+                background: #fff;
+                border-bottom: 1px solid #e9ecef;
+                padding: 0.75rem 1rem;
+            }
+            
+            /* Boutons */
+            .btn-sm {
+                padding: 0.25rem 0.5rem;
+                font-size: 0.75rem;
+            }
+            
+            /* Footer */
+            .app-footer {
+                padding: 0.8rem;
+                text-align: center;
+                font-size: 0.85rem;
+                color: #6c757d;
+            }
+        </style>
+    {% endblock %}
 </head>
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
 <div class="app-wrapper">
 
-  {# ── NAVBAR (inclut partials/_navbar.html.twig) ── #}
-  {% include 'backoffice/partials/_navbar.html.twig' %}
+    {# ── NAVBAR (inclut partials/_navbar.html.twig) ── #}
+    {% include 'backoffice/partials/_navbar.html.twig' %}
 
-  {# ── SIDEBAR (inclut partials/_sidebar.html.twig) ── #}
-  {% include 'backoffice/partials/_sidebar.html.twig' %}
+    {# ── SIDEBAR (inclut partials/_sidebar.html.twig) ── #}
+    {% include 'backoffice/partials/_sidebar.html.twig' %}
 
-  {# ── CONTENU PRINCIPAL ── #}
-  <main class="app-main">
-    <div class="app-content-header">
-      <div class="container-fluid">
-        <div class="row">
-          <div class="col-sm-6">
-            <h3 class="mb-0">{% block page_title %}Dashboard{% endblock %}</h3>
-          </div>
-          <div class="col-sm-6">
-            <ol class="breadcrumb float-sm-end">
-              <li class="breadcrumb-item"><a href="{{ path('app_backoffice_dashboard') }}">Accueil</a></li>
-              <li class="breadcrumb-item active">{% block breadcrumb %}Dashboard{% endblock %}</li>
-            </ol>
-          </div>
+    {# ── CONTENU PRINCIPAL ── #}
+    <main class="app-main">
+        <div class="app-content-header">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <h3 class="mb-0">{% block page_title %}Dashboard{% endblock %}</h3>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-end">
+                            <li class="breadcrumb-item">
+                                <a href="{{ path('app_backoffice_dashboard') }}">Accueil</a>
+                            </li>
+                            <li class="breadcrumb-item active">
+                                {% block breadcrumb %}Dashboard{% endblock %}
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
 
-    <div class="app-content">
-      <div class="container-fluid">
-        {# ══ Chaque page fille redéfinit ce bloc ══ #}
-        {% block admin_content %}{% endblock %}
-      </div>
-    </div>
-  </main>
+        <div class="app-content">
+            <div class="container-fluid">
+                {# ══ Chaque page fille redéfinit ce bloc ══ #}
+                {% block admin_content %}{% endblock %}
+            </div>
+        </div>
+    </main>
 
-  {# ── FOOTER ── #}
-  <footer class="app-footer">
-    <strong>Copyright &copy; {{ "now"|date("Y") }}</strong> &mdash; Tous droits réservés.
-  </footer>
+    {# ── FOOTER ── #}
+    <footer class="app-footer">
+        <strong>Copyright &copy; {{ "now"|date("Y") }}</strong> &mdash; Tous droits réservés.
+    </footer>
 
 </div>{# end app-wrapper #}
-//les scripts js
+
 {% block javascripts %}
-  {# ── OverlayScrollbars ── #}
-  <script src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/browser/overlayscrollbars.browser.es6.min.js"
-          crossorigin="anonymous"></script>
+    {# ── OverlayScrollbars ── #}
+    <script src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/browser/overlayscrollbars.browser.es6.min.js"
+            crossorigin="anonymous"></script>
 
-  {# ── Popper + Bootstrap 5 ── #}
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
-          crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.min.js"
-          crossorigin="anonymous"></script>
+    {# ── Popper + Bootstrap 5 ── #}
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.min.js"
+            crossorigin="anonymous"></script>
 
-  {# ── AdminLTE JS (copié dans public/adminlte/js/) ── #}
-  <script src="{{ asset('adminlte/js/adminlte.min.js') }}"></script>
+    {# ── AdminLTE JS (copié dans public/adminlte/js/) ── #}
+    <script src="{{ asset('adminlte/js/adminlte.min.js') }}"></script>
 
-  {# ── OverlayScrollbars init ── #}
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const sidebar = document.querySelector('.sidebar-wrapper');
-      if (sidebar && typeof OverlayScrollbarsGlobal !== 'undefined' && window.innerWidth > 992) {
-        OverlayScrollbarsGlobal.OverlayScrollbars(sidebar, {
-          scrollbars: { theme: 'os-theme-light', autoHide: 'leave', clickScroll: true }
+    {# ── OverlayScrollbars init ── #}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebar = document.querySelector('.sidebar-wrapper');
+            if (sidebar && typeof OverlayScrollbarsGlobal !== 'undefined' && window.innerWidth > 992) {
+                OverlayScrollbarsGlobal.OverlayScrollbars(sidebar, {
+                    scrollbars: { theme: 'os-theme-light', autoHide: 'leave', clickScroll: true }
+                });
+            }
         });
-      }
-    });
-  </script>
+    </script>
 {% endblock %}
 
 </body>

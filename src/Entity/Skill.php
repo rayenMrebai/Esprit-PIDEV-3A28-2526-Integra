@@ -7,7 +7,6 @@ use App\Repository\SkillRepository;
 
 use App\Entity\Training_program;
 use Doctrine\Common\Collections\Collection;
-use App\Entity\Training_program_skill;
 
 #[ORM\Entity(repositoryClass: SkillRepository::class)]
 class Skill
@@ -31,7 +30,7 @@ class Skill
 
         #[ORM\ManyToOne(targetEntity: Training_program::class, inversedBy: "skills")]
     #[ORM\JoinColumn(name: 'trainingprogram_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
-    private Training_program $trainingprogram_id;
+    private ?Training_program $trainingprogram_id;
 
     public function getId()
     {
@@ -88,38 +87,9 @@ class Skill
         return $this->trainingprogram_id;
     }
 
-    public function setTrainingprogram_id($value)
+    public function setTrainingprogram_id(?Training_program $value)
     {
         $this->trainingprogram_id = $value;
     }
-
-    #[ORM\OneToMany(mappedBy: "skill_id", targetEntity: Training_program_skill::class)]
-    private Collection $training_program_skills;
-
-        public function getTraining_program_skills(): Collection
-        {
-            return $this->training_program_skills;
-        }
-    
-        public function addTraining_program_skill(Training_program_skill $training_program_skill): self
-        {
-            if (!$this->training_program_skills->contains($training_program_skill)) {
-                $this->training_program_skills[] = $training_program_skill;
-                $training_program_skill->setSkill_id($this);
-            }
-    
-            return $this;
-        }
-    
-        public function removeTraining_program_skill(Training_program_skill $training_program_skill): self
-        {
-            if ($this->training_program_skills->removeElement($training_program_skill)) {
-                // set the owning side to null (unless already changed)
-                if ($training_program_skill->getSkill_id() === $this) {
-                    $training_program_skill->setSkill_id(null);
-                }
-            }
-    
-            return $this;
-        }
 }
+

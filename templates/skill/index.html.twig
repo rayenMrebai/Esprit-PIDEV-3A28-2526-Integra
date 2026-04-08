@@ -25,7 +25,7 @@
                 <td>{{ skill.description }}</td>
                 <td>{{ skill.level_required }}</td>
                 <td>{{ skill.categorie }}</td>
-                <td>{{ skill.trainingprogram_id.title }}</td>
+                <td>{{ skill.trainingprogram_id ? skill.trainingprogram_id.title : 'N/A' }}</td>
                 <td>
                     <a href="{{ path('app_skill_show', {'id': skill.id}) }}">show</a>
                     <a href="{{ path('app_skill_edit', {'id': skill.id}) }}">edit</a>
