@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "98fe2223d8bdfbaf70cf87facbf67fca",
+    "content-hash": "bbb74b912a24175828c12d53227e9744",
     "packages": [
         {
             "name": "composer/semver",
@@ -1262,6 +1262,88 @@
                 }
             ],
             "time": "2025-03-06T22:45:56+00:00"
+        },
+        {
+            "name": "kevinpapst/adminlte-bundle",
+            "version": "3.6.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/kevinpapst/AdminLTEBundle.git",
+                "reference": "427b545406c318b2a05fa89deecad6cb36845a25"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/kevinpapst/AdminLTEBundle/zipball/427b545406c318b2a05fa89deecad6cb36845a25",
+                "reference": "427b545406c318b2a05fa89deecad6cb36845a25",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.1.3",
+                "symfony/asset": ">4.3",
+                "symfony/config": ">4.3",
+                "symfony/dependency-injection": ">4.3",
+                "symfony/event-dispatcher": ">4.3",
+                "symfony/http-foundation": ">4.3",
+                "symfony/http-kernel": ">4.3",
+                "symfony/options-resolver": ">4.3",
+                "symfony/security-core": ">4.3",
+                "symfony/translation": ">4.3",
+                "symfony/twig-bridge": ">4.3",
+                "twig/twig": ">2.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^2.10",
+                "knplabs/knp-menu-bundle": "^2.2",
+                "phpspec/prophecy": "^1.6",
+                "phpstan/phpstan": "^0.12",
+                "phpstan/phpstan-phpunit": "^0.12",
+                "phpunit/phpunit": "^7.3",
+                "symfony/framework-bundle": ">4.3"
+            },
+            "suggest": {
+                "knplabs/knp-menu-bundle": "Allows easy menu integration"
+            },
+            "type": "symfony-bundle",
+            "autoload": {
+                "psr-4": {
+                    "KevinPapst\\AdminLTEBundle\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Kevin Papst",
+                    "homepage": "https://www.kevinpapst.de"
+                },
+                {
+                    "name": "Marc Bach",
+                    "homepage": "http://www.avanzu.de"
+                },
+                {
+                    "name": "Ángel Guzmán Maeso",
+                    "homepage": "https://shakaran.net/blog"
+                }
+            ],
+            "description": "Admin theme bundle for Symfony 4+ based on AdminLTE 2.4 with FOSUserBundle support",
+            "support": {
+                "issues": "https://github.com/kevinpapst/AdminLTEBundle/issues",
+                "source": "https://github.com/kevinpapst/AdminLTEBundle/tree/3.6.1"
+            },
+            "funding": [
+                {
+                    "url": "https://paypal.me/kevinpapst",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/kevinpapst",
+                    "type": "github"
+                }
+            ],
+            "abandoned": true,
+            "time": "2021-11-19T11:27:41+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -10042,5 +10124,5 @@
         "ext-iconv": "*"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }

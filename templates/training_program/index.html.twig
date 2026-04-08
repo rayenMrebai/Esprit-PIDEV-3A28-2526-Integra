@@ -1,0 +1,59 @@
+{% extends 'backoffice/base_backoffice.html.twig' %}
+
+{% block title %}Programmes de Formation{% endblock %}
+{% block page_title %}Gestion des Programmes de Formation{% endblock %}
+{% block breadcrumb %}Dashboard / Formations{% endblock %}
+
+{% block admin_content %}
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Liste des Programmes de Formation</h3>
+            <div class="card-tools">
+                <a href="{{ path('app_training_program_new') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Créer nouveau
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>Duration</th>
+                        <th>Type</th>
+                        <th>Start_date</th>
+                        <th>End_date</th>
+                        <th>Status</th>
+                        <th>actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for training_program in training_programs %}
+                    <tr>
+                        <td>{{ training_program.id }}</td>
+                        <td>{{ training_program.title }}</td>
+                        <td>{{ training_program.description }}</td>
+                        <td>{{ training_program.duration }}</td>
+                        <td>{{ training_program.type }}</td>
+                        <td>{{ training_program.start_date ? training_program.start_date|date('Y-m-d') : '' }}</td>
+                        <td>{{ training_program.end_date ? training_program.end_date|date('Y-m-d') : '' }}</td>
+                        <td>{{ training_program.status }}</td>
+                        <td>
+                            <a href="{{ path('app_training_program_show', {'id': training_program.id}) }}" class="btn btn-info btn-sm">show</a>
+                            <a href="{{ path('app_training_program_edit', {'id': training_program.id}) }}" class="btn btn-warning btn-sm">edit</a>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="9">no records found</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+{% endblock %}

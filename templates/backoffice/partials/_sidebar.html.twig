@@ -1,0 +1,74 @@
+<aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
+
+  {# Brand #}
+  <div class="sidebar-brand">
+    <a href="{{ path('app_backoffice_dashboard') }}" class="brand-link">
+      <img src="{{ asset('adminlte/img/AdminLTELogo.png') }}"
+           alt="Logo" class="brand-image opacity-75 shadow" />
+      <span class="brand-text fw-light">Mon Espace Admin</span>
+    </a>
+  </div>
+
+  {# Menu #}
+  <div class="sidebar-wrapper">
+    <nav class="mt-2">
+      <ul class="nav sidebar-menu flex-column"
+          data-lte-toggle="treeview"
+          role="navigation"
+          data-accordion="false">
+
+        {# Dashboard #}
+        <li class="nav-item">
+          <a href="{{ path('app_backoffice_dashboard') }}" class="nav-link">
+            <i class="nav-icon bi bi-speedometer2"></i>
+            <p>Dashboard</p>
+          </a>
+        </li>
+
+        <li class="nav-header">GESTION</li>
+
+        {# Utilisateurs #}
+        <li class="nav-item">
+          <a href="#" class="nav-link disabled" aria-disabled="true">
+            <i class="nav-icon bi bi-people-fill"></i>
+            <p>Utilisateurs</p>
+          </a>
+        </li>
+
+        {# Formations #}
+        <li class="nav-item">
+          <a href="{{ path('app_backoffice_dashboard') }}" class="nav-link">
+            <i class="nav-icon bi bi-mortarboard-fill"></i>
+            <p>Formations</p>
+          </a>
+        </li>
+
+        {# Salaires #}
+        <li class="nav-item">
+          <a href="#" class="nav-link disabled" aria-disabled="true">
+            <i class="nav-icon bi bi-cash-coin"></i>
+            <p>Salaires</p>
+          </a>
+        </li>
+
+        {# Projets #}
+        <li class="nav-item">
+          <a href="#" class="nav-link disabled" aria-disabled="true">
+            <i class="nav-icon bi bi-kanban-fill"></i>
+            <p>Projets</p>
+          </a>
+        </li>
+
+        {# Recrutement #}
+        <li class="nav-item">
+          <a href="#" class="nav-link disabled" aria-disabled="true">
+            <i class="nav-icon bi bi-person-badge-fill"></i>
+            <p>Recrutement</p>
+          </a>
+        </li>
+
+      </ul>
+    </nav>
+  </div>
+
+</aside>

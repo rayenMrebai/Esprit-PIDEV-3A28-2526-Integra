@@ -1,0 +1,19 @@
+{% extends 'backoffice/base_backoffice.html.twig' %}
+
+{% block title %}Nouveau Programme de Formation{% endblock %}
+{% block page_title %}Créer un Nouveau Programme de Formation{% endblock %}
+{% block breadcrumb %}Dashboard / Formations / Nouveau{% endblock %}
+
+{% block admin_content %}
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Nouveau Programme de Formation</h3>
+        </div>
+        <div class="card-body">
+            {{ include('training_program/_form.html.twig') }}
+        </div>
+        <div class="card-footer">
+            <a href="{{ path('app_training_program_index') }}" class="btn btn-secondary">Retour à la liste</a>
+        </div>
+    </div>
+{% endblock %}

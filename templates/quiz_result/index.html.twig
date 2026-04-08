@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Quiz result index{% endblock %}
+
+{% block body %}
+    <h1>Quiz result index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>User_id</th>
+                <th>Training_id</th>
+                <th>Score</th>
+                <th>Total_questions</th>
+                <th>Percentage</th>
+                <th>Passed</th>
+                <th>Completed_at</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for quiz_result in quiz_results %}
+            <tr>
+                <td>{{ quiz_result.id }}</td>
+                <td>{{ quiz_result.user_id }}</td>
+                <td>{{ quiz_result.training_id.title }}</td>
+                <td>{{ quiz_result.score }}</td>
+                <td>{{ quiz_result.total_questions }}</td>
+                <td>{{ quiz_result.percentage }}</td>
+                <td>{{ quiz_result.passed ? 'Yes' : 'No' }}</td>
+                <td>{{ quiz_result.completed_at ? quiz_result.completed_at|date('Y-m-d H:i:s') : '' }}</td>
+                <td>
+                    <a href="{{ path('app_quiz_result_show', {'id': quiz_result.id}) }}">show</a>
+                    <a href="{{ path('app_quiz_result_edit', {'id': quiz_result.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="9">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_quiz_result_new') }}">Create new</a>
+{% endblock %}
