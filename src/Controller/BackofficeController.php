@@ -28,11 +28,6 @@ class BackofficeController extends AbstractController
         return $this->render('backoffice/formations.html.twig');
     }
 
-    #[Route('/salaires', name: 'salaires')]
-    public function salaires(): Response
-    {
-        return $this->render('backoffice/salaires.html.twig');
-    }
 
     #[Route('/projets', name: 'projets')]
     public function projets(): Response
