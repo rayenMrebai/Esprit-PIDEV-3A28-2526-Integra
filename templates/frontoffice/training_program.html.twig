@@ -1,0 +1,31 @@
+{% extends 'front/base_frontoffice.html.twig' %}
+
+{% block title %}Nos formations - ESPRI TECH{% endblock %}
+
+{% block content %}
+    <h1 class="mt-4">Nos formations</h1>
+    <p>Découvrez toutes nos formations disponibles.</p>
+    
+    <div class="row">
+        {% for training in trainings %}
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ training.title }}</h5>
+                        <p class="card-text">{{ training.description|slice(0, 150) }}...</p>
+                        <ul class="list-unstyled">
+                            <li><strong>Durée :</strong> {{ training.duration }} heures</li>
+                            <li><strong>Type :</strong> {{ training.type }}</li>
+                            <li><strong>Statut :</strong> {{ training.status }}</li>
+                        </ul>
+                        <a href="#" class="btn btn-primary">S'inscrire</a>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-12">
+                <p>Aucune formation disponible pour le moment.</p>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

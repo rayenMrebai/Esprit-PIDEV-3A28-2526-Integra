@@ -1,0 +1,47 @@
+{% extends 'frontoffice/base_frontoffice.html.twig' %}
+
+{% block title %}Résultats des quiz - ESPRI TECH{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h1>Résultats des quiz</h1>
+    <p>Consultez les résultats des quiz passés.</p>
+    
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Utilisateur</th>
+                    <th>Formation</th>
+                    <th>Score</th>
+                    <th>Total questions</th>
+                    <th>Pourcentage</th>
+                    <th>Réussi</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for quiz in quizResults %}
+                <tr>
+                    <td>{{ quiz.id }}</td>
+                    <td>{{ quiz.userId }}</td>
+                    <td>{{ quiz.training ? quiz.training.title : 'N/A' }}</td>
+                    <td>{{ quiz.score }} / {{ quiz.totalQuestions }}</td>
+                    <td>{{ quiz.totalQuestions }}</td>
+                    <td class="{{ quiz.percentage >= 60 ? 'text-success' : 'text-danger' }} fw-bold">
+                        {{ quiz.percentage }}%
+                    </td>
+                    <td>{{ quiz.passed ? '✅ Oui' : '❌ Non' }}</td>
+                    <td>{{ quiz.completedAt ? quiz.completedAt|date('d/m/Y H:i') : 'N/A' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="text-center">Aucun résultat de quiz trouvé.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

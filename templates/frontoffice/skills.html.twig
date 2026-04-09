@@ -1,0 +1,41 @@
+{% extends 'frontoffice/base_frontoffice.html.twig' %}
+
+{% block title %}Compétences - ESPRI TECH{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h1>Compétences</h1>
+    <p>Liste des compétences disponibles dans nos formations.</p>
+    
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Nom</th>
+                    <th>Description</th>
+                    <th>Niveau requis</th>
+                    <th>Catégorie</th>
+                    <th>Formation liée</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for skill in skills %}
+                <tr>
+                    <td>{{ skill.id }}</td>
+                    <td>{{ skill.nom }}</td>
+                    <td>{{ skill.description|length > 100 ? skill.description|slice(0, 100) ~ '...' : skill.description }}</td>
+                    <td>{{ skill.levelRequired }}</td>
+                    <td>{{ skill.categorie }}</td>
+                    <td>{{ skill.trainingProgram ? skill.trainingProgram.title : 'N/A' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center">Aucune compétence trouvée.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
