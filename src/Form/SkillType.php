@@ -41,6 +41,7 @@ class SkillType extends AbstractType
                     'Autre' => 'autre',
                 ],
                 'placeholder' => '-- Sélectionner une catégorie --',
+                'required' => false,
                 'attr' => ['class' => 'form-select']
             ])
             ->add('trainingProgram', EntityType::class, [
@@ -49,7 +50,7 @@ class SkillType extends AbstractType
                 'label' => 'Programme de formation',
                 'multiple' => false,
                 'expanded' => false,
-                'required' => true,
+                'required' => false,
                 'placeholder' => '-- Sélectionner un programme --',
                 'attr' => ['class' => 'form-select']
             ]);
