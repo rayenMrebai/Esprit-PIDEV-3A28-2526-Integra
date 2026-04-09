@@ -16,7 +16,7 @@ class TrainingProgramController extends AbstractController
     #[Route('/', name: 'app_training_program_index', methods: ['GET'])]
     public function index(EntityManagerInterface $entityManager): Response
     {
-        return $this->render('training_program/index.html.twig', [
+        return $this->render('backoffice/training_program/index.html.twig', [
             'training_programs' => $entityManager->getRepository(Training_program::class)->findAll(),
         ]);
     }
@@ -33,28 +33,44 @@ class TrainingProgramController extends AbstractController
             $entityManager->flush();
 
             if ($request->isXmlHttpRequest()) {
-                return new Response(json_encode(['success' => true, 'message' => 'Programme créé avec succès']), 200, ['Content-Type' => 'application/json']);
+                return $this->json([
+                    'success' => true, 
+                    'message' => 'Programme créé avec succès',
+                    'id' => $trainingProgram->getId()
+                ]);
             }
             return $this->redirectToRoute('app_training_program_index', [], Response::HTTP_SEE_OTHER);
         }
 
+        if ($request->isXmlHttpRequest() && $form->isSubmitted()) {
+            $errors = [];
+            foreach ($form->getErrors(true) as $error) {
+                $errors[] = $error->getMessage();
+            }
+            return $this->json([
+                'success' => false, 
+                'message' => 'Erreur de validation',
+                'errors' => $errors
+            ], 400);
+        }
+
         if ($request->isXmlHttpRequest()) {
-            return $this->render('training_program/_form.html.twig', [
+            return $this->render('backoffice/training_program/_form.html.twig', [
                 'training_program' => $trainingProgram,
-                'form' => $form,
+                'form' => $form->createView(),
             ]);
         }
 
-        return $this->render('training_program/new.html.twig', [
+        return $this->render('backoffice/training_program/new.html.twig', [
             'training_program' => $trainingProgram,
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
 
     #[Route('/{id}', name: 'app_training_program_show', methods: ['GET'])]
     public function show(Training_program $trainingProgram): Response
     {
-        return $this->render('training_program/show.html.twig', [
+        return $this->render('backoffice/training_program/show.html.twig', [
             'training_program' => $trainingProgram,
         ]);
     }
@@ -69,21 +85,36 @@ class TrainingProgramController extends AbstractController
             $entityManager->flush();
 
             if ($request->isXmlHttpRequest()) {
-                return new Response(json_encode(['success' => true, 'message' => 'Programme modifié avec succès']), 200, ['Content-Type' => 'application/json']);
+                return $this->json([
+                    'success' => true, 
+                    'message' => 'Programme modifié avec succès'
+                ]);
             }
             return $this->redirectToRoute('app_training_program_index', [], Response::HTTP_SEE_OTHER);
         }
 
+        if ($request->isXmlHttpRequest() && $form->isSubmitted()) {
+            $errors = [];
+            foreach ($form->getErrors(true) as $error) {
+                $errors[] = $error->getMessage();
+            }
+            return $this->json([
+                'success' => false, 
+                'message' => 'Erreur de validation',
+                'errors' => $errors
+            ], 400);
+        }
+
         if ($request->isXmlHttpRequest()) {
-            return $this->render('training_program/_form.html.twig', [
+            return $this->render('backoffice/training_program/_form.html.twig', [
                 'training_program' => $trainingProgram,
-                'form' => $form,
+                'form' => $form->createView(),
             ]);
         }
 
-        return $this->render('training_program/edit.html.twig', [
+        return $this->render('backoffice/training_program/edit.html.twig', [
             'training_program' => $trainingProgram,
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
 
@@ -93,6 +124,13 @@ class TrainingProgramController extends AbstractController
         if ($this->isCsrfTokenValid('delete'.$trainingProgram->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($trainingProgram);
             $entityManager->flush();
+
+            if ($request->isXmlHttpRequest()) {
+                return $this->json([
+                    'success' => true, 
+                    'message' => 'Programme supprimé avec succès'
+                ]);
+            }
         }
 
         return $this->redirectToRoute('app_training_program_index', [], Response::HTTP_SEE_OTHER);

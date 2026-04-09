@@ -16,7 +16,7 @@ class SkillController extends AbstractController
     #[Route('/', name: 'app_skill_index', methods: ['GET'])]
     public function index(EntityManagerInterface $entityManager): Response
     {
-        return $this->render('skill/index.html.twig', [
+        return $this->render('backoffice/skill/index.html.twig', [
             'skills' => $entityManager->getRepository(Skill::class)->findAll(),
         ]);
     }
@@ -32,7 +32,6 @@ class SkillController extends AbstractController
             $entityManager->persist($skill);
             $entityManager->flush();
 
-            // Retourner une réponse JSON pour les requêtes AJAX
             if ($request->isXmlHttpRequest()) {
                 return $this->json([
                     'success' => true, 
@@ -43,7 +42,6 @@ class SkillController extends AbstractController
             return $this->redirectToRoute('app_skill_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        // Si le formulaire est soumis mais invalide, retourner les erreurs
         if ($request->isXmlHttpRequest() && $form->isSubmitted()) {
             $errors = [];
             foreach ($form->getErrors(true) as $error) {
@@ -56,15 +54,14 @@ class SkillController extends AbstractController
             ], 400);
         }
 
-        // Pour les requêtes AJAX GET, retourner le formulaire
         if ($request->isXmlHttpRequest()) {
-            return $this->render('skill/_form.html.twig', [
+            return $this->render('backoffice/skill/_form.html.twig', [
                 'skill' => $skill,
                 'form' => $form->createView(),
             ]);
         }
 
-        return $this->render('skill/new.html.twig', [
+        return $this->render('backoffice/skill/new.html.twig', [
             'skill' => $skill,
             'form' => $form->createView(),
         ]);
@@ -73,7 +70,7 @@ class SkillController extends AbstractController
     #[Route('/{id}', name: 'app_skill_show', methods: ['GET'])]
     public function show(Skill $skill): Response
     {
-        return $this->render('skill/show.html.twig', [
+        return $this->render('backoffice/skill/show.html.twig', [
             'skill' => $skill,
         ]);
     }
@@ -96,7 +93,6 @@ class SkillController extends AbstractController
             return $this->redirectToRoute('app_skill_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        // Si le formulaire est soumis mais invalide, retourner les erreurs
         if ($request->isXmlHttpRequest() && $form->isSubmitted()) {
             $errors = [];
             foreach ($form->getErrors(true) as $error) {
@@ -110,33 +106,32 @@ class SkillController extends AbstractController
         }
 
         if ($request->isXmlHttpRequest()) {
-            return $this->render('skill/_form.html.twig', [
+            return $this->render('backoffice/skill/_form.html.twig', [
                 'skill' => $skill,
                 'form' => $form->createView(),
             ]);
         }
 
-        return $this->render('skill/edit.html.twig', [
+        return $this->render('backoffice/skill/edit.html.twig', [
             'skill' => $skill,
             'form' => $form->createView(),
         ]);
     }
 
-#[Route('/{id}', name: 'app_skill_delete', methods: ['POST'])]
-public function delete(Request $request, Skill $skill, EntityManagerInterface $entityManager): Response
-{
-    // Vérifier le token CSRF
-    $token = $request->request->get('_token');
-    
-    if ($this->isCsrfTokenValid('delete' . $skill->getId(), $token)) {
-        $entityManager->remove($skill);
-        $entityManager->flush();
+    #[Route('/{id}', name: 'app_skill_delete', methods: ['POST'])]
+    public function delete(Request $request, Skill $skill, EntityManagerInterface $entityManager): Response
+    {
+        $token = $request->request->get('_token');
         
-        $this->addFlash('success', 'Compétence supprimée avec succès');
-    } else {
-        $this->addFlash('error', 'Token CSRF invalide');
+        if ($this->isCsrfTokenValid('delete' . $skill->getId(), $token)) {
+            $entityManager->remove($skill);
+            $entityManager->flush();
+            
+            $this->addFlash('success', 'Compétence supprimée avec succès');
+        } else {
+            $this->addFlash('error', 'Token CSRF invalide');
+        }
+        
+        return $this->redirectToRoute('app_backoffice_formations');
     }
-    
-    return $this->redirectToRoute('app_backoffice_formations');
-}
 }

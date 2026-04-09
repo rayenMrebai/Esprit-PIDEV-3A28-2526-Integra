@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\Quiz_resultRepository;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: Quiz_resultRepository::class)]
 class Quiz_result
@@ -14,28 +15,48 @@ class Quiz_result
     private ?int $id = null;
 
     #[ORM\Column(name: "user_id", type: "integer")]
+    #[Assert\NotBlank(message: "L'ID utilisateur est obligatoire.")]
+    #[Assert\Positive(message: "L'ID utilisateur doit être un nombre positif.")]
     private ?int $userId = null;
 
     #[ORM\ManyToOne(targetEntity: Training_program::class)]
     #[ORM\JoinColumn(name: "training_id", referencedColumnName: "id")]
+    #[Assert\NotNull(message: "La formation est obligatoire.")]
     private ?Training_program $training = null;
 
     #[ORM\Column(type: "integer")]
+    #[Assert\NotBlank(message: "Le score est obligatoire.")]
+    #[Assert\Range(
+        min: 0,
+        max: 100,
+        notInRangeMessage: "Le score doit être compris entre {{ min }} et {{ max }}."
+    )]
     private ?int $score = null;
 
     #[ORM\Column(name: "total_questions", type: "integer")]
+    #[Assert\NotBlank(message: "Le nombre total de questions est obligatoire.")]
+    #[Assert\Positive(message: "Le nombre total de questions doit être positif.")]
     private ?int $totalQuestions = null;
 
     #[ORM\Column(type: "float")]
+    #[Assert\Range(
+        min: 0,
+        max: 100,
+        notInRangeMessage: "Le pourcentage doit être compris entre {{ min }} et {{ max }}."
+    )]
     private ?float $percentage = null;
 
     #[ORM\Column(type: "boolean")]
     private ?bool $passed = null;
 
     #[ORM\Column(name: "completed_at", type: "datetime")]
+    #[Assert\NotNull(message: "La date de complétion est obligatoire.")]
+    #[Assert\LessThanOrEqual("today", message: "La date ne peut pas être dans le futur.")]
     private ?\DateTimeInterface $completedAt = null;
 
-    // Getters et setters
+    // ──────────────────────────────────────────────────────────────
+    // GETTERS & SETTERS
+    // ──────────────────────────────────────────────────────────────
 
     public function getId(): ?int
     {

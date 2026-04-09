@@ -10913,4 +10913,33 @@ textarea.form-control-lg {
         padding-left: 0.5rem !important;
         padding-right: 0.5rem !important;
     }
+    /* ============================================ */
+/* STYLES POUR LES ERREURS DE FORMULAIRE        */
+/* ============================================ */
+
+.form-error {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+input.is-invalid,
+select.is-invalid,
+textarea.is-invalid {
+    border-color: #dc3545 !important;
+}
+
+input.is-valid,
+select.is-valid,
+textarea.is-valid {
+    border-color: #198754 !important;
+}
+
+.invalid-feedback {
+    display: block;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.875em;
+    color: #dc3545;
+}
 }

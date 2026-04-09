@@ -5,6 +5,7 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\SkillRepository;
 use App\Entity\Training_program;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: SkillRepository::class)]
 class Skill
@@ -15,15 +16,35 @@ class Skill
     private ?int $id = null;
 
     #[ORM\Column(type: "string", length: 100)]
+    #[Assert\NotBlank(message: "Le nom de la compétence est obligatoire.")]
+    #[Assert\Length(
+        min: 2,
+        max: 100,
+        minMessage: "Le nom doit contenir au moins {{ limit }} caractères.",
+        maxMessage: "Le nom ne peut pas dépasser {{ limit }} caractères."
+    )]
     private string $nom;
 
     #[ORM\Column(type: "text", nullable: true)]
+    #[Assert\Length(
+        max: 500,
+        maxMessage: "La description ne peut pas dépasser {{ limit }} caractères."
+    )]
     private ?string $description = null;
 
     #[ORM\Column(type: "integer", nullable: true)]
+    #[Assert\Range(
+        min: 1,
+        max: 5,
+        notInRangeMessage: "Le niveau requis doit être compris entre {{ min }} et {{ max }}."
+    )]
     private ?int $level_required = null;
 
     #[ORM\Column(type: "string", length: 50, nullable: true)]
+    #[Assert\Choice(
+        choices: ["technique", "soft", "management", "autre"],
+        message: "La catégorie doit être: technique, soft, management ou autre."
+    )]
     private ?string $categorie = null;
 
     #[ORM\ManyToOne(targetEntity: Training_program::class, inversedBy: "skills")]
@@ -61,17 +82,16 @@ class Skill
         return $this;
     }
 
-public function getLevelRequired(): ?int
-{
-    return $this->level_required;
-}
+    public function getLevelRequired(): ?int
+    {
+        return $this->level_required;
+    }
 
-public function setLevelRequired(?int $level_required): self
-{
-    $this->level_required = $level_required;
-    return $this;
-}
-
+    public function setLevelRequired(?int $level_required): self
+    {
+        $this->level_required = $level_required;
+        return $this;
+    }
 
     public function getCategorie(): ?string
     {

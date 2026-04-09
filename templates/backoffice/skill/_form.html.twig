@@ -1,28 +1,40 @@
-{{ form_start(form, {'attr': {'id': 'skill-form', 'class': 'ajax-form', 'action': path(app.request.attributes.get('_route') == 'app_skill_new' ? 'app_skill_new' : 'app_skill_edit', app.request.attributes.get('_route') == 'app_skill_edit' ? {'id': skill.id} : {})}})}}
+{{ form_start(form, {'attr': {'id': 'skill-form', 'class': 'ajax-form'}})}}
+
+    {{ form_errors(form) }}
+
     <div class="mb-3">
         {{ form_label(form.nom, 'Nom de la compétence', {'label_attr': {'class': 'form-label'}})}}
         {{ form_widget(form.nom, {'attr': {'class': 'form-control'}})}}
         {{ form_errors(form.nom) }}
+        <small class="text-muted">Minimum 2 caractères, maximum 100.</small>
     </div>
+
     <div class="mb-3">
         {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label'}})}}
         {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 4}})}}
         {{ form_errors(form.description) }}
+        <small class="text-muted">Maximum 500 caractères.</small>
     </div>
+
     <div class="mb-3">
         {{ form_label(form.levelRequired, 'Niveau requis', {'label_attr': {'class': 'form-label'}})}}
         {{ form_widget(form.levelRequired, {'attr': {'class': 'form-control'}})}}
         {{ form_errors(form.levelRequired) }}
+        <small class="text-muted">Doit être compris entre 1 et 5.</small>
     </div>
+
     <div class="mb-3">
         {{ form_label(form.categorie, 'Catégorie', {'label_attr': {'class': 'form-label'}})}}
         {{ form_widget(form.categorie, {'attr': {'class': 'form-control'}})}}
         {{ form_errors(form.categorie) }}
+        <small class="text-muted">Valeurs possibles: technique, soft, management, autre.</small>
     </div>
+
     <div class="mb-3">
         {{ form_label(form.trainingProgram, 'Formation liée', {'label_attr': {'class': 'form-label'}})}}
         {{ form_widget(form.trainingProgram, {'attr': {'class': 'form-select'}})}}
         {{ form_errors(form.trainingProgram) }}
     </div>
+
     {{ form_rest(form) }}
 {{ form_end(form) }}

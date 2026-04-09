@@ -13,6 +13,16 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/quiz-result')]
 class QuizResultController extends AbstractController
 {
+    #[Route('/', name: 'app_quiz_result_index', methods: ['GET'])]
+    public function index(EntityManagerInterface $entityManager): Response
+    {
+        $quizResults = $entityManager->getRepository(Quiz_result::class)->findAll();
+        
+        return $this->render('backoffice/quiz_result/index.html.twig', [
+            'quiz_results' => $quizResults,
+        ]);
+    }
+
     #[Route('/new', name: 'app_quiz_result_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
@@ -35,12 +45,12 @@ class QuizResultController extends AbstractController
         }
 
         if ($request->isXmlHttpRequest()) {
-            return $this->render('quiz_result/_form.html.twig', [
+            return $this->render('backoffice/quiz_result/_form.html.twig', [
                 'form' => $form->createView(),
             ]);
         }
 
-        return $this->render('quiz_result/new.html.twig', [
+        return $this->render('backoffice/quiz_result/new.html.twig', [
             'form' => $form->createView(),
         ]);
     }
@@ -64,14 +74,22 @@ class QuizResultController extends AbstractController
         }
 
         if ($request->isXmlHttpRequest()) {
-            return $this->render('quiz_result/_form.html.twig', [
+            return $this->render('backoffice/quiz_result/_form.html.twig', [
                 'form' => $form->createView(),
             ]);
         }
 
-        return $this->render('quiz_result/edit.html.twig', [
+        return $this->render('backoffice/quiz_result/edit.html.twig', [
             'form' => $form->createView(),
             'quiz' => $quiz,
+        ]);
+    }
+
+    #[Route('/{id}', name: 'app_quiz_result_show', methods: ['GET'])]
+    public function show(Quiz_result $quiz): Response
+    {
+        return $this->render('backoffice/quiz_result/show.html.twig', [
+            'quiz_result' => $quiz,
         ]);
     }
 
@@ -92,21 +110,4 @@ class QuizResultController extends AbstractController
 
         return $this->redirectToRoute('app_backoffice_formations');
     }
-
-#[Route('/{id}', name: 'app_quiz_result_show', methods: ['GET'])]
-public function show(Quiz_result $quiz): Response
-{
-    return $this->render('quiz_result/show.html.twig', [
-        'quiz_result' => $quiz,  // ← variable nommée quiz_result
-    ]);
-}
-#[Route('/', name: 'app_quiz_result_index', methods: ['GET'])]
-public function index(EntityManagerInterface $entityManager): Response
-{
-    $quizResults = $entityManager->getRepository(Quiz_result::class)->findAll();
-    
-    return $this->render('quiz_result/index.html.twig', [
-        'quiz_results' => $quizResults,
-    ]);
-}
 }
