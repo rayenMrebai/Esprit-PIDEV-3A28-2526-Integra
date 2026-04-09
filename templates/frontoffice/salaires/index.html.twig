@@ -1,0 +1,365 @@
+{# templates/frontoffice/salaires/index.html.twig #}
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Mes Salaires{% endblock %}
+
+{% block body %}
+
+{% set fake_name = app.session.get('fake_user_name') ?? 'Utilisateur' %}
+{% set fake_role = app.session.get('fake_user_role') ?? '' %}
+
+<style>
+    .sal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1.75rem;
+    }
+
+    .sal-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #1e2533;
+        letter-spacing: -0.02em;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+
+    .sal-title svg { color: #667eea; }
+
+    .sal-subtitle {
+        font-size: 0.83rem;
+        color: #6c757d;
+        margin-top: 0.2rem;
+    }
+
+    /* ── Summary cards ── */
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.75rem;
+    }
+
+    .summary-card {
+        background: #fff;
+        border-radius: 14px;
+        padding: 1.1rem 1.25rem;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        border-left: 4px solid var(--card-accent, #667eea);
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .summary-card .sc-label {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: #adb5bd;
+        font-weight: 600;
+    }
+
+    .summary-card .sc-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1e2533;
+        line-height: 1;
+    }
+
+    .summary-card .sc-detail {
+        font-size: 0.77rem;
+        color: #6c757d;
+    }
+
+    /* ── Table card ── */
+    .table-card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+        overflow: hidden;
+    }
+
+    .table-card-header {
+        padding: 1.1rem 1.4rem;
+        border-bottom: 1px solid #f0f2f5;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .table-card-header h6 {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #1e2533;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .count-pill {
+        background: #eef0fd;
+        color: #667eea;
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 0.2rem 0.55rem;
+        border-radius: 20px;
+    }
+
+    .table-responsive { overflow-x: auto; }
+
+    table.sal-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .sal-table thead tr {
+        background: #f8f9fa;
+    }
+
+    .sal-table th {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #adb5bd;
+        font-weight: 700;
+        padding: 0.75rem 1.2rem;
+        white-space: nowrap;
+        border-bottom: 1px solid #f0f2f5;
+    }
+
+    .sal-table td {
+        padding: 0.9rem 1.2rem;
+        font-size: 0.86rem;
+        color: #495057;
+        border-bottom: 1px solid #f8f9fa;
+        vertical-align: middle;
+    }
+
+    .sal-table tbody tr:last-child td { border-bottom: none; }
+    .sal-table tbody tr:hover td { background: #fafbff; }
+
+    /* Mois badge */
+    .mois-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: #eef0fd;
+        color: #4a4dc5;
+        font-size: 0.78rem;
+        font-weight: 600;
+        padding: 0.3rem 0.65rem;
+        border-radius: 8px;
+        white-space: nowrap;
+    }
+
+    /* Amount styles */
+    .amount-base  { font-weight: 600; color: #1e2533; }
+    .amount-bonus { font-weight: 600; color: #28a745; }
+    .amount-net   { font-weight: 700; color: #667eea; font-size: 0.92rem; }
+
+    /* Status badge */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-size: 0.73rem;
+        font-weight: 600;
+        padding: 0.25rem 0.6rem;
+        border-radius: 20px;
+    }
+    .status-paye    { background: rgba(40,167,69,0.1);  color: #28a745; }
+    .status-encours { background: rgba(23,162,184,0.1); color: #17a2b8; }
+    .status-cree    { background: rgba(255,193,7,0.1);  color: #d4a000; }
+
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+    /* Bonus rules tags */
+    .bonus-tag {
+        display: inline-block;
+        font-size: 0.68rem;
+        padding: 0.15rem 0.45rem;
+        border-radius: 4px;
+        font-weight: 600;
+        background: rgba(102,126,234,0.1);
+        color: #667eea;
+        border: 1px solid rgba(102,126,234,0.2);
+        margin: 0.1rem;
+        white-space: nowrap;
+    }
+
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #adb5bd;
+    }
+    .empty-state svg { opacity: 0.35; margin-bottom: 0.75rem; }
+    .empty-state p { font-size: 0.88rem; }
+</style>
+
+{# ══ En-tête ══════════════════════════════════════════════════════════ #}
+<div class="sal-header">
+    <div>
+        <div class="sal-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M4 10.781c.148 1.667 1.513 2.85 3.591 3.003V15h1.043v-1.216c2.27-.179 3.678-1.438 3.678-3.3 0-1.59-.947-2.51-2.956-3.028l-.722-.187V3.467c1.122.11 1.879.714 2.07 1.616h1.47c-.166-1.6-1.54-2.748-3.54-2.875V1H7.591v1.233c-1.939.23-3.27 1.472-3.27 3.156 0 1.454.966 2.483 2.661 2.917l.61.162v4.031c-1.149-.17-1.94-.8-2.131-1.718H4zm3.391-3.836c-1.043-.263-1.6-.825-1.6-1.616 0-.944.704-1.641 1.8-1.828v3.495l-.2-.05zm1.591 1.872c1.287.323 1.852.859 1.852 1.769 0 1.097-.826 1.828-2.2 1.939V8.73l.348.086z"/>
+            </svg>
+            Mes Bulletins de Salaire
+        </div>
+        <div class="sal-subtitle">
+            Bonjour <strong>{{ fake_name }}</strong> — Historique complet de vos rémunérations
+        </div>
+    </div>
+</div>
+
+{# ══ Cartes résumé ════════════════════════════════════════════════════ #}
+{% if salaires is defined and salaires|length > 0 %}
+
+    {# ── Calculs Twig avec les vrais attributs de l'entity Salaire ── #}
+    {% set total_net   = 0 %}
+    {% set total_bonus = 0 %}
+    {% set nb_payes    = 0 %}
+    {% for s in salaires %}
+        {% set total_net   = total_net   + s.totalAmount %}
+        {% set total_bonus = total_bonus + s.bonusAmount %}
+        {% if s.status == 'PAYÉ' %}{% set nb_payes = nb_payes + 1 %}{% endif %}
+    {% endfor %}
+    {% set moy_net = salaires|length > 0 ? (total_net / salaires|length) : 0 %}
+
+    <div class="summary-grid">
+        <div class="summary-card" style="--card-accent:#667eea">
+            <span class="sc-label">Total perçu</span>
+            <span class="sc-value">{{ total_net|number_format(0, ',', ' ') }} <small style="font-size:0.9rem">DT</small></span>
+            <span class="sc-detail">sur {{ salaires|length }} bulletin(s)</span>
+        </div>
+
+        <div class="summary-card" style="--card-accent:#28a745">
+            <span class="sc-label">Total bonus</span>
+            <span class="sc-value">{{ total_bonus|number_format(0, ',', ' ') }} <small style="font-size:0.9rem">DT</small></span>
+            <span class="sc-detail">primes et avantages</span>
+        </div>
+
+        <div class="summary-card" style="--card-accent:#17a2b8">
+            <span class="sc-label">Moyenne nette</span>
+            <span class="sc-value">{{ moy_net|number_format(0, ',', ' ') }} <small style="font-size:0.9rem">DT</small></span>
+            <span class="sc-detail">par mois</span>
+        </div>
+
+        <div class="summary-card" style="--card-accent:#ffc107">
+            <span class="sc-label">Bulletins payés</span>
+            <span class="sc-value">{{ nb_payes }}</span>
+            <span class="sc-detail">sur {{ salaires|length }} total</span>
+        </div>
+    </div>
+
+    {# ══ Tableau détaillé ════════════════════════════════════════════ #}
+    <div class="table-card">
+        <div class="table-card-header">
+            <h6>
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm15 0a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2zM5 4h1.5a.5.5 0 0 1 0 1H5a.5.5 0 0 1 0-1zm0 2h1.5a.5.5 0 0 1 0 1H5a.5.5 0 0 1 0-1zm0 2h1.5a.5.5 0 0 1 0 1H5a.5.5 0 0 1 0-1zm0 2h1.5a.5.5 0 0 1 0 1H5a.5.5 0 0 1 0-1zm3-6h3.5a.5.5 0 0 1 0 1H8a.5.5 0 0 1 0-1zm0 2h3.5a.5.5 0 0 1 0 1H8a.5.5 0 0 1 0-1zm0 2h3.5a.5.5 0 0 1 0 1H8a.5.5 0 0 1 0-1zm0 2h3.5a.5.5 0 0 1 0 1H8a.5.5 0 0 1 0-1z"/>
+                </svg>
+                Détail des bulletins
+                <span class="count-pill">{{ salaires|length }}</span>
+            </h6>
+        </div>
+
+        <div class="table-responsive">
+            <table class="sal-table">
+                <thead>
+                    <tr>
+                        <th>Date de paiement</th>
+                        <th>Salaire de base</th>
+                        <th>Bonus</th>
+                        <th>Règles bonus</th>
+                        <th>Total net</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in salaires %}
+                    <tr>
+
+                        {# ── Date de paiement (datePaiement) ── #}
+                        <td>
+                            <span class="mois-badge">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
+                                </svg>
+                                {% if s.datePaiement %}
+                                    {{ s.datePaiement|date('d/m/Y') }}
+                                {% else %}
+                                    <span style="color:#adb5bd">—</span>
+                                {% endif %}
+                            </span>
+                        </td>
+
+                        {# ── Salaire de base (baseAmount) ── #}
+                        <td class="amount-base">
+                            {{ s.baseAmount|number_format(2, ',', ' ') }} DT
+                        </td>
+
+                        {# ── Bonus (bonusAmount) ── #}
+                        <td class="amount-bonus">
+                            {% if s.bonusAmount > 0 %}
+                                + {{ s.bonusAmount|number_format(2, ',', ' ') }} DT
+                            {% else %}
+                                <span style="color:#adb5bd">—</span>
+                            {% endif %}
+                        </td>
+
+                        {# ── Règles bonus (relation bonusRules) ── #}
+                        <td>
+                            {% if s.bonusRules is defined and s.bonusRules|length > 0 %}
+                                {% for rule in s.bonusRules %}
+                                    <span class="bonus-tag">{{ rule.nomRegle }} ({{ rule.percentage }}%)</span>
+                                {% endfor %}
+                            {% else %}
+                                <span style="color:#adb5bd; font-size:0.8rem;">Aucune règle</span>
+                            {% endif %}
+                        </td>
+
+                        {# ── Total net (totalAmount) ── #}
+                        <td class="amount-net">
+                            {{ s.totalAmount|number_format(2, ',', ' ') }} DT
+                        </td>
+
+                        {# ── Statut (status) : CREÉ | EN_COURS | PAYÉ ── #}
+                        <td>
+                            {% set st = s.status|default('CREÉ') %}
+                            {% if st == 'PAYÉ' %}
+                                <span class="status-badge status-paye"><span class="dot"></span>Payé</span>
+                            {% elseif st == 'EN_COURS' %}
+                                <span class="status-badge status-encours"><span class="dot"></span>En cours</span>
+                            {% else %}
+                                <span class="status-badge status-cree"><span class="dot"></span>Créé</span>
+                            {% endif %}
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+{% else %}
+
+    {# ── État vide ── #}
+    <div class="table-card">
+        <div class="empty-state">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M4 10.781c.148 1.667 1.513 2.85 3.591 3.003V15h1.043v-1.216c2.27-.179 3.678-1.438 3.678-3.3 0-1.59-.947-2.51-2.956-3.028l-.722-.187V3.467c1.122.11 1.879.714 2.07 1.616h1.47c-.166-1.6-1.54-2.748-3.54-2.875V1H7.591v1.233c-1.939.23-3.27 1.472-3.27 3.156 0 1.454.966 2.483 2.661 2.917l.61.162v4.031c-1.149-.17-1.94-.8-2.131-1.718H4z"/>
+            </svg>
+            <p>Aucun bulletin de salaire disponible pour le moment.</p>
+        </div>
+    </div>
+
+{% endif %}
+
+{% endblock %}

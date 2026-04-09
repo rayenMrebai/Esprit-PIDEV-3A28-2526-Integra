@@ -1,3 +1,10 @@
+{# templates/frontoffice/partials/_navbar.html.twig #}
+
+{# ── Lecture des données utilisateur depuis la session ── #}
+{% set fake_name  = app.session.get('fake_user_name')  ?? 'Utilisateur' %}
+{% set fake_email = app.session.get('fake_user_email') ?? '' %}
+{% set fake_role  = app.session.get('fake_user_role')  ?? '' %}
+
 <nav class="top-navbar navbar navbar-expand-lg">
     <div class="container-fluid">
 
@@ -8,11 +15,9 @@
             </svg>
         </button>
 
-        {# ===== BREADCRUMB / PAGE TITLE ===== #}
+        {# ===== PAGE TITLE ===== #}
         <div class="navbar-page-title d-none d-md-block">
-            {% block navbar_title %}
-                <span class="page-title-text">{% block page_title %}Dashboard{% endblock %}</span>
-            {% endblock %}
+            <span class="page-title-text">{% block page_title %}Dashboard{% endblock %}</span>
         </div>
 
         {# ===== SPACER ===== #}
@@ -38,26 +43,22 @@
             </button>
         </div>
 
-        {# ===== USER DROPDOWN ===== #}
+        {# ===== USER DROPDOWN (données depuis session) ===== #}
         <div class="dropdown">
             <button class="user-dropdown-btn dropdown-toggle" type="button"
                     id="userDropdown"
                     data-bs-toggle="dropdown"
                     aria-expanded="false">
                 <div class="user-avatar-sm">
-                    {{ app.user ? app.user.email|first|upper : 'U' }}
+                    {{ fake_name|first|upper }}
                 </div>
                 <div class="user-info-sm d-none d-md-block">
-                    <div class="user-name-sm">
-                        {{ app.user ? app.user.email : 'Utilisateur' }}
-                    </div>
+                    <div class="user-name-sm">{{ fake_name }}</div>
                     <div class="user-role-sm">
-                        {% if app.user and app.user.roles is defined %}
-                            {% set role = app.user.roles|first %}
-                            {% if role == 'ROLE_ADMIN' %}Admin
-                            {% elseif role == 'ROLE_RH' %}RH
-                            {% else %}Utilisateur{% endif %}
-                        {% endif %}
+                        {% if fake_role == 'ADMINISTRATEUR' %}Administrateur
+                        {% elseif fake_role == 'MANAGER' %}Manager
+                        {% elseif fake_role == 'EMPLOYE' %}Employé
+                        {% else %}Utilisateur{% endif %}
                     </div>
                 </div>
                 <svg class="dropdown-caret d-none d-md-block" xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
@@ -68,14 +69,9 @@
             <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="userDropdown">
                 <li>
                     <div class="dropdown-header-info">
-                        <div class="dh-name">{{ app.user ? app.user.email : 'Utilisateur' }}</div>
+                        <div class="dh-name">{{ fake_name }}</div>
                         <div class="dh-role">
-                            {% if app.user and app.user.roles is defined %}
-                                {% set role = app.user.roles|first %}
-                                {% if role == 'ROLE_ADMIN' %}Administrateur
-                                {% elseif role == 'ROLE_RH' %}Responsable RH
-                                {% else %}Utilisateur{% endif %}
-                            {% endif %}
+                            {% if fake_email %}{{ fake_email }}{% endif %}
                         </div>
                     </div>
                 </li>
@@ -88,8 +84,18 @@
                         Mon Profil
                     </a>
                 </li>
+                <li><hr class="dropdown-divider"></li>
                 <li>
-                    <a class="dropdown-item" href="#">
+                    <a class="dropdown-item text-danger" href="{{ path('fake_logout') }}">
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="me-2" viewBox="0 0 16 16">
-                            <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/>
-                            <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.
+                            <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/>
+                            <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/>
+                        </svg>
+                        Déconnexion
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+</nav>

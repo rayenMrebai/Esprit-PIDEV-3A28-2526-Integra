@@ -1,3 +1,10 @@
+{# templates/frontoffice/partials/_sidebar.html.twig #}
+
+{# ── Lecture des données utilisateur depuis la session fake ── #}
+{% set fake_name  = app.session.get('fake_user_name')  ?? 'Utilisateur' %}
+{% set fake_email = app.session.get('fake_user_email') ?? '' %}
+{% set fake_role  = app.session.get('fake_user_role')  ?? '' %}
+
 <div class="border-end" id="sidebar-wrapper">
     <div class="sidebar-inner">
 
@@ -9,27 +16,19 @@
             </div>
         </div>
 
-        {# ===== PROFILE SECTION ===== #}
+        {# ===== PROFILE SECTION — session fake ===== #}
         <div class="sidebar-profile">
             <div class="avatar">
-                {{ app.user ? app.user.email|first|upper : 'U' }}
+                {{ fake_name|first|upper }}
             </div>
             <div class="user-name">
-                {{ app.user ? app.user.email : 'Utilisateur' }}
+                {{ fake_name }}
             </div>
             <div class="user-role">
-                {% if app.user and app.user.roles is defined %}
-                    {% set role = app.user.roles|first %}
-                    {% if role == 'ROLE_ADMIN' %}
-                        Administrateur
-                    {% elseif role == 'ROLE_RH' %}
-                        Responsable RH
-                    {% else %}
-                        Utilisateur
-                    {% endif %}
-                {% else %}
-                    Invité
-                {% endif %}
+                {% if fake_role == 'ADMINISTRATEUR' %}Administrateur
+                {% elseif fake_role == 'MANAGER' %}Manager
+                {% elseif fake_role == 'EMPLOYE' %}Employé
+                {% else %}Invité{% endif %}
             </div>
         </div>
 
@@ -41,8 +40,8 @@
             <div class="list-group list-group-flush">
 
                 {# Dashboard #}
-                <a href="{{ path('app_home') }}"
-                   class="list-group-item list-group-item-action {{ app.request.get('_route') == 'app_home' ? 'active' : '' }}">
+                <a href="{{ path('app_dashboard') }}"
+                   class="list-group-item list-group-item-action {{ app.request.get('_route') == 'app_dashboard' ? 'active' : '' }}">
                     <span class="nav-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                             <path d="M8 3.293 1 9.5V15h5v-4h4v4h5V9.5L8 3.293zM8 1.707l7 6.563V16H9v-4H7v4H1V8.27L8 1.707z"/>
@@ -103,8 +102,6 @@
             <div class="sidebar-section-label" style="margin-top: 0.5rem;">Mon Compte</div>
 
             <div class="list-group list-group-flush">
-
-                {# Profil #}
                 <a href="{{ path('app_profile') }}"
                    class="list-group-item list-group-item-action {{ app.request.get('_route') == 'app_profile' ? 'active' : '' }}">
                     <span class="nav-icon">
@@ -114,16 +111,15 @@
                     </span>
                     Mon Profil
                 </a>
-
             </div>
         </div>
 
         {# ===== SPACER ===== #}
         <div style="flex: 1;"></div>
 
-        {# ===== LOGOUT ===== #}
+        {# ===== LOGOUT — pointe vers fake_logout ===== #}
         <div class="sidebar-logout">
-            <a href="{{ path('app_logout') }}" class="btn-logout">
+            <a href="{{ path('fake_logout') }}" class="btn-logout">
                 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16">
                     <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/>
                     <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/>

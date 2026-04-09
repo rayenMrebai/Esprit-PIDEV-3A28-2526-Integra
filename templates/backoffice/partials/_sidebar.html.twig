@@ -1,3 +1,10 @@
+{# templates/backoffice/partials/_sidebar.html.twig #}
+
+{# ── Lecture des données utilisateur depuis la session fake ── #}
+{% set fake_name  = app.session.get('fake_user_name')  ?? 'Administrateur' %}
+{% set fake_email = app.session.get('fake_user_email') ?? '' %}
+{% set fake_role  = app.session.get('fake_user_role')  ?? '' %}
+
 <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
 
   {# Brand #}
@@ -9,8 +16,41 @@
     </a>
   </div>
 
-  {# Menu #}
+  {# ── Section profil utilisateur connecté ── #}
   <div class="sidebar-wrapper">
+
+    <div class="p-3 border-bottom border-secondary border-opacity-25">
+      <div class="d-flex align-items-center gap-2">
+        <div style="
+          width: 38px; height: 38px; border-radius: 50%;
+          background: linear-gradient(135deg, #6c63ff, #00d4aa);
+          display: flex; align-items: center; justify-content: center;
+          font-weight: 700; font-size: 1rem; color: #fff; flex-shrink: 0;">
+          {{ fake_name|first|upper }}
+        </div>
+        <div class="overflow-hidden">
+          <div class="fw-semibold text-white text-truncate" style="font-size: 0.85rem;">
+            {{ fake_name }}
+          </div>
+          <div class="text-truncate" style="font-size: 0.72rem; color: rgba(255,255,255,0.5);">
+            {% if fake_role == 'ADMINISTRATEUR' %}
+              <span style="color:#ff9f9f;">● Administrateur</span>
+            {% elseif fake_role == 'MANAGER' %}
+              <span style="color:#ffd97f;">● Manager</span>
+            {% else %}
+              <span style="color:#9fbfff;">● {{ fake_role }}</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% if fake_email %}
+        <div class="text-truncate mt-1" style="font-size: 0.7rem; color: rgba(255,255,255,0.35);">
+          {{ fake_email }}
+        </div>
+      {% endif %}
+    </div>
+
+    {# Menu #}
     <nav class="mt-2">
       <ul class="nav sidebar-menu flex-column"
           data-lte-toggle="treeview"
@@ -19,7 +59,8 @@
 
         {# Dashboard #}
         <li class="nav-item">
-          <a href="{{ path('app_backoffice_dashboard') }}" class="nav-link">
+          <a href="{{ path('app_backoffice_dashboard') }}"
+             class="nav-link {{ app.request.get('_route') == 'app_backoffice_dashboard' ? 'active' : '' }}">
             <i class="nav-icon bi bi-speedometer2"></i>
             <p>Dashboard</p>
           </a>
@@ -29,7 +70,8 @@
 
         {# Utilisateurs #}
         <li class="nav-item">
-          <a href="{{ path('app_backoffice_utilisateurs') }}" class="nav-link">
+          <a href="{{ path('app_backoffice_utilisateurs') }}"
+             class="nav-link {{ app.request.get('_route') starts with 'app_backoffice_utilisateurs' ? 'active' : '' }}">
             <i class="nav-icon bi bi-people-fill"></i>
             <p>Utilisateurs</p>
           </a>
@@ -37,7 +79,8 @@
 
         {# Formations #}
         <li class="nav-item">
-          <a href="{{ path('app_backoffice_formations') }}" class="nav-link">
+          <a href="{{ path('app_backoffice_formations') }}"
+             class="nav-link {{ app.request.get('_route') starts with 'app_backoffice_formations' ? 'active' : '' }}">
             <i class="nav-icon bi bi-mortarboard-fill"></i>
             <p>Formations</p>
           </a>
@@ -45,7 +88,8 @@
 
         {# Salaires #}
         <li class="nav-item">
-          <a href="{{ path('app_backoffice_salaires_index') }}" class="nav-link">
+          <a href="{{ path('app_backoffice_salaires_index') }}"
+             class="nav-link {{ app.request.get('_route') starts with 'app_backoffice_salaires' ? 'active' : '' }}">
             <i class="nav-icon bi bi-cash-coin"></i>
             <p>Salaires</p>
           </a>
@@ -53,7 +97,8 @@
 
         {# Projets #}
         <li class="nav-item">
-          <a href="{{ path('app_backoffice_projets') }}" class="nav-link">
+          <a href="{{ path('app_backoffice_projets') }}"
+             class="nav-link {{ app.request.get('_route') starts with 'app_backoffice_projets' ? 'active' : '' }}">
             <i class="nav-icon bi bi-kanban-fill"></i>
             <p>Projets</p>
           </a>
@@ -61,9 +106,20 @@
 
         {# Recrutement #}
         <li class="nav-item">
-          <a href="{{ path('app_backoffice_recrutement') }}" class="nav-link">
+          <a href="{{ path('app_backoffice_recrutement') }}"
+             class="nav-link {{ app.request.get('_route') starts with 'app_backoffice_recrutement' ? 'active' : '' }}">
             <i class="nav-icon bi bi-person-badge-fill"></i>
             <p>Recrutement</p>
+          </a>
+        </li>
+
+        {# ── Séparateur + Déconnexion ── #}
+        <li class="nav-header">COMPTE</li>
+
+        <li class="nav-item">
+          <a href="{{ path('fake_logout') }}" class="nav-link text-danger">
+            <i class="nav-icon bi bi-box-arrow-right"></i>
+            <p>Déconnexion</p>
           </a>
         </li>
 
