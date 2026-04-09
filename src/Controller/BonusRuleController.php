@@ -22,21 +22,21 @@ class BonusRuleController extends AbstractController
     ): Response {
         $rule = new BonusRule();
 
-        // ✅ CONTRÔLE MÉTIER: Vérifier paramètre URL présent
+        // Vérifier paramètre URL présent
         $salaireId = $request->query->get('salaireId');
         if (!$salaireId) {
             $this->addFlash('error', 'ID du salaire manquant dans l\'URL.');
             return $this->redirectToRoute('app_backoffice_salaires_index');
         }
 
-        // ✅ CONTRÔLE MÉTIER: Vérifier salaire existe
+        // Vérifier salaire existe
         $salaire = $salaireRepo->find($salaireId);
         if (!$salaire) {
             $this->addFlash('error', 'Salaire introuvable.');
             return $this->redirectToRoute('app_backoffice_salaires_index');
         }
 
-        // ✅ CONTRÔLE MÉTIER: Vérifier salaire pas déjà payé
+        // Vérifier salaire pas déjà payé
         if ($salaire->getStatus() === 'PAYÉ') {
             $this->addFlash('error', 'Impossible d\'ajouter une règle à un salaire déjà payé.');
             return $this->redirectToRoute('app_backoffice_salaires_index');
@@ -44,11 +44,14 @@ class BonusRuleController extends AbstractController
 
         $rule->setSalaire($salaire);
 
-        $form = $this->createForm(BonusRuleType::class, $rule);
+        // ✅ CORRECTION: Ajout de 'is_edit' => false
+        $form = $this->createForm(BonusRuleType::class, $rule, [
+            'is_edit' => false,
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // ✅ CONTRÔLE MÉTIER: Double vérification sécurité (race condition)
+            // Double vérification sécurité (race condition)
             if ($rule->getSalaire()->getStatus() === 'PAYÉ') {
                 $this->addFlash('error', 'Impossible d\'ajouter une règle à un salaire payé.');
                 return $this->redirectToRoute('app_backoffice_salaires_index');
@@ -56,7 +59,7 @@ class BonusRuleController extends AbstractController
 
             $rule->recalculateBonus();
 
-            // ✅ CONTRÔLE MÉTIER: Vérifier bonus calculé valide
+            // Vérifier bonus calculé valide
             if ($rule->getBonus() < 0) {
                 $this->addFlash('error', 'Le bonus calculé ne peut pas être négatif.');
                 return $this->render('backoffice/salaires/bonus/add.html.twig', [
@@ -85,25 +88,28 @@ class BonusRuleController extends AbstractController
         BonusRule $rule,
         EntityManagerInterface $em
     ): Response {
-        // ✅ CONTRÔLE MÉTIER: Vérifier règle pas déjà active
+        // Vérifier règle pas déjà active
         if ($rule->getStatus() === 'ACTIVE') {
             $this->addFlash('error', 'Impossible de modifier une règle déjà active.');
             return $this->redirectToRoute('app_backoffice_salaires_index');
         }
 
-        // ✅ CONTRÔLE MÉTIER: Vérifier salaire pas payé
+        // Vérifier salaire pas payé
         if ($rule->getSalaire()->getStatus() === 'PAYÉ') {
             $this->addFlash('error', 'Impossible de modifier une règle d\'un salaire déjà payé.');
             return $this->redirectToRoute('app_backoffice_salaires_index');
         }
 
-        $form = $this->createForm(BonusRuleType::class, $rule);
+        // ✅ CORRECTION: Ajout de 'is_edit' => true
+        $form = $this->createForm(BonusRuleType::class, $rule, [
+            'is_edit' => true,
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $rule->recalculateBonus();
 
-            // ✅ CONTRÔLE MÉTIER: Vérifier bonus calculé valide
+            // Vérifier bonus calculé valide
             if ($rule->getBonus() < 0) {
                 $this->addFlash('error', 'Le bonus calculé ne peut pas être négatif.');
                 return $this->render('backoffice/salaires/bonus/editRule.html.twig', [
@@ -113,7 +119,7 @@ class BonusRuleController extends AbstractController
 
             $rule->setUpdatedAt(new \DateTime());
 
-            // ✅ CONTRÔLE MÉTIER: Si activation, recalculer total salaire
+            // Si activation, recalculer total salaire
             if ($rule->getStatus() === 'ACTIVE') {
                 $salaire = $rule->getSalaire();
                 $totalBonus = 0;
@@ -145,19 +151,19 @@ class BonusRuleController extends AbstractController
         BonusRule $rule,
         EntityManagerInterface $em
     ): Response {
-        // ✅ CONTRÔLE SÉCURITÉ: Token CSRF
+        // Token CSRF
         if (!$this->isCsrfTokenValid('delete' . $rule->getId(), $request->request->get('_token'))) {
             $this->addFlash('error', 'Token de sécurité invalide.');
             return $this->redirectToRoute('app_backoffice_salaires_index');
         }
 
-        // ✅ CONTRÔLE MÉTIER: Vérifier règle pas active
+        // Vérifier règle pas active
         if ($rule->getStatus() === 'ACTIVE') {
             $this->addFlash('error', 'Impossible de supprimer une règle active.');
             return $this->redirectToRoute('app_backoffice_salaires_index');
         }
 
-        // ✅ CONTRÔLE MÉTIER: Vérifier salaire pas payé
+        // Vérifier salaire pas payé
         if ($rule->getSalaire()->getStatus() === 'PAYÉ') {
             $this->addFlash('error', 'Impossible de supprimer une règle d\'un salaire payé.');
             return $this->redirectToRoute('app_backoffice_salaires_index');

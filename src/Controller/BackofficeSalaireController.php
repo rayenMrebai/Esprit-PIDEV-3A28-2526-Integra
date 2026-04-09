@@ -20,30 +20,25 @@ class BackofficeSalaireController extends AbstractController
         BonusRuleRepository $bonusRuleRepo,
         CsrfTokenManagerInterface $csrf
     ): Response {
-        // ⭐ RECHERCHE (par nom employé)
         $search = $request->query->get('search', '');
         $hasSearch = !empty($search);
 
-        // ⭐ FILTRAGE (statut uniquement)
+        
         $filterStatus = $request->query->get('filter_status', '');
         $hasFilter = !empty($filterStatus);
 
-        // ⭐ Logique combinée
+        
         if ($hasSearch && $hasFilter) {
-            // Recherche + Filtrage par statut
             $salaires = $salaireRepo->findBySearchAndStatus($search, $filterStatus);
         } elseif ($hasSearch) {
-            // Uniquement recherche
             $salaires = $salaireRepo->findByUsernameSearch($search);
         } elseif ($hasFilter) {
-            // Uniquement filtrage par statut
             $salaires = $salaireRepo->findByStatus($filterStatus);
         } else {
-            // Aucun critère - afficher tout
             $salaires = $salaireRepo->findAll();
         }
 
-        // ── bonusRulesMap pour le JS ──
+        
         $bonusRulesMap = [];
         foreach ($salaires as $salaire) {
             $rules = $bonusRuleRepo->findBy(['salaire' => $salaire->getId()]);
@@ -59,7 +54,7 @@ class BackofficeSalaireController extends AbstractController
             ], $rules);
         }
 
-        // ── salaireUrls pour le JS ──
+        
         $salaireUrls = [];
         foreach ($salaires as $salaire) {
             $salaireUrls[$salaire->getId()] = [

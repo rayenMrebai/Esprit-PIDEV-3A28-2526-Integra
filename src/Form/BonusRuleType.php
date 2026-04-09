@@ -16,17 +16,28 @@ class BonusRuleType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('nomRegle')
-            ->add('percentage')
-            ->add('conditionText');
+            ->add('nomRegle', TextType::class, [
+                'required' => true,
+                'empty_data' => '', // important
+            ])
 
-        // 🔥 ajouter status seulement si edit
+            ->add('percentage', NumberType::class, [
+                'required' => true,
+                'empty_data' => null, // 🔥 évite crash
+            ])
+
+            ->add('conditionText', TextareaType::class, [
+                'required' => true,
+                'empty_data' => '', // important pour NotBlank
+            ]);
+
         if ($options['is_edit']) {
             $builder->add('status', ChoiceType::class, [
                 'choices' => [
                     'Créé' => 'CRÉE',
                     'Active' => 'ACTIVE'
-                ]
+                ],
+                'required' => true
             ]);
         }
     }
@@ -35,7 +46,7 @@ class BonusRuleType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => BonusRule::class,
-            'is_edit' => false, // 🔥 important
+            'is_edit' => false,
         ]);
     }
 }

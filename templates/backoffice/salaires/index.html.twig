@@ -6,7 +6,7 @@
 
 {% block admin_content %}
 
-{# Messages flash #}
+
 {% for msg in app.flashes('success') %}
   <div class="alert alert-success alert-dismissible fade show" role="alert">
     <i class="bi bi-check-circle me-2"></i>{{ msg }}
@@ -22,14 +22,12 @@
 
 <div class="row g-3">
 
-  {# ══════════════════════════════════════════
-     COLONNE GAUCHE — Liste des salaires
-  ══════════════════════════════════════════ #}
+  
   <div class="col-lg-6" id="leftPanel">
     <div class="card h-100">
       <div class="card-body d-flex flex-column" style="gap:0;">
 
-        {# ── Header + barre d'outils inline ── #}
+        
         <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
           <div>
             <h5 class="fw-bold text-dark mb-0" style="font-size:15px;">Employee Salaries</h5>
@@ -40,10 +38,10 @@
           </a>
         </div>
 
-        {# ── Recherche + filtre sur une seule ligne ── #}
+        
         <div class="d-flex gap-2 mb-2 align-items-center flex-wrap" style="background:#f8fafc; border-radius:8px; padding:8px 10px; border:0.5px solid #e2e8f0;">
 
-          {# Recherche #}
+          
           <form method="get" action="{{ path('app_backoffice_salaires_index') }}" class="d-flex gap-1 align-items-center flex-grow-1" style="min-width:160px;">
             <div class="input-group input-group-sm" style="max-width:220px;">
               <span class="input-group-text bg-white px-2"><i class="bi bi-search" style="font-size:11px;"></i></span>
@@ -55,10 +53,10 @@
             </div>
           </form>
 
-          {# Séparateur #}
+          
           <div style="width:1px; height:24px; background:#e2e8f0;"></div>
 
-          {# Filtre statut #}
+          
           <form method="get" action="{{ path('app_backoffice_salaires_index') }}" class="d-flex gap-1 align-items-center">
             {% if hasSearch|default(false) %}
               <input type="hidden" name="search" value="{{ search }}">
@@ -76,7 +74,7 @@
           </form>
         </div>
 
-        {# Badges actifs #}
+        
         {% if hasSearch|default(false) or hasFilter|default(false) %}
           <div class="d-flex gap-2 mb-2 flex-wrap" style="font-size:11px;">
             {% if hasSearch|default(false) %}
@@ -90,7 +88,7 @@
 
         <hr class="my-2">
 
-        {# En-têtes #}
+        
         <div class="row px-2 mb-1" style="font-size:10px; text-transform:uppercase; letter-spacing:.04em; color:#94a3b8; font-weight:700;">
           <div class="col-1">ID</div>
           <div class="col-3">Employé</div>
@@ -100,7 +98,7 @@
           <div class="col-2">Statut</div>
         </div>
 
-        {# Lignes — scrollable si nécessaire #}
+        
         <div id="salaryRows" style="overflow-y:auto; flex:1;">
           {% if salaires|length > 0 %}
             {% for salaire in salaires %}
@@ -145,9 +143,7 @@
     </div>
   </div>
 
-  {# ══════════════════════════════════════════
-     COLONNE DROITE — Détails + Bonus Rules
-  ══════════════════════════════════════════ #}
+  
   <div class="col-lg-6" id="rightPanel" style="display:none;">
     <div class="card h-100">
       <div class="card-body">
@@ -234,7 +230,7 @@
   </div>
 </div>
 
-{# ── Données JSON pour le JS ── #}
+
 <script>
 const bonusRulesMap = {{ bonusRulesMap | json_encode(constant('JSON_THROW_ON_ERROR')) | raw }};
 const salaireUrls   = {{ salaireUrls   | json_encode(constant('JSON_THROW_ON_ERROR')) | raw }};
@@ -242,7 +238,7 @@ const salaireUrls   = {{ salaireUrls   | json_encode(constant('JSON_THROW_ON_ERR
 let activeRow = null;
 
 function showDetails(row, id, name, base, bonus, total, date, status) {
-  // 🔹 gérer sélection ligne
+  
   if (activeRow) {
     activeRow.style.background = '';
     activeRow.classList.remove('active-row');
@@ -252,28 +248,26 @@ function showDetails(row, id, name, base, bonus, total, date, status) {
   row.classList.add('active-row');
   activeRow = row;
 
-  // 🔹 afficher panel
+  
   document.getElementById('rightPanel').style.display = '';
 
-  // 🔹 afficher données
+  
   document.getElementById('detailName').textContent  = name;
   document.getElementById('detailBase').textContent  = formatDT(base);
   document.getElementById('detailBonus').textContent = formatDT(bonus);
   document.getElementById('detailTotal').textContent = formatDT(total);
   document.getElementById('detailDate').textContent  = date;
 
-  // 🔹 statut badge
+  
   const badge = document.getElementById('detailStatus');
   badge.textContent = status;
   badge.className   = 'badge rounded-pill ' + getStatusClass(status);
 
-  // 🔹 urls
+  
   const urls = salaireUrls[id] || {};
   const isPaid = (status === 'PAYÉ');
 
-  // ========================
-  // 🔹 bouton EDIT
-  // ========================
+  
   const btnEdit = document.getElementById('btnEdit');
   btnEdit.href = urls.edit || '#';
 
@@ -289,14 +283,10 @@ function showDetails(row, id, name, base, bonus, total, date, status) {
     btnEdit.style.opacity = '';
   }
 
-  // ========================
-  // 🔹 bouton PDF
-  // ========================
+  
   document.getElementById('btnPdf').href = urls.show || '#';
 
-  // ========================
-  // 🔹 bouton DELETE
-  // ========================
+  
   const deleteForm = document.getElementById('deleteForm');
   const deleteBtn = deleteForm.querySelector('button');
 
@@ -313,15 +303,13 @@ function showDetails(row, id, name, base, bonus, total, date, status) {
     deleteBtn.classList.add('btn-danger');
   }
 
-  // ========================
-  // 🔥 bouton ADD BONUS RULE (corrigé)
-  // ========================
+  
   const btnAddRule = document.getElementById('btnAddRule');
 
-  // 👉 lien dynamique avec salaireId
+  
   btnAddRule.href = `/bonus-rule/new?salaireId=${id}`;
 
-  // 👉 désactivation si payé
+  
   if (isPaid) {
     btnAddRule.classList.add('disabled');
     btnAddRule.style.pointerEvents = 'none';
@@ -334,9 +322,7 @@ function showDetails(row, id, name, base, bonus, total, date, status) {
     btnAddRule.title = "Ajouter une règle";
   }
 
-  // ========================
-  // 🔹 charger bonus rules
-  // ========================
+  
   loadBonusRules(id, status);
 }
 

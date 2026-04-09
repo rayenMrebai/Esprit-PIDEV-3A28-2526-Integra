@@ -20,15 +20,17 @@ class BonusRule
     #[Assert\Length(min: 3, max: 100)]
     private ?string $nomRegle = null;
 
-    #[ORM\Column(name: 'percentage', type: 'float', options: ['default' => 0])]
+    #[ORM\Column(name: 'percentage', type: 'float', nullable: true)]
     #[Assert\NotBlank(message: "Le pourcentage est obligatoire")]
     #[Assert\Positive(message: "Le pourcentage doit être positif")]
-    private ?float $percentage = 0;
+    private ?float $percentage = null;
 
     #[ORM\Column(name: 'bonus', type: 'float', options: ['default' => 0])]
     private ?float $bonus = 0;
 
-    #[ORM\Column(name: 'condition_text', type: 'text', nullable: true)]
+    #[ORM\Column(name: 'condition_text', type: 'text', nullable: false)]
+    #[Assert\NotBlank(message: "Le texte de condition est obligatoire")]
+    #[Assert\Length(min: 25, minMessage: "Le texte doit contenir au moins {{ limit }} caractères")]
     private ?string $conditionText = null;
 
     #[ORM\Column(
@@ -63,12 +65,14 @@ class BonusRule
     public function setNomRegle(string $nomRegle): static { $this->nomRegle = $nomRegle; return $this; }
 
     public function getPercentage(): ?float { return $this->percentage; }
-    public function setPercentage(float $percentage): static
+    public function setPercentage(?float $percentage): static
     {
         $this->percentage = $percentage;
-        if ($this->salaire !== null) {
+
+        if ($percentage !== null && $this->salaire !== null) {
             $this->bonus = $this->salaire->getBaseAmount() * ($percentage / 100);
         }
+
         $this->updatedAt = new \DateTime();
         return $this;
     }
