@@ -1,4 +1,3 @@
-
 ###> symfony/framework-bundle ###
 /.env.local
 /.env.local.php
@@ -18,3 +17,11 @@
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
+
+# Exclure les gros assets AdminLTE et front-office
+/public/adminlte/
+/public/front-assets/
+/public/front/
+
+# (Optionnel) Exclure les dépendances Node si vous les avez
+/node_modules/
