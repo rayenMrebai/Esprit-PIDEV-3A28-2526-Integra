@@ -1,6 +1,5 @@
 {{ form_start(form, {'attr': {'id': 'training-form', 'class': 'ajax-form'}})}}
 
-    {# Affichage des erreurs globales du formulaire #}
     {{ form_errors(form) }}
 
     <div class="mb-3">
@@ -26,9 +25,9 @@
 
     <div class="mb-3">
         {{ form_label(form.type, 'Type', {'label_attr': {'class': 'form-label'}})}}
-        {{ form_widget(form.type, {'attr': {'class': 'form-control'}})}}
+        {{ form_widget(form.type, {'attr': {'class': 'form-select'}})}}
         {{ form_errors(form.type) }}
-        <small class="text-muted">Valeurs possibles: présentiel, en ligne, hybride.</small>
+        <small class="text-muted">Sélectionnez le type de formation.</small>
     </div>
 
     <div class="mb-3">
@@ -46,9 +45,16 @@
 
     <div class="mb-3">
         {{ form_label(form.status, 'Statut', {'label_attr': {'class': 'form-label'}})}}
-        {{ form_widget(form.status, {'attr': {'class': 'form-control'}})}}
+        {{ form_widget(form.status, {'attr': {'class': 'form-select'}})}}
         {{ form_errors(form.status) }}
-        <small class="text-muted">Valeurs possibles: PROGRAMMÉ, EN COURS, TERMINÉ, ANNULÉ.</small>
+        <small class="text-muted">Sélectionnez le statut du programme.</small>
+    </div>
+
+    <div class="mb-3">
+        {{ form_label(form.skills, 'Compétences associées', {'label_attr': {'class': 'form-label'}})}}
+        {{ form_widget(form.skills, {'attr': {'class': 'form-select'}})}}
+        {{ form_errors(form.skills) }}
+        <small class="text-muted">Sélectionnez au moins une compétence (Ctrl+clic pour plusieurs).</small>
     </div>
 
     {{ form_rest(form) }}

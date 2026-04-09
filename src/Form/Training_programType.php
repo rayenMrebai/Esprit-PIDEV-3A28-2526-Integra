@@ -2,7 +2,9 @@
 
 namespace App\Form;
 
+use App\Entity\Skill;
 use App\Entity\Training_program;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -10,6 +12,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
 class TrainingProgramType extends AbstractType
 {
@@ -30,10 +33,15 @@ class TrainingProgramType extends AbstractType
                 'required' => false,
                 'attr' => ['class' => 'form-control']
             ])
-            ->add('type', TextType::class, [
+            ->add('type', ChoiceType::class, [
                 'label' => 'Type',
-                'required' => false,
-                'attr' => ['class' => 'form-control']
+                'choices' => [
+                    'Présentiel' => 'présentiel',
+                    'En ligne' => 'en ligne',
+                    'Hybride' => 'hybride',
+                ],
+                'placeholder' => '-- Sélectionner un type --',
+                'attr' => ['class' => 'form-select']
             ])
             ->add('startDate', DateType::class, [
                 'label' => 'Date de début',
@@ -47,10 +55,26 @@ class TrainingProgramType extends AbstractType
                 'required' => false,
                 'attr' => ['class' => 'form-control']
             ])
-            ->add('status', TextType::class, [
+            ->add('status', ChoiceType::class, [
                 'label' => 'Statut',
-                'required' => false,
-                'attr' => ['class' => 'form-control']
+                'choices' => [
+                    'Programmé' => 'PROGRAMMÉ',
+                    'En cours' => 'EN COURS',
+                    'Terminé' => 'TERMINÉ',
+                    'Annulé' => 'ANNULÉ',
+                ],
+                'placeholder' => '-- Sélectionner un statut --',
+                'attr' => ['class' => 'form-select']
+            ])
+            ->add('skills', EntityType::class, [
+                'class' => Skill::class,
+                'choice_label' => 'nom',
+                'label' => 'Compétences associées',
+                'multiple' => true,
+                'expanded' => false,
+                'required' => true,
+                'attr' => ['class' => 'form-select', 'size' => 6],
+                'help' => 'Sélectionnez au moins une compétence (Ctrl+clic pour plusieurs)'
             ]);
     }
 

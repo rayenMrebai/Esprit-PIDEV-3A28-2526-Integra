@@ -17,23 +17,24 @@
     </div>
 
     <div class="mb-3">
-        {{ form_label(form.levelRequired, 'Niveau requis', {'label_attr': {'class': 'form-label'}})}}
-        {{ form_widget(form.levelRequired, {'attr': {'class': 'form-control'}})}}
-        {{ form_errors(form.levelRequired) }}
+        {{ form_label(form.level_required, 'Niveau requis', {'label_attr': {'class': 'form-label'}})}}
+        {{ form_widget(form.level_required, {'attr': {'class': 'form-control'}})}}
+        {{ form_errors(form.level_required) }}
         <small class="text-muted">Doit être compris entre 1 et 5.</small>
     </div>
 
     <div class="mb-3">
         {{ form_label(form.categorie, 'Catégorie', {'label_attr': {'class': 'form-label'}})}}
-        {{ form_widget(form.categorie, {'attr': {'class': 'form-control'}})}}
+        {{ form_widget(form.categorie, {'attr': {'class': 'form-select'}})}}
         {{ form_errors(form.categorie) }}
-        <small class="text-muted">Valeurs possibles: technique, soft, management, autre.</small>
+        <small class="text-muted">Sélectionnez la catégorie de la compétence.</small>
     </div>
 
     <div class="mb-3">
-        {{ form_label(form.trainingProgram, 'Formation liée', {'label_attr': {'class': 'form-label'}})}}
+        {{ form_label(form.trainingProgram, 'Programme de formation', {'label_attr': {'class': 'form-label'}})}}
         {{ form_widget(form.trainingProgram, {'attr': {'class': 'form-select'}})}}
         {{ form_errors(form.trainingProgram) }}
+        <small class="text-muted">Sélectionnez le programme associé à cette compétence.</small>
     </div>
 
     {{ form_rest(form) }}

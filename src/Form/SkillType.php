@@ -11,6 +11,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
 class SkillType extends AbstractType
 {
@@ -26,22 +27,30 @@ class SkillType extends AbstractType
                 'required' => false,
                 'attr' => ['class' => 'form-control', 'rows' => 4]
             ])
-            ->add('levelRequired', IntegerType::class, [  // ← levelRequired (camelCase)
+            ->add('level_required', IntegerType::class, [
                 'label' => 'Niveau requis',
                 'required' => false,
                 'attr' => ['class' => 'form-control']
             ])
-            ->add('categorie', TextType::class, [
+            ->add('categorie', ChoiceType::class, [
                 'label' => 'Catégorie',
-                'required' => false,
-                'attr' => ['class' => 'form-control']
+                'choices' => [
+                    'Technique' => 'technique',
+                    'Soft skills' => 'soft',
+                    'Management' => 'management',
+                    'Autre' => 'autre',
+                ],
+                'placeholder' => '-- Sélectionner une catégorie --',
+                'attr' => ['class' => 'form-select']
             ])
             ->add('trainingProgram', EntityType::class, [
                 'class' => Training_program::class,
                 'choice_label' => 'title',
-                'label' => 'Formation liée',
-                'required' => false,
-                'placeholder' => '-- Sélectionner une formation --',
+                'label' => 'Programme de formation',
+                'multiple' => false,
+                'expanded' => false,
+                'required' => true,
+                'placeholder' => '-- Sélectionner un programme --',
                 'attr' => ['class' => 'form-select']
             ]);
     }

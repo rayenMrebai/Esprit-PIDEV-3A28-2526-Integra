@@ -47,8 +47,10 @@ class Skill
     )]
     private ?string $categorie = null;
 
+    // Relation ManyToOne avec Training_program
     #[ORM\ManyToOne(targetEntity: Training_program::class, inversedBy: "skills")]
-    #[ORM\JoinColumn(name: 'trainingprogram_id', referencedColumnName: 'id', onDelete: 'SET NULL')]
+    #[ORM\JoinColumn(name: "trainingprogram_id", referencedColumnName: "id", nullable: true)]
+    #[Assert\NotNull(message: "La compétence doit être liée à un programme de formation.")]
     private ?Training_program $trainingProgram = null;
 
     // ──────────────────────────────────────────────────────────────
@@ -104,14 +106,14 @@ class Skill
         return $this;
     }
 
-    public function getTrainingProgram(): ?Training_program
-    {
-        return $this->trainingProgram;
-    }
+   public function getTrainingProgram(): ?Training_program
+{
+    return $this->trainingProgram;
+}
 
-    public function setTrainingProgram(?Training_program $trainingProgram): self
-    {
-        $this->trainingProgram = $trainingProgram;
-        return $this;
-    }
+public function setTrainingProgram(?Training_program $trainingProgram): self
+{
+    $this->trainingProgram = $trainingProgram;
+    return $this;
+}
 }
