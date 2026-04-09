@@ -1,24 +1,375 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
-        {% block stylesheets %}
-        {% endblock %}
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>INTEGRA RH – {% block title %}{% endblock %}</title>
 
-        {% block javascripts %}
-            {% block importmap %}{{ importmap('app') }}{% endblock %}
-        {% endblock %}
+    {# ========== ADMIN LTE (accessible via le symlink public/adminlte) ========== #}
+    <link rel="stylesheet" href="{{ asset('adminlte/plugins/fontawesome-free/css/all.css') }}">
+    <link rel="stylesheet" href="{{ asset('adminlte/dist/css/adminlte.css') }}">
 
-        {% set frankenphpHotReload = app.request.server.get('FRANKENPHP_HOT_RELOAD') %}
-        {% if frankenphpHotReload %}
-        <meta name="frankenphp-hot-reload:url" content="{{ frankenphpHotReload }}">
-        <script src="https://cdn.jsdelivr.net/npm/idiomorph"></script>
-        <script src="https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm" type="module"></script>
-        {% endif %}
-    </head>
-    <body>
-        {% block body %}{% endblock %}
-    </body>
+    {# ========== STYLES PERSONNALISÉS INTEGRA ========== #}
+    <style>
+        :root {
+            --integra-blue: #0B63CE;
+            --integra-green: #0FA36B;
+            --integra-dark: #1e3a5f;
+            --integra-darker: #0b1e33;
+            --integra-light-bg: #f8fafc;
+            --integra-sidebar-text: #b0c4de;
+        }
+
+        .content-wrapper, .content, .container-fluid {
+            background: var(--integra-light-bg) !important;
+        }
+        .content { padding: 0 !important; }
+        .container-fluid { padding: 25px 30px !important; }
+
+        .main-sidebar, .main-sidebar::before {
+            background-color: var(--integra-dark) !important;
+        }
+        .brand-link {
+            background-color: var(--integra-darker) !important;
+            border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+        }
+        .nav-sidebar .nav-link {
+            color: var(--integra-sidebar-text) !important;
+            border-radius: 30px !important;
+            margin: 4px 8px;
+            transition: 0.2s;
+        }
+        .nav-sidebar .nav-link:hover {
+            background: rgba(11,99,206,0.3) !important;
+            color: white !important;
+        }
+        .nav-sidebar .nav-link.active {
+            background: rgba(11,99,206,0.5) !important;
+            color: white !important;
+        }
+        .nav-sidebar .nav-icon { color: var(--integra-sidebar-text) !important; }
+
+        .main-header.navbar {
+            background: linear-gradient(to right, var(--integra-blue), var(--integra-green)) !important;
+            border-bottom: none !important;
+        }
+
+        .main-footer {
+            background: linear-gradient(to right, #e2eaf8, #d4e0f0) !important;
+            color: var(--integra-dark) !important;
+            font-weight: 500;
+            border-top: none !important;
+        }
+
+        .integra-header {
+            background: linear-gradient(to right, var(--integra-blue), var(--integra-green));
+            border-radius: 20px;
+            padding: 20px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            margin-bottom: 25px;
+        }
+        .integra-header h1 {
+            font-size: 22px;
+            font-weight: bold;
+            color: white;
+            margin: 0;
+        }
+        .integra-header p {
+            font-size: 12px;
+            color: var(--integra-sidebar-text);
+            margin: 0;
+        }
+        .btn-add {
+            background: #10b981;
+            color: white;
+            font-weight: bold;
+            border-radius: 30px;
+            padding: 12px 24px;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: 0.2s;
+            display: inline-block;
+        }
+        .btn-add:hover {
+            background: #0c9a68;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .integra-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,50,100,0.08);
+            margin-bottom: 25px;
+        }
+
+        .details-card {
+            background: linear-gradient(to bottom right, #ffffff, #f9fcff);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid #d9e2ef;
+            box-shadow: 0 10px 25px rgba(0,50,100,0.08);
+        }
+        .detail-row {
+            display: flex;
+            margin-bottom: 12px;
+            align-items: flex-start;
+        }
+        .detail-label {
+            width: 145px;
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .detail-value {
+            flex: 1;
+            background: #f1f9ff;
+            padding: 5px 10px;
+            border-radius: 8px;
+            color: #0f172a;
+            font-size: 14px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-planning   { background: #f59e0b !important; color: white !important; }
+        .status-inprogress { background: #3b82f6 !important; color: white !important; }
+        .status-active     { background: #10b981 !important; color: white !important; }
+        .status-onhold     { background: #ef4444 !important; color: white !important; }
+        .status-completed  { background: #6b7280 !important; color: white !important; }
+
+        .action-btn {
+            display: block;
+            text-align: center;
+            padding: 11px 0;
+            border-radius: 30px;
+            color: white;
+            font-weight: bold;
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            border: none;
+            width: 100%;
+            transition: 0.2s;
+        }
+        .action-btn:hover { opacity: 0.9; color: white; transform: translateY(-1px); }
+        .action-btn.orange { background: #f59e0b; }
+        .action-btn.red    { background: #ef4444; }
+        .action-btn.blue   { background: #2563eb; }
+        .action-btn.green  { background: #10b981; }
+
+        .project-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .project-row:nth-child(odd) { background: #f8fafc; }
+        .project-row:hover { background: #e6f0ff !important; }
+        .project-row.selected { background: linear-gradient(to right, #dbeafe, #f0fdf4) !important; }
+
+        .integra-form-label {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 14px;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .integra-form-control {
+            border-radius: 8px !important;
+            border: 1px solid #d1d5db !important;
+            padding: 9px 12px !important;
+            width: 100%;
+        }
+        .integra-form-control:focus {
+            border-color: var(--integra-blue) !important;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(11,99,206,0.1) !important;
+        }
+
+        .rate-pill-nav {
+            background: white;
+            border: 1px solid #dbeafe;
+            border-radius: 40px;
+            padding: 5px 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .table {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        .table thead th {
+            background: #f1f5f9;
+            border-bottom: 2px solid #e2e8f0;
+            color: var(--integra-dark);
+        }
+
+        .status-bar {
+            background: linear-gradient(to right, #e2eaf8, #d4e0f0);
+            border-radius: 40px;
+            padding: 14px 22px;
+            margin-top: 25px;
+            color: var(--integra-dark);
+            font-weight: 500;
+            font-size: 13px;
+        }
+    </style>
+
+    {% block stylesheets %}{% endblock %}
+</head>
+
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+
+    {# ========== NAVBAR ========== #}
+    <nav class="main-header navbar navbar-expand navbar-dark">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" data-widget="pushmenu" href="#" role="button">
+                    <i class="fas fa-bars"></i>
+                </a>
+            </li>
+        </ul>
+
+        <ul class="navbar-nav ml-auto align-items-center">
+            <li class="nav-item mr-3 d-none d-sm-flex align-items-center">
+                <div class="rate-pill-nav">
+                    <span style="background:linear-gradient(to right,#0B63CE,#1a7de8); border-radius:20px; padding:3px 10px; color:white; font-weight:bold; font-size:12px;">💱 Taux</span>
+                    <span style="color:#0B63CE; font-weight:bold; font-size:13px;" id="usdRate">
+            {% set rates = currency_rates() %}
+                        {{ rates.USD|default('—') }}
+        </span>
+                    <span style="color:#64748b; font-size:11px;">USD</span>
+                    <span style="color:#dbeafe; font-size:11px;">|</span>
+                    <span style="color:#0FA36B; font-weight:bold; font-size:13px;" id="eurRate">
+            {{ rates.EUR|default('—') }}
+        </span>
+                    <span style="color:#64748b; font-size:11px;">EUR</span>
+                    <span style="background:#dcfce7; border-radius:20px; padding:2px 8px; font-size:10px; font-weight:bold; color:#0FA36B;">● LIVE</span>
+                </div>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">
+                    <i class="fas fa-user-circle mr-1"></i>
+                    {{ app.user ? app.user.username : 'Admin' }}
+                </a>
+                <div class="dropdown-menu dropdown-menu-right">
+                    <a href="#" class="dropdown-item"><i class="fas fa-user mr-2"></i>Profil</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item text-danger" href="{{ path('app_logout') }}">
+                        <i class="fas fa-sign-out-alt mr-2"></i> Déconnexion
+                    </a>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    {# ========== SIDEBAR ========== #}
+    <aside class="main-sidebar sidebar-dark-primary elevation-4">
+        <a href="{{ path('dashboard') }}" class="brand-link text-center">
+            <span class="brand-text font-weight-bold" style="color:white; font-size:18px; letter-spacing:1px;">🏢 INTEGRA</span>
+        </a>
+        <div class="sidebar">
+            <div class="mt-2 mb-2 text-center" style="color:#64748b; font-size:11px; text-transform:uppercase; letter-spacing:1px; padding:8px 0 4px;">
+                NAVIGATION
+            </div>
+            <nav class="mt-0">
+                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
+                    <li class="nav-item">
+                        <a href="{{ path('dashboard') }}" class="nav-link {{ app.request.get('_route') == 'dashboard' ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-tachometer-alt"></i>
+                            <p>Dashboard</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ path('app_project_index') }}" class="nav-link {{ app.request.get('_route') starts with 'app_project' ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-project-diagram"></i>
+                            <p>Projects</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ path('app_projectassignment_index') }}" class="nav-link {{ app.request.get('_route') starts with 'app_projectassignment' ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-tasks"></i>
+                            <p>Affections</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ path('app_salaire_index') }}" class="nav-link {{ app.request.get('_route') starts with 'app_salaire' ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-money-bill-wave"></i>
+                            <p>Salaires</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ path('app_user_account_index') }}" class="nav-link {{ app.request.get('_route') starts with 'app_user' ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-users"></i>
+                            <p>Utilisateurs</p>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </aside>
+
+    {# ========== CONTENU PRINCIPAL ========== #}
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="container-fluid">
+                {% block content %}{% endblock %}
+            </div>
+        </section>
+    </div>
+
+    {# ========== FOOTER ========== #}
+    <footer class="main-footer">
+        <strong>🔌 INTEGRA HR Management System</strong> &copy; 2026
+        <div class="float-right d-none d-sm-inline-block">
+            <b>Version</b> 1.0 • Database: db_sym
+        </div>
+    </footer>
+</div>
+
+{# ========== SCRIPTS ========== #}
+<script src="{{ asset('adminlte/plugins/jquery/jquery.js') }}"></script>
+<script src="{{ asset('adminlte/plugins/bootstrap/js/bootstrap.bundle.js') }}"></script>
+<script src="{{ asset('adminlte/dist/js/adminlte.js') }}"></script>
+
+<script>
+    async function loadRates() {
+        try {
+            const response = await fetch('{{ path('api_currency_rates') }}');
+            const data = await response.json();
+            if (data.USD) {
+                document.getElementById('usdRate').textContent = data.USD.toFixed(4);
+            }
+            if (data.EUR) {
+                document.getElementById('eurRate').textContent = data.EUR.toFixed(4);
+            }
+        } catch(e) {
+            // Silencieux
+        }
+    }
+    loadRates();
+    setInterval(loadRates, 1800000); // 30 minutes
+</script>
+
+{% block javascripts %}{% endblock %}
+</body>
 </html>
