@@ -338,4 +338,34 @@ body {
     .job-card { height: auto; }
     .form-grid { grid-template-columns: 1fr; }
     .form-group.full { grid-column: span 1; }
+    /* Mise en évidence de l'offre sélectionnée */
+    .job-card.selected-job {
+        border-color: var(--primary);
+        box-shadow: 0 8px 20px rgba(11, 99, 206, 0.15);
+        background: linear-gradient(90deg, #ffffff, #f0f7ff);
+    }
+    .stat-card {
+        background: white;
+        border-radius: var(--radius-lg);
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        box-shadow: var(--shadow-md);
+    }
+    .stat-card.blue .stat-icon { background: #eff6ff; color: var(--primary); }
+    .stat-card.green .stat-icon { background: #f0fdf4; color: var(--secondary); }
+    .stat-card.orange .stat-icon { background: #fffbeb; color: var(--warning); }
+    .stat-card.gray .stat-icon { background: #f1f5f9; color: #64748b; }
+    .stat-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+    }
+    .stat-label { font-size: 13px; color: var(--gray-500); margin-bottom: 6px; }
+    .stat-value { font-size: 32px; font-weight: 800; }
 }

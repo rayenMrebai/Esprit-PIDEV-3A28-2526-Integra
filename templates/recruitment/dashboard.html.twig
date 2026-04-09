@@ -18,6 +18,9 @@
                     <strong>Admin User</strong><br>
                     <span>Administrateur</span>
                 </div>
+                <a href="{{ path('app_recruitment_statistiques') }}" class="btn btn-outline-light">
+                    <i class="fas fa-chart-line"></i> Statistiques
+                </a>
             </div>
         </div>
 
@@ -27,71 +30,141 @@
             </div>
         {% endfor %}
 
-        <!-- SECTION OFFRES -->
+        <!-- SECTION OFFRES D'EMPLOI -->
         <div class="card-modern">
             <div class="section-header">
                 <div class="section-title"><i class="fas fa-briefcase"></i> OFFRES D'EMPLOI</div>
                 <div class="actions-bar">
+                    <form method="get" action="{{ path('app_recruitment_dashboard') }}" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                        <input type="text" name="search_job" value="{{ searchJob|default('') }}"
+                               placeholder="🔍 Rechercher par titre..." class="form-control" style="width: 200px;">
+                        <button type="submit" class="btn btn-primary">Rechercher</button>
+
+                        <!-- Boutons de tri par date -->
+                        <div class="btn-group" style="display: flex; gap: 5px;">
+                            {% set currentParams = app.request.query.all %}
+                            <a href="{{ path('app_recruitment_dashboard', currentParams|merge({'sort_jobs': 'date_desc'})) }}"
+                               class="btn {{ sortJobs|default('date_desc') == 'date_desc' ? 'btn-primary' : 'btn-outline' }}" style="font-size: 12px;">
+                                <i class="fas fa-calendar-alt"></i> Récent
+                            </a>
+                            <a href="{{ path('app_recruitment_dashboard', currentParams|merge({'sort_jobs': 'date_asc'})) }}"
+                               class="btn {{ sortJobs|default('date_desc') == 'date_asc' ? 'btn-primary' : 'btn-outline' }}" style="font-size: 12px;">
+                                <i class="fas fa-calendar-alt"></i> Ancien
+                            </a>
+                        </div>
+
+                        {% if searchJob %}
+                            <a href="{{ path('app_recruitment_dashboard', {'sort_jobs': sortJobs|default('date_desc')}) }}" class="btn btn-outline">Réinitialiser</a>
+                        {% endif %}
+                    </form>
                     <a href="{{ path('app_recruitment_dashboard', {'modal': 'job_new'}) }}" class="btn btn-primary"><i class="fas fa-plus"></i> Nouvelle offre</a>
                 </div>
             </div>
             <div id="jobsList">
-                {% for job in jobs %}
-                    <div class="job-card {{ job.status|lower == 'closed' ? 'closed' : '' }}" data-job-id="{{ job.idJob }}">
-                        <div class="job-accent"></div>
-                        <div class="job-card-content">
-                            <div class="job-icon-id"><span>💼</span><br><span class="job-id">#{{ job.idJob }}</span></div>
-                            <div class="job-title">{{ job.title }}</div>
-                            <div class="job-department"><label>DÉPARTEMENT</label><div>{{ job.departement }}</div></div>
-                            <div class="job-type"><label>TYPE</label><div>{{ job.employeeType }}</div></div>
-                            <div class="job-date"><label>PUBLIÉ LE</label><div>{{ job.postedAt ? job.postedAt|date('Y-m-d') : '' }}</div></div>
-                            <div class="job-stats">
-                                <span class="candidate-badge"><i class="fas fa-users"></i> {{ job.candidats|length }} candidat(s)</span>
-                                <span class="status-badge {{ job.status|lower == 'open' ? 'open' : 'closed' }}">{{ job.status }}</span>
+                {% if jobs is empty %}
+                    <p>Aucune offre trouvée pour "{{ searchJob }}"</p>
+                {% else %}
+                    {% for job in jobs %}
+                        <div class="job-card {{ job.status|lower == 'closed' ? 'closed' : '' }} {% if selectedJob is defined and selectedJob and selectedJob.idJob == job.idJob %}selected-job{% endif %}"
+                             data-job-id="{{ job.idJob }}"
+                             style="cursor: pointer; transition: all 0.2s;">
+                            <div class="job-accent"></div>
+                            <div class="job-card-content">
+                                <div class="job-icon-id"><span>💼</span><br><span class="job-id">#{{ job.idJob }}</span></div>
+                                <div class="job-title">{{ job.title }}</div>
+                                <div class="job-department"><label>DÉPARTEMENT</label><div>{{ job.departement }}</div></div>
+                                <div class="job-type"><label>TYPE</label><div>{{ job.employeeType }}</div></div>
+                                <div class="job-date"><label>PUBLIÉ LE</label><div>{{ job.postedAt ? job.postedAt|date('Y-m-d') : '' }}</div></div>
+                                <div class="job-stats">
+                                    <span class="candidate-badge"><i class="fas fa-users"></i> {{ job.candidats|length }} candidat(s)</span>
+                                    <span class="status-badge {{ job.status|lower == 'open' ? 'open' : 'closed' }}">{{ job.status }}</span>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 5px; margin-right: 16px;">
+                                <a href="{{ path('app_jobposition_edit', {'idJob': job.idJob}) }}" class="btn btn-warning btn-sm" onclick="event.stopPropagation();">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form method="post" action="{{ path('app_jobposition_delete', {'idJob': job.idJob}) }}" onsubmit="return confirm('Supprimer cette offre ?');" style="display: inline;" onclick="event.stopPropagation();">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ job.idJob) }}">
+                                    <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                                </form>
                             </div>
                         </div>
-                        <div style="display: flex; gap: 5px; margin-right: 16px;">
-                            <!-- LIEN DIRECT VERS L'ÉDITION -->
-                            <a href="{{ path('app_jobposition_edit', {'idJob': job.idJob}) }}" class="btn btn-warning btn-sm">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <form method="post" action="{{ path('app_jobposition_delete', {'idJob': job.idJob}) }}" onsubmit="return confirm('Supprimer cette offre ?');" style="display: inline;">
-                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ job.idJob) }}">
-                                <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
-                            </form>
-                        </div>
-                    </div>
-                {% else %}
-                    <p>Aucune offre d'emploi.</p>
-                {% endfor %}
+                    {% endfor %}
+                {% endif %}
             </div>
         </div>
 
         <!-- SECTION CANDIDATS -->
         <div class="card-modern">
             <div class="section-header">
-                <div class="section-title"><i class="fas fa-users"></i> CANDIDATS</div>
+                <div class="section-title">
+                    <i class="fas fa-users"></i> CANDIDATS
+                    {% if selectedJob is defined and selectedJob %}
+                        <span style="font-size: 14px; background: var(--primary); color: white; padding: 2px 10px; border-radius: 20px; margin-left: 12px;">
+                        {{ selectedJob.title }}
+                    </span>
+                    {% endif %}
+                </div>
                 <div class="actions-bar">
+                    <form method="get" action="{{ path('app_recruitment_dashboard') }}" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                        {% if selectedJob is defined and selectedJob %}
+                            <input type="hidden" name="job" value="{{ selectedJob.idJob }}">
+                        {% endif %}
+                        <input type="text" name="search_candidat" value="{{ searchCandidat|default('') }}"
+                               placeholder="🔍 Nom, prénom ou email..." class="form-control" style="width: 220px;">
+                        <button type="submit" class="btn btn-primary">Rechercher</button>
+
+                        <!-- Boutons de tri alphabétique -->
+                        <div class="btn-group" style="display: flex; gap: 5px;">
+                            {% set currentParams = app.request.query.all %}
+                            <a href="{{ path('app_recruitment_dashboard', currentParams|merge({'sort_candidats': 'name_asc'})) }}"
+                               class="btn {{ sortCandidats|default('name_asc') == 'name_asc' ? 'btn-primary' : 'btn-outline' }}" style="font-size: 12px;">
+                                <i class="fas fa-sort-alpha-down"></i> A→Z
+                            </a>
+                            <a href="{{ path('app_recruitment_dashboard', currentParams|merge({'sort_candidats': 'name_desc'})) }}"
+                               class="btn {{ sortCandidats|default('name_asc') == 'name_desc' ? 'btn-primary' : 'btn-outline' }}" style="font-size: 12px;">
+                                <i class="fas fa-sort-alpha-up"></i> Z→A
+                            </a>
+                        </div>
+
+                        {% if searchCandidat %}
+                            <a href="{{ path('app_recruitment_dashboard', (selectedJob is defined and selectedJob) ? {'job': selectedJob.idJob, 'sort_candidats': sortCandidats|default('name_asc')} : {'sort_candidats': sortCandidats|default('name_asc')}) }}" class="btn btn-outline">Réinitialiser</a>
+                        {% endif %}
+                    </form>
                     <a href="{{ path('app_recruitment_dashboard', {'modal': 'candidat_new'}) }}" class="btn btn-success"><i class="fas fa-plus"></i> Ajouter</a>
                 </div>
             </div>
+
+            {% if selectedJob is defined and selectedJob %}
+                <p style="margin-bottom: 12px; color: var(--gray-600);">
+                    <i class="fas fa-info-circle"></i> Affichage des candidats pour <strong>{{ selectedJob.title }}</strong>
+                    ({{ candidats|length }} résultat{{ candidats|length > 1 ? 's' : '' }})
+                </p>
+            {% endif %}
+
             <div style="overflow-x: auto;">
                 <table class="data-table">
                     <thead>
-                    <tr><th>ID</th><th>Nom complet</th><th>Email</th><th>Niveau</th><th>Statut</th><th>Offre</th><th>Actions</th></tr>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nom complet</th>
+                        <th>Email</th>
+                        <th>Niveau</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
                     </thead>
                     <tbody>
                     {% for candidat in candidats %}
-                        <tr data-candidat-id="{{ candidat.id }}">
+                        <tr>
                             <td>{{ candidat.id }}</td>
                             <td>{{ candidat.firstName }} {{ candidat.lastName }}</td>
                             <td>{{ candidat.email }}</td>
                             <td>{{ candidat.educationLevel }}</td>
                             <td><span class="status-badge open" style="background: var(--primary);">{{ candidat.status }}</span></td>
-                            <td>{{ candidat.jobposition ? candidat.jobposition.title : '-' }}</td>
                             <td>
                                 <div class="action-buttons">
-                                    <!-- LIEN DIRECT VERS L'ÉDITION -->
                                     <a href="{{ path('app_candidat_edit', {'id': candidat.id}) }}" class="btn btn-warning btn-sm">
                                         <i class="fas fa-edit"></i>
                                     </a>
@@ -103,7 +176,12 @@
                             </td>
                         </tr>
                     {% else %}
-                        <tr><td colspan="7">Aucun candidat.</td></tr>
+                        <tr>
+                            <td colspan="6">
+                                Aucun candidat trouvé.
+                                <a href="{{ path('app_recruitment_dashboard', {'modal': 'candidat_new'}) }}" class="btn btn-success btn-sm" style="margin-left: 10px;">+ Ajouter</a>
+                            </td>
+                        </tr>
                     {% endfor %}
                     </tbody>
                 </table>
@@ -181,13 +259,26 @@
         </div>
     {% endif %}
 
-    <!-- Script de fermeture des modales (au cas où elles seraient ouvertes) -->
     <script>
-        // Fermeture des modales en cliquant sur l'arrière-plan
+        // Rendre les cartes d'offres cliquables (filtre candidats)
+        document.querySelectorAll('.job-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (e.target.closest('.btn-warning') || e.target.closest('.btn-danger')) return;
+                const jobId = card.dataset.jobId;
+                if (jobId) {
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('job', jobId);
+                    url.searchParams.delete('search_candidat');
+                    window.location.href = url.toString();
+                }
+            });
+        });
+
+        // Fermeture des modales en cliquant à l'extérieur
         window.onclick = function(event) {
             if (event.target.classList.contains('modal')) {
                 event.target.style.display = 'none';
             }
-        }
+        };
     </script>
 {% endblock %}
