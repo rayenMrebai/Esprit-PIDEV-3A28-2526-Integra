@@ -383,7 +383,9 @@ button,
 [type=button],
 [type=reset],
 [type=submit] {
-  -webkit-appearance: button;
+  -webkit-appearance: none;
+   -moz-appearance: none;
+        appearance: none; 
 }
 button:not(:disabled),
 [type=button]:not(:disabled),
@@ -441,7 +443,9 @@ legend + * {
 
 [type=search] {
   outline-offset: -2px;
-  -webkit-appearance: textfield;
+  -webkit-appearance: none;
+   -moz-appearance: none;
+        appearance: none; 
 }
 
 /* rtl:raw:
@@ -462,7 +466,9 @@ legend + * {
 
 ::file-selector-button {
   font: inherit;
-  -webkit-appearance: button;
+  -webkit-appearance: none;
+   -moz-appearance: none;
+        appearance: none; 
 }
 
 output {
@@ -10847,19 +10853,64 @@ textarea.form-control-lg {
   min-width: 100vw;
 }
 
-body.sb-sidenav-toggled #wrapper #sidebar-wrapper {
-  margin-left: 0;
+#sidebar-wrapper .sidebar-heading {
+    display: none !important;
 }
 
-@media (min-width: 768px) {
-  #sidebar-wrapper {
+/* 3. Ajuster le contenu principal pour prendre toute la largeur restante */
+#page-content-wrapper {
+    width: calc(100% - 280px) !important;
+    min-width: 0 !important;
+}
+
+/* 4. Supprimer les marges/paddings indésirables du conteneur */
+.container-fluid {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/* 5. Ajuster les cartes et rangées pour qu'elles prennent toute la largeur */
+.card {
     margin-left: 0;
-  }
-  #page-content-wrapper {
-    min-width: 0;
+    margin-right: 0;
     width: 100%;
-  }
-  body.sb-sidenav-toggled #wrapper #sidebar-wrapper {
-    margin-left: -15rem;
-  }
+}
+
+.row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100%;
+}
+
+/* 6. Ajuster les colonnes pour un meilleur espacement */
+[class*="col-"] {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+}
+
+/* 7. Ajuster la table pour qu'elle prenne toute la largeur */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+/* 8. Version responsive pour mobile */
+@media (max-width: 768px) {
+    #sidebar-wrapper {
+        transform: translateX(-100%);
+        width: 260px !important;
+    }
+    
+    body.sb-sidenav-toggled #sidebar-wrapper {
+        transform: translateX(0);
+    }
+    
+    #page-content-wrapper {
+        width: 100% !important;
+    }
+    
+    .container-fluid {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+    }
 }

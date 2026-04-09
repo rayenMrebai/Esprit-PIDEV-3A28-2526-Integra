@@ -18,13 +18,13 @@ class FrontofficeController extends AbstractController
         return $this->render('frontoffice/index.html.twig');
     }
     
-    #[Route('/formations', name: 'app_frontoffice_trainings')]
-    public function trainings(Training_programRepository $trainingRepository): Response
-    {
-        return $this->render('frontoffice/training_program.html.twig', [
-            'trainings' => $trainingRepository->findAll(),
-        ]);
-    }
+   #[Route('/formations', name: 'app_frontoffice_trainings')]
+public function trainings(Training_programRepository $trainingRepository): Response
+{
+    return $this->render('frontoffice/training_program.html.twig', [
+        'trainings' => $trainingRepository->findAll(),
+    ]);
+}
     
     #[Route('/competences', name: 'app_frontoffice_skills')]
     public function skills(SkillRepository $skillRepository): Response
