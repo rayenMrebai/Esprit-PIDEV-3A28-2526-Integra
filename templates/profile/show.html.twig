@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container mt-5">
+        <div class="card">
+            <div class="card-header">
+                <h3>My Profile</h3>
+            </div>
+            <div class="card-body">
+                <p><strong>Username:</strong> {{ user.username }}</p>
+                <p><strong>Email:</strong> {{ user.email }}</p>
+                <p><strong>Status:</strong> {{ user.isActive ? 'Active' : 'Inactive' }}</p>
+                <p><strong>Role:</strong> {{ user.role }}</p>
+                <a href="{{ path('app_profile_edit') }}" class="btn btn-primary">Edit Profile</a>
+                {% if is_granted('ROLE_MANAGER') or is_granted('ROLE_ADMIN') %}
+                    <a href="{{ path('app_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
