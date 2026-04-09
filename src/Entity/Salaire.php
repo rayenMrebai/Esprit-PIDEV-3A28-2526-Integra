@@ -53,7 +53,7 @@ class Salaire
     #[Assert\NotBlank(message: "L'employé est obligatoire.")]
     private ?UserAccount $user = null;
 
-    #[ORM\OneToMany(mappedBy: 'salaire', targetEntity: BonusRule::class, orphanRemoval: true, cascade: ['persist'])]
+    #[ORM\OneToMany(mappedBy: 'salaire', targetEntity: BonusRule::class, cascade: ['persist', 'remove'])]
     private Collection $bonusRules;
 
     public function __construct()

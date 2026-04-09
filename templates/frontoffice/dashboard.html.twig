@@ -1,0 +1,30 @@
+{% extends 'frontoffice/simpleUsr/base.html.twig' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block sidebar_menu %}
+    <a class="list-group-item list-group-item-action list-group-item-light p-3 active"
+       href="{{ path('app_dashboard') }}">
+        Dashboard
+    </a>
+    <a class="list-group-item list-group-item-action list-group-item-light p-3"
+       href="{{ path('app_profile') }}">
+        Mon Profil
+    </a>
+{% endblock %}
+
+{% block body %}
+    <h1 class="mt-4">Dashboard</h1>
+    <p>Bienvenue sur votre espace utilisateur.</p>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Statistiques</h5>
+                    <p class="card-text">Contenu de la carte...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

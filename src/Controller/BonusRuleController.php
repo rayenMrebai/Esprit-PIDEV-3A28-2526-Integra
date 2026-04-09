@@ -14,7 +14,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/bonus-rule')]
 class BonusRuleController extends AbstractController
 {
-    #[Route('/new', name: 'bonus_rule_new')]
+    #[Route('/new', name: 'bonus_rule_new', methods: ['GET', 'POST'])]
     public function new(
         Request $request,
         EntityManagerInterface $em,
@@ -22,35 +22,47 @@ class BonusRuleController extends AbstractController
     ): Response {
         $rule = new BonusRule();
 
-        // 🔥 récupérer salaire depuis URL
+        // ✅ CONTRÔLE MÉTIER: Vérifier paramètre URL présent
         $salaireId = $request->query->get('salaireId');
-        if ($salaireId) {
-            $salaire = $salaireRepo->find($salaireId);
-            if ($salaire) {
-                $rule->setSalaire($salaire);
-            }
+        if (!$salaireId) {
+            $this->addFlash('error', 'ID du salaire manquant dans l\'URL.');
+            return $this->redirectToRoute('app_backoffice_salaires_index');
         }
 
-        // 🔥 Form sans status (ADD)
-        $form = $this->createForm(BonusRuleType::class, $rule, [
-            'is_edit' => false
-        ]);
+        // ✅ CONTRÔLE MÉTIER: Vérifier salaire existe
+        $salaire = $salaireRepo->find($salaireId);
+        if (!$salaire) {
+            $this->addFlash('error', 'Salaire introuvable.');
+            return $this->redirectToRoute('app_backoffice_salaires_index');
+        }
 
+        // ✅ CONTRÔLE MÉTIER: Vérifier salaire pas déjà payé
+        if ($salaire->getStatus() === 'PAYÉ') {
+            $this->addFlash('error', 'Impossible d\'ajouter une règle à un salaire déjà payé.');
+            return $this->redirectToRoute('app_backoffice_salaires_index');
+        }
+
+        $rule->setSalaire($salaire);
+
+        $form = $this->createForm(BonusRuleType::class, $rule);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
-            // ❌ sécurité salaire payé
+            // ✅ CONTRÔLE MÉTIER: Double vérification sécurité (race condition)
             if ($rule->getSalaire()->getStatus() === 'PAYÉ') {
-                $this->addFlash('error', 'Impossible d’ajouter une règle à un salaire payé');
+                $this->addFlash('error', 'Impossible d\'ajouter une règle à un salaire payé.');
                 return $this->redirectToRoute('app_backoffice_salaires_index');
             }
 
-            // 🔥 status automatique
-            $rule->setStatus('CRÉE');
-
-            // 🔥 calcul bonus
             $rule->recalculateBonus();
+
+            // ✅ CONTRÔLE MÉTIER: Vérifier bonus calculé valide
+            if ($rule->getBonus() < 0) {
+                $this->addFlash('error', 'Le bonus calculé ne peut pas être négatif.');
+                return $this->render('backoffice/salaires/bonus/add.html.twig', [
+                    'form' => $form->createView()
+                ]);
+            }
 
             $rule->setCreatedAt(new \DateTime());
             $rule->setUpdatedAt(new \DateTime());
@@ -58,7 +70,7 @@ class BonusRuleController extends AbstractController
             $em->persist($rule);
             $em->flush();
 
-            $this->addFlash('success', 'Règle ajoutée');
+            $this->addFlash('success', 'Règle ajoutée avec succès');
             return $this->redirectToRoute('app_backoffice_salaires_index');
         }
 
@@ -67,38 +79,41 @@ class BonusRuleController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'bonus_rule_edit')]
+    #[Route('/{id<\d+>}/edit', name: 'bonus_rule_edit', methods: ['GET', 'POST'])]
     public function edit(
         Request $request,
         BonusRule $rule,
         EntityManagerInterface $em
     ): Response {
-
-        // ❌ sécurité règle ACTIVE
+        // ✅ CONTRÔLE MÉTIER: Vérifier règle pas déjà active
         if ($rule->getStatus() === 'ACTIVE') {
-            $this->addFlash('error', 'Impossible de modifier une règle active');
+            $this->addFlash('error', 'Impossible de modifier une règle déjà active.');
             return $this->redirectToRoute('app_backoffice_salaires_index');
         }
 
-        // ❌ sécurité salaire PAYÉ
+        // ✅ CONTRÔLE MÉTIER: Vérifier salaire pas payé
         if ($rule->getSalaire()->getStatus() === 'PAYÉ') {
-            $this->addFlash('error', 'Impossible de modifier une règle d’un salaire payé');
+            $this->addFlash('error', 'Impossible de modifier une règle d\'un salaire déjà payé.');
             return $this->redirectToRoute('app_backoffice_salaires_index');
         }
 
-        // 🔥 Form avec status (EDIT)
-        $form = $this->createForm(BonusRuleType::class, $rule, [
-            'is_edit' => true
-        ]);
-
+        $form = $this->createForm(BonusRuleType::class, $rule);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $rule->recalculateBonus();
+
+            // ✅ CONTRÔLE MÉTIER: Vérifier bonus calculé valide
+            if ($rule->getBonus() < 0) {
+                $this->addFlash('error', 'Le bonus calculé ne peut pas être négatif.');
+                return $this->render('backoffice/salaires/bonus/editRule.html.twig', [
+                    'form' => $form->createView()
+                ]);
+            }
+
             $rule->setUpdatedAt(new \DateTime());
 
-            // 🔥 si ACTIVE → recalcul salaire
+            // ✅ CONTRÔLE MÉTIER: Si activation, recalculer total salaire
             if ($rule->getStatus() === 'ACTIVE') {
                 $salaire = $rule->getSalaire();
                 $totalBonus = 0;
@@ -111,12 +126,11 @@ class BonusRuleController extends AbstractController
 
                 $salaire->setBonusAmount($totalBonus);
                 $salaire->setTotalAmount($salaire->getBaseAmount() + $totalBonus);
-                $salaire->setUpdatedAt(new \DateTime());
             }
 
             $em->flush();
 
-            $this->addFlash('success', 'Règle modifiée');
+            $this->addFlash('success', 'Règle modifiée avec succès');
             return $this->redirectToRoute('app_backoffice_salaires_index');
         }
 
@@ -125,25 +139,34 @@ class BonusRuleController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/delete', name: 'bonus_rule_delete', methods: ['POST'])]
-    public function delete(BonusRule $rule, EntityManagerInterface $em): Response
-    {
-        // ❌ règle ACTIVE
-        if ($rule->getStatus() === 'ACTIVE') {
-            $this->addFlash('error', 'Impossible de supprimer une règle active');
+    #[Route('/{id<\d+>}/delete', name: 'bonus_rule_delete', methods: ['POST'])]
+    public function delete(
+        Request $request,
+        BonusRule $rule,
+        EntityManagerInterface $em
+    ): Response {
+        // ✅ CONTRÔLE SÉCURITÉ: Token CSRF
+        if (!$this->isCsrfTokenValid('delete' . $rule->getId(), $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token de sécurité invalide.');
             return $this->redirectToRoute('app_backoffice_salaires_index');
         }
 
-        // ❌ salaire PAYÉ
+        // ✅ CONTRÔLE MÉTIER: Vérifier règle pas active
+        if ($rule->getStatus() === 'ACTIVE') {
+            $this->addFlash('error', 'Impossible de supprimer une règle active.');
+            return $this->redirectToRoute('app_backoffice_salaires_index');
+        }
+
+        // ✅ CONTRÔLE MÉTIER: Vérifier salaire pas payé
         if ($rule->getSalaire()->getStatus() === 'PAYÉ') {
-            $this->addFlash('error', 'Impossible de supprimer une règle d’un salaire payé');
+            $this->addFlash('error', 'Impossible de supprimer une règle d\'un salaire payé.');
             return $this->redirectToRoute('app_backoffice_salaires_index');
         }
 
         $em->remove($rule);
         $em->flush();
 
-        $this->addFlash('success', 'Règle supprimée');
+        $this->addFlash('success', 'Règle supprimée avec succès');
         return $this->redirectToRoute('app_backoffice_salaires_index');
     }
 }
