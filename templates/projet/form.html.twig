@@ -1,0 +1,112 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ project.projectId ? 'Edit' : 'New' }} Project{% endblock %}
+{% block page_title %}{{ project.projectId ? '✏️ Edit' : '📁 New' }} Project{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item"><a href="{{ path('project_index') }}">Projets</a></li>
+    <li class="breadcrumb-item active">{{ project.projectId ? 'Edit' : 'New' }}</li>
+{% endblock %}
+
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            {# HEADER CARD #}
+            <div class="card mb-0" style="border-radius:20px; overflow:hidden;">
+                <div class="card-header py-3 px-4" style="background: linear-gradient(to right, #0b1e33, #1e3a5f);">
+                    <h5 class="mb-0 text-white font-weight-bold">
+                        <i class="fas fa-folder mr-2"></i> Project Details
+                    </h5>
+                </div>
+
+                <div class="card-body p-4">
+                    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+                    <div class="row">
+                        {# Project Name #}
+                        <div class="col-12 mb-3">
+                            <label class="font-weight-bold" style="color:#2c3e50;">
+                                📛 Project Name <span class="text-danger">*</span>
+                            </label>
+                            {{ form_widget(form.name, {'attr': {
+                                'class': 'form-control',
+                                'placeholder': 'Enter project name',
+                                'style': 'border-radius:8px; border:1px solid #d1d5db; padding:10px 14px;'
+                            }}) }}
+                            {{ form_errors(form.name) }}
+                        </div>
+
+                        {# Description #}
+                        <div class="col-12 mb-3">
+                            <label class="font-weight-bold" style="color:#2c3e50;">📝 Description</label>
+                            {{ form_widget(form.description, {'attr': {
+                                'class': 'form-control',
+                                'rows': 3,
+                                'placeholder': 'Enter project description',
+                                'style': 'border-radius:8px; border:1px solid #d1d5db; padding:10px 14px;'
+                            }}) }}
+                        </div>
+
+                        {# Start Date #}
+                        <div class="col-md-6 mb-3">
+                            <label class="font-weight-bold" style="color:#2c3e50;">
+                                📅 Start Date <span class="text-danger">*</span>
+                            </label>
+                            {{ form_widget(form.startDate, {'attr': {
+                                'class': 'form-control',
+                                'style': 'border-radius:8px; border:1px solid #d1d5db; padding:10px 14px;'
+                            }}) }}
+                        </div>
+
+                        {# End Date #}
+                        <div class="col-md-6 mb-3">
+                            <label class="font-weight-bold" style="color:#2c3e50;">
+                                📆 End Date <span class="text-danger">*</span>
+                            </label>
+                            {{ form_widget(form.endDate, {'attr': {
+                                'class': 'form-control',
+                                'style': 'border-radius:8px; border:1px solid #d1d5db; padding:10px 14px;'
+                            }}) }}
+                        </div>
+
+                        {# Status #}
+                        <div class="col-md-6 mb-3">
+                            <label class="font-weight-bold" style="color:#2c3e50;">
+                                ⚙️ Status <span class="text-danger">*</span>
+                            </label>
+                            {{ form_widget(form.status, {'attr': {
+                                'class': 'form-control',
+                                'style': 'border-radius:8px; border:1px solid #d1d5db; padding:10px 14px;'
+                            }}) }}
+                        </div>
+
+                        {# Budget #}
+                        <div class="col-md-6 mb-3">
+                            <label class="font-weight-bold" style="color:#2c3e50;">
+                                💰 Budget (TND) <span class="text-danger">*</span>
+                            </label>
+                            {{ form_widget(form.budget, {'attr': {
+                                'class': 'form-control',
+                                'placeholder': '0.00',
+                                'style': 'border-radius:8px; border:1px solid #d1d5db; padding:10px 14px;'
+                            }}) }}
+                        </div>
+                    </div>
+
+                    {# Buttons #}
+                    <div class="d-flex justify-content-end mt-3" style="gap:12px;">
+                        <a href="{{ path('project_index') }}" class="btn" style="background:#e2e8f0; color:#1e293b; border-radius:30px; padding:10px 25px; font-weight:bold;">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-integra-green" style="padding:10px 30px; font-weight:bold;">
+                            <i class="fas fa-save mr-2"></i> Save Project
+                        </button>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+
+        </div>
+    </div>
+{% endblock %}

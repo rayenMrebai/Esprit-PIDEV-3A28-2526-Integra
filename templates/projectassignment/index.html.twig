@@ -1,0 +1,236 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Affectations{% endblock %}
+
+{% block content %}
+
+    {# FLASH MESSAGES #}
+    {% for msg in app.flashes('success') %}
+        <div class="alert alert-success alert-dismissible fade show" style="border-radius:15px; background:#10b981; color:white; border:none; margin-bottom:15px;">
+            <button type="button" class="close" data-dismiss="alert" style="color:white;">&times;</button>
+            ✅ {{ msg }}
+        </div>
+    {% endfor %}
+    {% for msg in app.flashes('error') %}
+        <div class="alert alert-danger alert-dismissible fade show" style="border-radius:15px; background:#ef4444; color:white; border:none; margin-bottom:15px;">
+            <button type="button" class="close" data-dismiss="alert" style="color:white;">&times;</button>
+            ❌ {{ msg }}
+        </div>
+    {% endfor %}
+
+    {# HEADER INTEGRA #}
+    <div class="integra-header">
+        <div>
+            <h1>INTEGRA – Manage Assignments</h1>
+            <p>Gestion des affectations</p>
+        </div>
+        <a href="{{ path('app_projectassignment_new') }}" class="btn-add">
+            <i class="fas fa-plus mr-1"></i> Nouvelle affectation
+        </a>
+    </div>
+
+    {# BARRE DE RECHERCHE ET FILTRES EN TEMPS RÉEL #}
+    <div class="integra-card" style="padding: 20px;">
+        <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+
+            {# Recherche textuelle #}
+            <div style="flex:2; min-width:220px; position:relative;">
+                <i class="fas fa-search" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:13px;"></i>
+                <input type="text" id="liveSearch" placeholder="Recherche par projet, employé ou rôle..."
+                       style="width:100%; border-radius:30px; border:1px solid #dbeafe; padding:10px 15px 10px 38px; font-size:14px; outline:none; background:white;">
+            </div>
+
+            {# Filtre par Projet #}
+            <div style="min-width:200px;">
+                <select id="liveProject" style="width:100%; border-radius:30px; border:1px solid #dbeafe; padding:10px 15px; font-size:14px; background:white; cursor:pointer; outline:none;">
+                    <option value="">Tous les projets</option>
+                    {% for project in projects %}
+                        <option value="{{ project.projectId }}">{{ project.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            {# Filtre par Rôle #}
+            <div style="min-width:180px;">
+                <select id="liveRole" style="width:100%; border-radius:30px; border:1px solid #dbeafe; padding:10px 15px; font-size:14px; background:white; cursor:pointer; outline:none;">
+                    <option value="">Tous les rôles</option>
+                    {% for role in roles %}
+                        <option value="{{ role }}">{{ role }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+
+    {# TABLE DES AFFECTATIONS #}
+    <div class="integra-card" style="padding:0; overflow:hidden;">
+        <div style="padding:20px 20px 0 20px;">
+            <h3 style="color:#1e3a5f; font-weight:700; font-size:18px; margin:0 0 15px 0;">
+                👥 Project Assignments
+                <span id="countBadge" style="background:#dbeafe; color:#0B63CE; border-radius:20px; padding:2px 12px; font-size:13px; margin-left:10px; font-weight:600;">
+                    {{ assignments|length }}
+                </span>
+            </h3>
+        </div>
+
+        <div style="overflow-x:auto;">
+            <table class="table" style="width:100%; margin:0; border-collapse:collapse;">
+                <thead>
+                <tr style="background:#f1f5f9; border-bottom:2px solid #dbeafe;">
+                    <th style="padding:12px 15px; text-align:left; color:#1e3a5f; font-weight:700;">ID</th>
+                    <th style="padding:12px 15px; text-align:left; color:#1e3a5f; font-weight:700;">Projet</th>
+                    <th style="padding:12px 15px; text-align:left; color:#1e3a5f; font-weight:700;">Employé</th>
+                    <th style="padding:12px 15px; text-align:left; color:#1e3a5f; font-weight:700;">Rôle</th>
+                    <th style="padding:12px 15px; text-align:left; color:#1e3a5f; font-weight:700;">Allocation</th>
+                    <th style="padding:12px 15px; text-align:left; color:#1e3a5f; font-weight:700;">Début</th>
+                    <th style="padding:12px 15px; text-align:left; color:#1e3a5f; font-weight:700;">Fin</th>
+                    <th style="padding:12px 15px; text-align:center; color:#1e3a5f; font-weight:700;">Actions</th>
+                </tr>
+                </thead>
+                <tbody id="assignmentsTableBody">
+                {% for assignment in assignments %}
+                    <tr class="assignment-row"
+                        data-id="{{ assignment.idAssignment }}"
+                        data-project="{{ assignment.project ? assignment.project.name|lower : '' }}"
+                        data-employee="{{ assignment.userAccount ? assignment.userAccount.username|lower : '' }}"
+                        data-role="{{ assignment.role|lower }}"
+                        data-projectid="{{ assignment.project ? assignment.project.projectId : '' }}"
+                        style="border-bottom:1px solid #e2e8f0; transition:background 0.2s;"
+                        onmouseover="this.style.backgroundColor='#f8fafc'"
+                        onmouseout="this.style.backgroundColor='transparent'">
+
+                        <td style="padding:12px 15px; font-weight:700; color:#0B63CE;">{{ assignment.idAssignment }}</td>
+
+                        <td style="padding:12px 15px;">
+                                <span style="background:#e0f2fe; color:#0369a1; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:500;">
+                                    {{ assignment.project ? assignment.project.name : '—' }}
+                                </span>
+                        </td>
+
+                        <td style="padding:12px 15px;">
+                            <i class="fas fa-user-circle mr-1" style="color:#0B63CE;"></i>
+                            {{ assignment.userAccount ? assignment.userAccount.username : '—' }}
+                        </td>
+
+                        <td style="padding:12px 15px;">{{ assignment.role }}</td>
+
+                        <td style="padding:12px 15px;">
+                            <div style="display:flex; align-items:center;">
+                                <div style="width:60px; height:6px; background:#e2e8f0; border-radius:10px; margin-right:8px;">
+                                    <div style="width:{{ assignment.allocationRate }}%; height:6px; background:#0FA36B; border-radius:10px;"></div>
+                                </div>
+                                <span style="font-size:13px; font-weight:500;">{{ assignment.allocationRate }}%</span>
+                            </div>
+                        </td>
+
+                        <td style="padding:12px 15px; color:#64748b; font-size:13px;">
+                            {{ assignment.assignedFrom ? assignment.assignedFrom|date('d/m/Y') : '—' }}
+                        </td>
+
+                        <td style="padding:12px 15px; color:#64748b; font-size:13px;">
+                            {{ assignment.assignedTo ? assignment.assignedTo|date('d/m/Y') : '—' }}
+                        </td>
+
+                        <td style="padding:12px 15px; text-align:center;">
+                            <div style="display:flex; gap:6px; justify-content:center;">
+                                <a href="{{ path('app_projectassignment_edit', {'idAssignment': assignment.idAssignment}) }}"
+                                   style="background:#f59e0b; color:white; border-radius:20px; padding:5px 12px; font-size:12px; font-weight:bold; text-decoration:none; display:inline-block;">
+                                    ✏️ Edit
+                                </a>
+                                <form method="post" action="{{ path('app_projectassignment_delete', {'idAssignment': assignment.idAssignment}) }}"
+                                      onsubmit="return confirm('Supprimer cette affectation ?');" style="margin:0;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ assignment.idAssignment) }}">
+                                    <button type="submit"
+                                            style="background:#ef4444; color:white; border-radius:20px; padding:5px 12px; font-size:12px; font-weight:bold; border:none; cursor:pointer;">
+                                        🗑️ Del
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="8" style="padding:40px; text-align:center; color:#94a3b8;">
+                            <i class="fas fa-inbox fa-3x" style="display:block; margin-bottom:10px; color:#dbeafe;"></i>
+                            Aucune affectation trouvée.
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {# Barre de statut #}
+    <div class="status-bar" style="margin-top:25px;">
+        🔌 Connecté – <span id="filterStatus">Aucun filtre appliqué</span>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        // Fonction de filtrage en direct
+        function filterAssignments() {
+            const searchTerm = document.getElementById('liveSearch').value.toLowerCase().trim();
+            const projectFilter = document.getElementById('liveProject').value;
+            const roleFilter = document.getElementById('liveRole').value.toLowerCase();
+
+            const rows = document.querySelectorAll('.assignment-row');
+            let visibleCount = 0;
+            let filtersActive = [];
+
+            rows.forEach(row => {
+                const projectName = row.dataset.project || '';
+                const employee = row.dataset.employee || '';
+                const role = row.dataset.role || '';
+                const projectId = row.dataset.projectid || '';
+
+                // Critères de correspondance
+                const matchesSearch = !searchTerm
+                    || projectName.includes(searchTerm)
+                    || employee.includes(searchTerm)
+                    || role.includes(searchTerm);
+
+                const matchesProject = !projectFilter || projectId === projectFilter;
+                const matchesRole = !roleFilter || role === roleFilter;
+
+                if (matchesSearch && matchesProject && matchesRole) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            // Mise à jour du compteur
+            document.getElementById('countBadge').textContent = visibleCount;
+
+            // Construction du texte des filtres actifs
+            if (searchTerm) filtersActive.push(`Recherche : "${searchTerm}"`);
+            if (projectFilter) {
+                const projectSelect = document.getElementById('liveProject');
+                const selectedText = projectSelect.options[projectSelect.selectedIndex]?.text || '';
+                filtersActive.push(`Projet : ${selectedText}`);
+            }
+            if (roleFilter) filtersActive.push(`Rôle : "${roleFilter}"`);
+
+            const statusEl = document.getElementById('filterStatus');
+            statusEl.textContent = filtersActive.length ? 'Filtres actifs : ' + filtersActive.join(' • ') : 'Aucun filtre appliqué';
+        }
+
+        // Attacher les écouteurs d'événements
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('liveSearch');
+            const projectSelect = document.getElementById('liveProject');
+            const roleSelect = document.getElementById('liveRole');
+
+            if (searchInput) searchInput.addEventListener('input', filterAssignments);
+            if (projectSelect) projectSelect.addEventListener('change', filterAssignments);
+            if (roleSelect) roleSelect.addEventListener('change', filterAssignments);
+
+            // Initialisation
+            filterAssignments();
+        });
+    </script>
+{% endblock %}

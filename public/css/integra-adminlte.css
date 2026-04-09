@@ -1,0 +1,111 @@
+/* Override AdminLTE pour intégrer le style INTEGRA */
+:root {
+    --integra-blue: #0B63CE;
+    --integra-green: #0FA36B;
+    --integra-dark: #0b1e33;
+}
+
+.main-header.navbar {
+    background: linear-gradient(90deg, var(--integra-blue), var(--integra-green)) !important;
+    border-bottom: none !important;
+}
+
+.main-sidebar {
+    background: var(--integra-dark) !important;
+}
+
+.brand-link {
+    background: var(--integra-dark) !important;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.nav-sidebar .nav-link {
+    color: #b0c4de !important;
+    border-radius: 30px !important;
+    margin: 2px 8px;
+}
+.nav-sidebar .nav-link:hover {
+    background: rgba(255,255,255,0.1) !important;
+    color: white !important;
+}
+.nav-sidebar .nav-link.active {
+    background: rgba(11,99,206,0.3) !important;
+    color: white !important;
+}
+
+.content-wrapper {
+    background: #f8fafc !important;
+}
+
+.card {
+    border-radius: 20px !important;
+    border: none !important;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.025);
+}
+.card-header {
+    background: white !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    border-radius: 20px 20px 0 0 !important;
+}
+.card-header .card-title {
+    color: #1e3a5f;
+    font-weight: 700;
+}
+
+.btn-integra-blue {
+    background: var(--integra-blue);
+    color: white;
+    border-radius: 30px;
+    border: none;
+    padding: 8px 20px;
+    font-weight: bold;
+}
+.btn-integra-blue:hover { background: #0a56b0; }
+
+.btn-integra-green {
+    background: var(--integra-green);
+    color: white;
+    border-radius: 30px;
+    border: none;
+    padding: 8px 20px;
+    font-weight: bold;
+}
+.btn-integra-green:hover { background: #0c8c5a; }
+
+.btn-integra-orange {
+    background: #f59e0b;
+    color: white;
+    border-radius: 30px;
+}
+
+.btn-integra-red {
+    background: #ef4444;
+    color: white;
+    border-radius: 30px;
+}
+
+/* Badges de statut (comme dans les FXML) */
+.badge-status-planning   { background: #f59e0b; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+.badge-status-inprogress { background: #f59e0b; color: white; }
+.badge-status-active     { background: #10b981; color: white; }
+.badge-status-on-hold    { background: #ef4444; color: white; }
+.badge-status-completed  { background: #6b7280; color: white; }
+
+/* Formulaires */
+.form-group {
+    margin-bottom: 1rem;
+}
+.form-control {
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    padding: 8px 12px;
+}
+.form-control:focus {
+    border-color: var(--integra-blue);
+    box-shadow: 0 0 0 2px rgba(11,99,206,0.2);
+}
+.form-error {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}

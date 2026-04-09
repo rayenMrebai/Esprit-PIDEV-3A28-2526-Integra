@@ -1,0 +1,36 @@
+{% extends 'base_front.html.twig' %}
+
+{% block title %}Accueil{% endblock %}
+
+{% block content %}
+    <div class="post-preview">
+        <h2 class="post-title" style="color: #0B63CE;">Bienvenue sur INTEGRA RH</h2>
+        <p class="post-subtitle">Découvrez nos projets et l'équipe qui les porte.</p>
+    </div>
+    <hr class="my-4" />
+    <h3 class="mb-4" style="font-weight: 300;">📌 Derniers projets</h3>
+    {% for project in latestProjects %}
+        <div class="post-preview">
+            <a href="{{ path('front_project_show', {projectId: project.projectId}) }}" style="text-decoration: none;">
+                <h3 class="post-title" style="color: #0B63CE;">{{ project.name }}</h3>
+                <p class="post-subtitle">{{ project.description|default('Aucune description')|u.truncate(100, '...') }}</p>
+            </a>
+            <p class="post-meta">
+                <span class="badge" style="background: #0FA36B; color: white; padding: 5px 14px; border-radius: 20px;">
+                    {{ project.status }}
+                </span>
+                <span class="ms-3"><i class="far fa-calendar-alt"></i> Début : {{ project.startDate ? project.startDate|date('d/m/Y') : '—' }}</span>
+                <span class="ms-3"><i class="far fa-calendar-check"></i> Fin : {{ project.endDate ? project.endDate|date('d/m/Y') : '—' }}</span>
+            </p>
+        </div>
+        {% if not loop.last %}<hr class="my-4" />{% endif %}
+    {% else %}
+        <p class="text-muted">Aucun projet pour le moment.</p>
+    {% endfor %}
+    <hr class="my-4" />
+    <div class="d-flex justify-content-end mb-4">
+        <a class="btn btn-outline-primary" href="{{ path('front_projects') }}" style="border-color: #0B63CE; color: #0B63CE; border-radius: 30px; padding: 10px 24px;">
+            Voir tous les projets →
+        </a>
+    </div>
+{% endblock %}

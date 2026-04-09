@@ -1,0 +1,261 @@
+/* ===== VARIABLES ===== */
+:root {
+    --fxml-bg: #f8fafc;
+    --fxml-white: #ffffff;
+    --fxml-blue: #0B63CE;
+    --fxml-green: #0FA36B;
+    --fxml-dark-blue: #0b1e33;
+    --fxml-light-blue: #1e3a5f;
+    --fxml-border: #d1d5db;
+    --fxml-shadow: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.025);
+}
+
+/* Conteneur principal (comme le VBox du ScrollPane) */
+.fxml-container {
+    padding: 25px 30px;
+    background: var(--fxml-bg);
+}
+
+/* ===== HEADER (identique à Dashboard.fxml) ===== */
+.fxml-header {
+    background: linear-gradient(90deg, var(--fxml-blue), var(--fxml-green));
+    border-radius: 20px;
+    padding: 20px 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.fxml-header h1 {
+    font-size: 22px;
+    font-weight: bold;
+    color: white;
+    margin: 0;
+}
+.fxml-header p {
+    font-size: 12px;
+    color: #b0c4de;
+    margin: 0;
+}
+.fxml-header .btn-add {
+    background: #10b981;
+    color: white;
+    font-weight: bold;
+    border-radius: 30px;
+    padding: 12px 24px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.fxml-header .btn-add:hover { background: #0c8c5a; }
+
+/* ===== BLOC DES TAUX (identique) ===== */
+.rate-pill {
+    background: var(--fxml-white);
+    border: 1px solid #dbeafe;
+    border-radius: 40px;
+    padding: 4px 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+.rate-pill .rate-badge {
+    background: linear-gradient(90deg, var(--fxml-blue), #1a7de8);
+    border-radius: 30px;
+    padding: 6px 12px;
+    color: white;
+    font-weight: bold;
+}
+.rate-pill .currency {
+    font-weight: bold;
+    font-size: 13px;
+}
+.rate-pill .usd { color: var(--fxml-blue); }
+.rate-pill .eur { color: var(--fxml-green); }
+.rate-pill .live {
+    background: #e2e8f0;
+    border-radius: 20px;
+    padding: 2px 8px;
+    font-size: 10px;
+    font-weight: bold;
+    color: #0FA36B;
+}
+
+/* ===== CARTE BLANCHE (comme les VBox des listes) ===== */
+.fxml-card {
+    background: var(--fxml-white);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: var(--fxml-shadow);
+}
+
+/* ===== EN-TÊTE DES COLONNES ===== */
+.column-header {
+    display: flex;
+    gap: 10px;
+    padding: 5px 0;
+    border-bottom: 1px solid #dbeafe;
+    margin-bottom: 10px;
+}
+.column-header span {
+    font-weight: bold;
+    color: #1e3a5f;
+}
+.col-id { width: 100px; }
+.col-name { width: 250px; }
+.col-start { width: 120px; }
+.col-end { width: 120px; }
+.col-status { width: 140px; }
+
+/* ===== LIGNE DE PROJET (comme dans la ListView) ===== */
+.project-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    margin-bottom: 4px;
+    background: white;
+}
+.project-row:nth-child(odd) {
+    background: linear-gradient(90deg, #e6f0ff, #ffffff);
+}
+.project-row:hover {
+    background: #f1f5f9;
+    cursor: pointer;
+}
+.project-row .col-id { font-weight: bold; color: #0B63CE; }
+
+/* ===== BADGES DE STATUT ===== */
+.status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+}
+.status-planning   { background: #f59e0b; }
+.status-inprogress { background: #f59e0b; }
+.status-active     { background: #10b981; }
+.status-onhold     { background: #ef4444; }
+.status-completed  { background: #6b7280; }
+
+/* ===== DÉTAILS DU PROJET (carte de droite) ===== */
+.details-card {
+    background: linear-gradient(135deg, #ffffff, #f9fcff);
+    border-radius: 20px;
+    border: 1px solid #d9e2ef;
+    padding: 25px;
+    box-shadow: 0 20px 30px -10px rgba(0,50,100,0.1);
+}
+.details-card h3 {
+    font-size: 20px;
+    font-weight: bold;
+    color: #1e3a5f;
+    border-bottom: 2px solid #b0c4de;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+.detail-row {
+    display: flex;
+    margin-bottom: 12px;
+}
+.detail-label {
+    width: 140px;
+    font-weight: bold;
+    color: #2c3e50;
+}
+.detail-value {
+    flex: 1;
+    background: #f1f9ff;
+    padding: 5px 10px;
+    border-radius: 8px;
+}
+
+/* ===== BOUTONS D'ACTION ===== */
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.action-btn {
+    border-radius: 30px;
+    padding: 12px 0;
+    font-weight: bold;
+    text-align: center;
+    color: white;
+    cursor: pointer;
+    border: none;
+}
+.action-btn.orange { background: #f59e0b; }
+.action-btn.red    { background: #ef4444; }
+.action-btn.blue   { background: #2563eb; }
+
+/* ===== FORMULAIRES (comme ProjectForm.fxml) ===== */
+.fxml-form-grid {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 12px 15px;
+    align-items: center;
+}
+.fxml-form-grid label {
+    font-weight: bold;
+    color: #2c3e50;
+}
+.fxml-form-grid input,
+.fxml-form-grid select,
+.fxml-form-grid textarea {
+    border-radius: 8px;
+    border: 1px solid var(--fxml-border);
+    padding: 8px;
+    background: white;
+}
+.fxml-form-grid textarea {
+    resize: vertical;
+}
+.form-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+.btn-cancel {
+    background: #e2e8f0;
+    color: #1e293b;
+    border-radius: 30px;
+    padding: 10px 25px;
+    border: none;
+    cursor: pointer;
+}
+.btn-save {
+    background: #10b981;
+    color: white;
+    border-radius: 30px;
+    padding: 10px 30px;
+    border: none;
+    cursor: pointer;
+}
+
+/* ===== TABLEAU DES AFFECTATIONS (comme ProjectAssignmentForm.fxml) ===== */
+.assignments-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+}
+.assignments-table th {
+    background: #f1f5f9;
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: bold;
+    color: #0b5e42;
+}
+.assignments-table td {
+    padding: 10px 15px;
+    border-bottom: 1px solid #e2e8f0;
+}

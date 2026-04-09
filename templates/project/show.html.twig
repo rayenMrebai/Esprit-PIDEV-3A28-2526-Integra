@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ project.name }}{% endblock %}
+
+{% block content %}
+
+    <div class="integra-header">
+        <div>
+            <h1>📋 {{ project.name }}</h1>
+            <p>Détails du projet #{{ project.projectId }}</p>
+        </div>
+        <a href="{{ path('app_project_index') }}" style="background:rgba(255,255,255,0.25); color:white; border-radius:30px; padding:10px 20px; text-decoration:none; font-weight:bold; border:1px solid rgba(255,255,255,0.4);">
+            ← Retour
+        </a>
+    </div>
+
+    <div style="display:flex; gap:20px;">
+
+        <div class="details-card" style="flex:1;">
+            <h3 style="font-size:18px; font-weight:bold; color:#1e3a5f; border-bottom:2px solid #b0c4de; padding-bottom:10px; margin-bottom:20px;">
+                📋 Project Details
+            </h3>
+            <div class="detail-row"><div class="detail-label">🏷️ Nom:</div><div class="detail-value">{{ project.name }}</div></div>
+            <div class="detail-row"><div class="detail-label">📝 Description:</div><div class="detail-value">{{ project.description|default('—') }}</div></div>
+            <div class="detail-row"><div class="detail-label">📅 Début:</div><div class="detail-value">{{ project.startDate ? project.startDate|date('d/m/Y') : '—' }}</div></div>
+            <div class="detail-row"><div class="detail-label">📆 Fin:</div><div class="detail-value">{{ project.endDate ? project.endDate|date('d/m/Y') : '—' }}</div></div>
+            <div class="detail-row">
+                <div class="detail-label">⚙️ Statut:</div>
+                <div class="detail-value" style="background:transparent; padding:0;">
+                    {% if project.status == 'PLANNING' %}<span class="status-badge status-planning">PLANNING</span>
+                    {% elseif project.status == 'IN PROGRESS' %}<span class="status-badge status-inprogress">IN PROGRESS</span>
+                    {% elseif project.status == 'ACTIVE' %}<span class="status-badge status-active">ACTIVE</span>
+                    {% elseif project.status == 'ON HOLD' %}<span class="status-badge status-onhold">ON HOLD</span>
+                    {% elseif project.status == 'COMPLETED' %}<span class="status-badge status-completed">COMPLETED</span>
+                    {% else %}<span class="status-badge" style="background:#94a3b8; color:white;">{{ project.status }}</span>{% endif %}
+                </div>
+            </div>
+            <div class="detail-row"><div class="detail-label">💰 Budget:</div><div class="detail-value">{{ project.budget }} TND</div></div>
+        </div>
+
+        <div class="details-card" style="width:250px; min-width:250px;">
+            <h3 style="font-size:18px; font-weight:bold; color:#1e3a5f; border-bottom:1px solid #b0c4de; padding-bottom:10px; margin-bottom:15px;">
+                ⚡ Quick Actions
+            </h3>
+            <a href="{{ path('app_project_edit', {id: project.projectId}) }}" class="action-btn orange">✏️ Edit Project</a>
+            {{ include('project/_delete_form.html.twig') }}
+            <a href="{{ path('app_project_index') }}" class="action-btn blue" style="background:#0B63CE; margin-top:5px;">← Retour liste</a>
+        </div>
+    </div>
+
+{% endblock %}
