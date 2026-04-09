@@ -13,18 +13,31 @@ use Symfony\Component\Routing\Annotation\Route;
 class FrontofficeController extends AbstractController
 {
     #[Route('/', name: 'app_frontoffice_index')]
-    public function index(): Response
-    {
-        return $this->render('frontoffice/index.html.twig');
+    public function index(
+        Training_programRepository $trainingRepository,
+        SkillRepository $skillRepository,
+        Quiz_resultRepository $quizRepository
+    ): Response {
+        return $this->render('frontoffice/index.html.twig', [
+            'trainings_count' => $trainingRepository->count([]),
+            'skills_count' => $skillRepository->count([]),
+            'quiz_count' => $quizRepository->count([]),
+            'projets_count' => 0,
+        ]);
     }
     
-   #[Route('/formations', name: 'app_frontoffice_trainings')]
-public function trainings(Training_programRepository $trainingRepository): Response
-{
-    return $this->render('frontoffice/training_program.html.twig', [
-        'trainings' => $trainingRepository->findAll(),
-    ]);
-}
+    #[Route('/formations', name: 'app_frontoffice_trainings')]
+    public function formations(
+        Training_programRepository $trainingRepository,
+        SkillRepository $skillRepository,
+        Quiz_resultRepository $quizRepository
+    ): Response {
+        return $this->render('frontoffice/training_program.html.twig', [
+            'trainings' => $trainingRepository->findAll(),
+            'skills' => $skillRepository->findAll(),
+            'quizResults' => $quizRepository->findAll(),
+        ]);
+    }
     
     #[Route('/competences', name: 'app_frontoffice_skills')]
     public function skills(SkillRepository $skillRepository): Response
