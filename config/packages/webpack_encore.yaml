@@ -1,0 +1,12 @@
+webpack_encore:
+    # La ligne suivante est obsolète, commentez-la ou supprimez-la
+    # dev_server:
+    #     enabled: true
+    #     host: localhost
+    #     port: 8080
+    
+    # Utilisez plutôt cette configuration moderne
+    output_path: '%kernel.project_dir%/public/build'
+    
+    # Si vous voulez le serveur de dev
+    # (supprimez complètement la section dev_server)

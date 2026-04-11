@@ -1,11 +1,15 @@
-{% extends 'base.html.twig' %}
+{% extends 'backoffice/base_backoffice.html.twig' %}
 
-{% block title %}New Skill{% endblock %}
+{% block page_title %}Ajouter une compétence{% endblock %}
+{% block breadcrumb %}Compétences / Ajouter{% endblock %}
 
-{% block body %}
-    <h1>Create new Skill</h1>
-
-    {{ include('skill/_form.html.twig') }}
-
-    <a href="{{ path('app_skill_index') }}">back to list</a>
+{% block admin_content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Nouvelle compétence</h3>
+    </div>
+    <div class="card-body">
+        {{ include('backoffice/skill/_form.html.twig', {'form': form}) }}
+    </div>
+</div>
 {% endblock %}

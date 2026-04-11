@@ -1,0 +1,21 @@
+{% extends 'backoffice/base_backoffice.html.twig' %}
+
+{% block page_title %}Mon Profil{% endblock %}
+{% block breadcrumb %}Mon Profil{% endblock %}
+
+{% block admin_content %}
+<div class="card">
+    <div class="card-header">
+        <h3>Mon Profil</h3>
+    </div>
+    <div class="card-body">
+        <p><strong>Nom d'utilisateur :</strong> {{ user.username }}</p>
+        <p><strong>Email :</strong> {{ user.email }}</p>
+        <p><strong>Statut :</strong> {{ user.isActive ? 'Actif' : 'Inactif' }}</p>
+        <p><strong>Rôle :</strong> {{ user.role }}</p>
+        
+        <a href="{{ path('app_backoffice_profile_edit') }}" class="btn btn-primary">Modifier mon profil</a>
+        <a href="{{ path('app_backoffice_dashboard') }}" class="btn btn-secondary">Retour au Dashboard</a>
+    </div>
+</div>
+{% endblock %}

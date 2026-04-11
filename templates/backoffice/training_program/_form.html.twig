@@ -1,61 +1,95 @@
-{{ form_start(form, {'attr': {'id': 'training-form', 'class': 'ajax-form'}})}}
+{{ form_start(form, {'attr': {'class': 'form', 'id': 'training-program-form'}})}}
 
     {{ form_errors(form) }}
 
-    <div class="mb-3">
-        {{ form_label(form.title, 'Titre', {'label_attr': {'class': 'form-label'}})}}
-        {{ form_widget(form.title, {'attr': {'class': 'form-control'}})}}
-        {{ form_errors(form.title) }}
-        <small class="text-muted">Minimum 3 caractères, maximum 150.</small>
-    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="mb-3">
+                {{ form_label(form.title, 'Titre *', {'label_attr': {'class': 'form-label fw-bold'}})}}
+                {{ form_widget(form.title, {'attr': {'class': 'form-control'}})}}
+                {{ form_errors(form.title) }}
+                <small class="text-muted">Minimum 3 caractères, maximum 150.</small>
+            </div>
+        </div>
 
-    <div class="mb-3">
-        {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label'}})}}
-        {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 4}})}}
-        {{ form_errors(form.description) }}
-        <small class="text-muted">Maximum 1000 caractères.</small>
-    </div>
+        <div class="col-md-12">
+            <div class="mb-3">
+                {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label fw-bold'}})}}
+                {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 5}})}}
+                {{ form_errors(form.description) }}
+                <small class="text-muted">Maximum 1000 caractères.</small>
+            </div>
+        </div>
 
-    <div class="mb-3">
-        {{ form_label(form.duration, 'Durée (heures)', {'label_attr': {'class': 'form-label'}})}}
-        {{ form_widget(form.duration, {'attr': {'class': 'form-control'}})}}
-        {{ form_errors(form.duration) }}
-        <small class="text-muted">Doit être un nombre positif.</small>
-    </div>
+        <div class="col-md-4">
+            <div class="mb-3">
+                {{ form_label(form.duration, 'Durée (heures)', {'label_attr': {'class': 'form-label fw-bold'}})}}
+                {{ form_widget(form.duration, {'attr': {'class': 'form-control'}})}}
+                {{ form_errors(form.duration) }}
+                <small class="text-muted">Nombre positif.</small>
+            </div>
+        </div>
 
-    <div class="mb-3">
-        {{ form_label(form.type, 'Type', {'label_attr': {'class': 'form-label'}})}}
-        {{ form_widget(form.type, {'attr': {'class': 'form-select'}})}}
-        {{ form_errors(form.type) }}
-        <small class="text-muted">Sélectionnez le type de formation.</small>
-    </div>
+        <div class="col-md-4">
+            <div class="mb-3">
+                {{ form_label(form.type, 'Type', {'label_attr': {'class': 'form-label fw-bold'}})}}
+                {{ form_widget(form.type, {'attr': {'class': 'form-select'}})}}
+                {{ form_errors(form.type) }}
+                <small class="text-muted">Présentiel, en ligne ou hybride.</small>
+            </div>
+        </div>
 
-    <div class="mb-3">
-        {{ form_label(form.startDate, 'Date de début', {'label_attr': {'class': 'form-label'}})}}
-        {{ form_widget(form.startDate, {'attr': {'class': 'form-control'}})}}
-        {{ form_errors(form.startDate) }}
-        <small class="text-muted">Doit être antérieure à la date de fin.</small>
-    </div>
+        <div class="col-md-4">
+            <div class="mb-3">
+                {{ form_label(form.status, 'Statut', {'label_attr': {'class': 'form-label fw-bold'}})}}
+                {{ form_widget(form.status, {'attr': {'class': 'form-select'}})}}
+                {{ form_errors(form.status) }}
+                <small class="text-muted">PROGRAMMÉ, EN COURS, TERMINÉ ou ANNULÉ.</small>
+            </div>
+        </div>
 
-    <div class="mb-3">
-        {{ form_label(form.endDate, 'Date de fin', {'label_attr': {'class': 'form-label'}})}}
-        {{ form_widget(form.endDate, {'attr': {'class': 'form-control'}})}}
-        {{ form_errors(form.endDate) }}
-    </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                {{ form_label(form.startDate, 'Date de début', {'label_attr': {'class': 'form-label fw-bold'}})}}
+                {{ form_widget(form.startDate, {'attr': {'class': 'form-control'}})}}
+                {{ form_errors(form.startDate) }}
+            </div>
+        </div>
 
-    <div class="mb-3">
-        {{ form_label(form.status, 'Statut', {'label_attr': {'class': 'form-label'}})}}
-        {{ form_widget(form.status, {'attr': {'class': 'form-select'}})}}
-        {{ form_errors(form.status) }}
-        <small class="text-muted">Sélectionnez le statut du programme.</small>
-    </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                {{ form_label(form.endDate, 'Date de fin', {'label_attr': {'class': 'form-label fw-bold'}})}}
+                {{ form_widget(form.endDate, {'attr': {'class': 'form-control'}})}}
+                {{ form_errors(form.endDate) }}
+                <small class="text-muted">Doit être après la date de début.</small>
+            </div>
+        </div>
 
-    <div class="mb-3">
-        {{ form_label(form.skills, 'Compétences associées', {'label_attr': {'class': 'form-label'}})}}
-        {{ form_widget(form.skills, {'attr': {'class': 'form-select'}})}}
-        {{ form_errors(form.skills) }}
-        <small class="text-muted">Sélectionnez au moins une compétence (Ctrl+clic pour plusieurs).</small>
+        <div class="col-md-12">
+            <div class="mb-3">
+                {{ form_label(form.skills, 'Compétences associées', {'label_attr': {'class': 'form-label fw-bold'}})}}
+                {{ form_widget(form.skills, {'attr': {'class': 'form-select select2-multi'}})}}
+                {{ form_errors(form.skills) }}
+                <div class="alert alert-info mt-2 small">
+                    <i class="bi bi-info-circle"></i> 
+                    <strong>Note :</strong> Le programme doit avoir au moins une compétence associée.
+                    {% if form.skills.vars.value is not empty %}
+                        <span class="badge bg-success ms-2">{{ form.skills.vars.value|length }} compétence(s) sélectionnée(s)</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </div>
 
     {{ form_rest(form) }}
+    
+    <div class="mt-4 d-flex justify-content-between">
+        <button type="submit" class="btn btn-success">
+            <i class="bi bi-check-lg"></i> Enregistrer
+        </button>
+        <a href="{{ path('app_backoffice_formations') }}" class="btn btn-secondary">
+            <i class="bi bi-x-lg"></i> Annuler
+        </a>
+    </div>
+
 {{ form_end(form) }}

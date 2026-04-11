@@ -4,12 +4,12 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\SkillRepository;
-use App\Entity\Training_program;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: SkillRepository::class)]
+#[ORM\Table(name: "skill")]
 class Skill
 {
     #[ORM\Id]
@@ -53,8 +53,8 @@ class Skill
     #[ORM\JoinColumn(name: "trainingprogram_id", referencedColumnName: "id", nullable: true)]
     private ?Training_program $trainingProgram = null;
 
-    // Relation ManyToMany avec User
-    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: "skills")]
+    // Relation ManyToMany avec UserAccount
+    #[ORM\ManyToMany(targetEntity: UserAccount::class, mappedBy: "skills")]
     private Collection $users;
 
     public function __construct()
@@ -131,15 +131,15 @@ class Skill
         return $this->users;
     }
 
-    public function addUser(User $user): self
+    public function addUser(UserAccount $user): self
     {
         if (!$this->users->contains($user)) {
-            $this->users[] = $user;
+            $this->users->add($user);
         }
         return $this;
     }
 
-    public function removeUser(User $user): self
+    public function removeUser(UserAccount $user): self
     {
         $this->users->removeElement($user);
         return $this;

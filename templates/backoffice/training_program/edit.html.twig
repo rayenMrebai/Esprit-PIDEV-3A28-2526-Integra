@@ -1,20 +1,20 @@
 {% extends 'backoffice/base_backoffice.html.twig' %}
 
-{% block title %}Modifier Programme de Formation{% endblock %}
-{% block page_title %}Modifier le Programme de Formation{% endblock %}
-{% block breadcrumb %}Dashboard / Formations / Modifier{% endblock %}
+{% block page_title %}Modifier la formation{% endblock %}
+{% block breadcrumb %}Formations / Modifier{% endblock %}
 
 {% block admin_content %}
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">Modifier {{ training_program.title }}</h3>
-        </div>
-        <div class="card-body">
-            {{ include('training_program/_form.html.twig') }}
-        </div>
-        <div class="card-footer">
-            <a href="{{ path('app_training_program_index') }}" class="btn btn-secondary">Retour à la liste</a>
-            {{ include('training_program/_delete_form.html.twig') }}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Modifier la formation #{{ training_program.id }}</h3>
+        <div class="card-tools">
+            <a href="{{ path('app_backoffice_formations') }}" class="btn btn-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Retour à la liste
+            </a>
         </div>
     </div>
+    <div class="card-body">
+        {{ include('backoffice/training_program/_form.html.twig', {'form': form}) }}
+    </div>
+</div>
 {% endblock %}

@@ -39,13 +39,17 @@ class FrontofficeController extends AbstractController
         ]);
     }
     
-    #[Route('/competences', name: 'app_frontoffice_skills')]
-    public function skills(SkillRepository $skillRepository): Response
-    {
-        return $this->render('frontoffice/skills.html.twig', [
-            'skills' => $skillRepository->findAll(),
-        ]);
-    }
+  #[Route('/competences', name: 'app_frontoffice_skills')]
+public function skills(SkillRepository $skillRepository): Response
+{
+    /** @var UserAccount $user */
+    $user = $this->getUser();
+    $userSkills = $user->getSkills();
+    
+    return $this->render('frontoffice/skills.html.twig', [
+        'userSkills' => $userSkills,
+    ]);
+}
     
     #[Route('/quiz', name: 'app_frontoffice_quiz')]
     public function quiz(Quiz_resultRepository $quizRepository): Response

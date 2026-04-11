@@ -1,24 +1,29 @@
 {% extends 'frontoffice/base_frontoffice.html.twig' %}
 
-{% block title %}Dashboard - ESPRI TECH{% endblock %}
+{% block title %}Dashboard {% endblock %}
 
 {% block content %}
-{# Récupération des données utilisateur depuis la session #}
-{% set fake_name = app.session.get('fake_user_name') ?? 'Utilisateur' %}
-{% set fake_role = app.session.get('fake_user_role') ?? 'EMPLOYE' %}
+{# Utilisation des vraies données de l'utilisateur connecté #}
+{% set user = app.user %}
+{% set user_role = user.role ?? 'EMPLOYE' %}
 
 <div class="dashboard-header">
     <h1 class="dashboard-title">Dashboard</h1>
     <p class="dashboard-welcome">
-        Bienvenue <strong>{{ fake_name }}</strong>
+        Bienvenue <strong>{{ user.username ?? 'Utilisateur' }}</strong>
         <span class="badge 
-            {% if fake_role == 'ADMINISTRATEUR' %}bg-danger
-            {% elseif fake_role == 'MANAGER' %}bg-warning
+            {% if user_role == 'MANAGER' %}bg-warning
             {% else %}bg-success{% endif %} ms-2">
-            {{ fake_role }}
+            {% if user_role == 'MANAGER' %}
+                MANAGER
+            {% else %}
+                EMPLOYE
+            {% endif %}
         </span>
     </p>
 </div>
+
+{# Le reste du template reste identique #}
 
 <div class="dashboard-cards">
     <div class="row g-4">

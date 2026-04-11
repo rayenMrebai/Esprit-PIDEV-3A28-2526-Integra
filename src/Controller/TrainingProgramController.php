@@ -13,14 +13,35 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/training-program')]
 class TrainingProgramController extends AbstractController
 {
-    #[Route('/', name: 'app_training_program_index', methods: ['GET'])]
-    public function index(EntityManagerInterface $entityManager): Response
-    {
-        return $this->render('backoffice/training_program/index.html.twig', [
-            'training_programs' => $entityManager->getRepository(Training_program::class)->findAll(),
-        ]);
+#[Route('/training-program', name: 'app_training_program_index')]
+public function index(EntityManagerInterface $entityManager, Request $request): Response
+{
+    $search = $request->query->get('search', '');
+    $type = $request->query->get('type', '');
+    $status = $request->query->get('status', '');
+    
+    $qb = $entityManager->getRepository(Training_program::class)->createQueryBuilder('t');
+    
+    if ($search) {
+        $qb->andWhere('t.title LIKE :search OR t.description LIKE :search')
+           ->setParameter('search', '%' . $search . '%');
     }
-
+    if ($type) {
+        $qb->andWhere('t.type = :type')->setParameter('type', $type);
+    }
+    if ($status) {
+        $qb->andWhere('t.status = :status')->setParameter('status', $status);
+    }
+    
+    $training_programs = $qb->getQuery()->getResult();
+    
+    return $this->render('backoffice/training_program/index.html.twig', [
+        'training_programs' => $training_programs,
+        'search' => $search,                    // ← AJOUTEZ CETTE LIGNE
+        'selectedType' => $type,                // ← AJOUTEZ CETTE LIGNE
+        'selectedStatus' => $status,            // ← AJOUTEZ CETTE LIGNE
+    ]);
+}
     #[Route('/new', name: 'app_training_program_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {

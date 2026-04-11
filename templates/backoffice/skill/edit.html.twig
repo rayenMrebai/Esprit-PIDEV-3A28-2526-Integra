@@ -1,13 +1,18 @@
-{% extends 'base.html.twig' %}
+{% extends 'backoffice/base_backoffice.html.twig' %}
 
-{% block title %}Edit Skill{% endblock %}
+{% block page_title %}Modifier la compétence{% endblock %}
+{% block breadcrumb %}Compétences / Modifier{% endblock %}
 
-{% block body %}
-    <h1>Edit Skill</h1>
-
-    {{ include('skill/_form.html.twig') }}
-
-    <a href="{{ path('app_skill_index') }}">back to list</a>
-
-    {{ include('skill/_delete_form.html.twig') }}
+{% block admin_content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Modifier la compétence #{{ skill.id }}</h3>
+    </div>
+    <div class="card-body">
+        {{ include('backoffice/skill/_form.html.twig', {'form': form}) }}
+    </div>
+    <div class="card-footer">
+        <a href="{{ path('app_backoffice_competences') }}" class="btn btn-secondary">Retour à la liste</a>
+    </div>
+</div>
 {% endblock %}
