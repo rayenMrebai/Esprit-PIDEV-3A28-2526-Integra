@@ -43,7 +43,6 @@ class Project
     #[ORM\Column(type: 'string', name: 'status', nullable: true)]
     private ?string $status = null;
 
-    // Validation métier : date fin > date début
     #[Assert\Callback]
     public function validateDates(ExecutionContextInterface $context): void
     {
@@ -57,20 +56,25 @@ class Project
     // Getters / setters
     public function getProjectId(): ?int { return $this->projectId; }
     public function setProjectId(int $projectId): self { $this->projectId = $projectId; return $this; }
+
     public function getName(): ?string { return $this->name; }
-    public function setName(string $name): self { $this->name = $name; return $this; }
+    public function setName(?string $name): self { $this->name = $name; return $this; }      // ✅ ?string
+
     public function getBudget(): ?float { return $this->budget; }
-    public function setBudget(float $budget): self { $this->budget = $budget; return $this; }
+    public function setBudget(?float $budget): self { $this->budget = $budget; return $this; }  // ✅ ?float
+
     public function getStartDate(): ?\DateTimeInterface { return $this->startDate; }
     public function setStartDate(?\DateTimeInterface $startDate): self { $this->startDate = $startDate; return $this; }
+
     public function getEndDate(): ?\DateTimeInterface { return $this->endDate; }
     public function setEndDate(?\DateTimeInterface $endDate): self { $this->endDate = $endDate; return $this; }
+
     public function getDescription(): ?string { return $this->description; }
     public function setDescription(?string $description): self { $this->description = $description; return $this; }
-    public function getStatus(): ?string { return $this->status; }
-    public function setStatus(?string $status): self { $this->status = $status; return $this; }
 
-    // Fonction utilitaire pour savoir si le projet est en retard
+    public function getStatus(): ?string { return $this->status; }
+    public function setStatus(?string $status): self { $this->status = $status; return $this; }  // ✅ ?string
+
     public function isOverdue(): bool
     {
         if (!$this->endDate) return false;

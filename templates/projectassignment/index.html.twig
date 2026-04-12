@@ -29,37 +29,42 @@
         </a>
     </div>
 
-    {# BARRE DE RECHERCHE ET FILTRES EN TEMPS RÉEL #}
+    {# FORMULAIRE GET AVEC SOUMISSION AUTO #}
     <div class="integra-card" style="padding: 20px;">
-        <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
-
-            {# Recherche textuelle #}
+        <form method="get" action="{{ path('app_projectassignment_index') }}" id="filterForm" style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
             <div style="flex:2; min-width:220px; position:relative;">
                 <i class="fas fa-search" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:13px;"></i>
-                <input type="text" id="liveSearch" placeholder="Recherche par projet, employé ou rôle..."
+                <input type="text" name="search" value="{{ searchTerm }}" id="searchInput"
+                       placeholder="Recherche par projet, employé ou rôle..."
                        style="width:100%; border-radius:30px; border:1px solid #dbeafe; padding:10px 15px 10px 38px; font-size:14px; outline:none; background:white;">
             </div>
-
-            {# Filtre par Projet #}
             <div style="min-width:200px;">
-                <select id="liveProject" style="width:100%; border-radius:30px; border:1px solid #dbeafe; padding:10px 15px; font-size:14px; background:white; cursor:pointer; outline:none;">
+                <select name="project" id="projectSelect" style="width:100%; border-radius:30px; border:1px solid #dbeafe; padding:10px 15px; font-size:14px; background:white; cursor:pointer; outline:none;">
                     <option value="">Tous les projets</option>
                     {% for project in projects %}
-                        <option value="{{ project.projectId }}">{{ project.name }}</option>
+                        <option value="{{ project.projectId }}" {% if selectedProject == project.projectId %}selected{% endif %}>{{ project.name }}</option>
                     {% endfor %}
                 </select>
             </div>
-
-            {# Filtre par Rôle #}
             <div style="min-width:180px;">
-                <select id="liveRole" style="width:100%; border-radius:30px; border:1px solid #dbeafe; padding:10px 15px; font-size:14px; background:white; cursor:pointer; outline:none;">
+                <select name="role" id="roleSelect" style="width:100%; border-radius:30px; border:1px solid #dbeafe; padding:10px 15px; font-size:14px; background:white; cursor:pointer; outline:none;">
                     <option value="">Tous les rôles</option>
                     {% for role in roles %}
-                        <option value="{{ role }}">{{ role }}</option>
+                        <option value="{{ role }}" {% if selectedRole == role %}selected{% endif %}>{{ role }}</option>
                     {% endfor %}
                 </select>
             </div>
-        </div>
+            <div style="display:flex; gap:10px;">
+                <button type="submit"
+                        style="background:#0B63CE; color:white; border:none; border-radius:30px; padding:10px 20px; font-weight:bold; cursor:pointer; font-size:14px; white-space:nowrap;">
+                    <i class="fas fa-filter mr-1"></i> Filtrer
+                </button>
+                <a href="{{ path('app_projectassignment_index') }}"
+                   style="background:#6b7280; color:white; border-radius:30px; padding:10px 18px; text-decoration:none; font-weight:bold; font-size:14px; white-space:nowrap;">
+                    <i class="fas fa-redo-alt mr-1"></i> Reset
+                </a>
+            </div>
+        </form>
     </div>
 
     {# TABLE DES AFFECTATIONS #}
@@ -67,7 +72,7 @@
         <div style="padding:20px 20px 0 20px;">
             <h3 style="color:#1e3a5f; font-weight:700; font-size:18px; margin:0 0 15px 0;">
                 👥 Project Assignments
-                <span id="countBadge" style="background:#dbeafe; color:#0B63CE; border-radius:20px; padding:2px 12px; font-size:13px; margin-left:10px; font-weight:600;">
+                <span style="background:#dbeafe; color:#0B63CE; border-radius:20px; padding:2px 12px; font-size:13px; margin-left:10px; font-weight:600;">
                     {{ assignments|length }}
                 </span>
             </h3>
@@ -87,24 +92,18 @@
                     <th style="padding:12px 15px; text-align:center; color:#1e3a5f; font-weight:700;">Actions</th>
                 </tr>
                 </thead>
-                <tbody id="assignmentsTableBody">
+                <tbody>
                 {% for assignment in assignments %}
-                    <tr class="assignment-row"
-                        data-id="{{ assignment.idAssignment }}"
-                        data-project="{{ assignment.project ? assignment.project.name|lower : '' }}"
-                        data-employee="{{ assignment.userAccount ? assignment.userAccount.username|lower : '' }}"
-                        data-role="{{ assignment.role|lower }}"
-                        data-projectid="{{ assignment.project ? assignment.project.projectId : '' }}"
-                        style="border-bottom:1px solid #e2e8f0; transition:background 0.2s;"
+                    <tr style="border-bottom:1px solid #e2e8f0; transition:background 0.2s;"
                         onmouseover="this.style.backgroundColor='#f8fafc'"
                         onmouseout="this.style.backgroundColor='transparent'">
 
                         <td style="padding:12px 15px; font-weight:700; color:#0B63CE;">{{ assignment.idAssignment }}</td>
 
                         <td style="padding:12px 15px;">
-                                <span style="background:#e0f2fe; color:#0369a1; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:500;">
-                                    {{ assignment.project ? assignment.project.name : '—' }}
-                                </span>
+                            <span style="background:#e0f2fe; color:#0369a1; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:500;">
+                                {{ assignment.project ? assignment.project.name : '—' }}
+                            </span>
                         </td>
 
                         <td style="padding:12px 15px;">
@@ -163,74 +162,34 @@
 
     {# Barre de statut #}
     <div class="status-bar" style="margin-top:25px;">
-        🔌 Connecté – <span id="filterStatus">Aucun filtre appliqué</span>
+        🔌 Connecté – {{ assignments|length }} affectation(s) affichée(s) •
+        {% if searchTerm or selectedProject or selectedRole %}
+            Filtres actifs :
+            {% if searchTerm %}"{{ searchTerm }}" {% endif %}
+            {% if selectedProject %}Projet spécifique {% endif %}
+            {% if selectedRole %}Rôle "{{ selectedRole }}" {% endif %}
+        {% else %}
+            Aucun filtre appliqué
+        {% endif %}
     </div>
 
 {% endblock %}
 
 {% block javascripts %}
     <script>
-        // Fonction de filtrage en direct
-        function filterAssignments() {
-            const searchTerm = document.getElementById('liveSearch').value.toLowerCase().trim();
-            const projectFilter = document.getElementById('liveProject').value;
-            const roleFilter = document.getElementById('liveRole').value.toLowerCase();
+        // ===== SOUMISSION AUTO DU FORMULAIRE =====
+        const filterForm = document.getElementById('filterForm');
+        const searchInput = document.getElementById('searchInput');
+        const projectSelect = document.getElementById('projectSelect');
+        const roleSelect = document.getElementById('roleSelect');
 
-            const rows = document.querySelectorAll('.assignment-row');
-            let visibleCount = 0;
-            let filtersActive = [];
-
-            rows.forEach(row => {
-                const projectName = row.dataset.project || '';
-                const employee = row.dataset.employee || '';
-                const role = row.dataset.role || '';
-                const projectId = row.dataset.projectid || '';
-
-                // Critères de correspondance
-                const matchesSearch = !searchTerm
-                    || projectName.includes(searchTerm)
-                    || employee.includes(searchTerm)
-                    || role.includes(searchTerm);
-
-                const matchesProject = !projectFilter || projectId === projectFilter;
-                const matchesRole = !roleFilter || role === roleFilter;
-
-                if (matchesSearch && matchesProject && matchesRole) {
-                    row.style.display = '';
-                    visibleCount++;
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-
-            // Mise à jour du compteur
-            document.getElementById('countBadge').textContent = visibleCount;
-
-            // Construction du texte des filtres actifs
-            if (searchTerm) filtersActive.push(`Recherche : "${searchTerm}"`);
-            if (projectFilter) {
-                const projectSelect = document.getElementById('liveProject');
-                const selectedText = projectSelect.options[projectSelect.selectedIndex]?.text || '';
-                filtersActive.push(`Projet : ${selectedText}`);
-            }
-            if (roleFilter) filtersActive.push(`Rôle : "${roleFilter}"`);
-
-            const statusEl = document.getElementById('filterStatus');
-            statusEl.textContent = filtersActive.length ? 'Filtres actifs : ' + filtersActive.join(' • ') : 'Aucun filtre appliqué';
+        let debounceTimer;
+        function submitForm() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => filterForm.submit(), 400);
         }
-
-        // Attacher les écouteurs d'événements
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('liveSearch');
-            const projectSelect = document.getElementById('liveProject');
-            const roleSelect = document.getElementById('liveRole');
-
-            if (searchInput) searchInput.addEventListener('input', filterAssignments);
-            if (projectSelect) projectSelect.addEventListener('change', filterAssignments);
-            if (roleSelect) roleSelect.addEventListener('change', filterAssignments);
-
-            // Initialisation
-            filterAssignments();
-        });
+        searchInput.addEventListener('input', submitForm);
+        projectSelect.addEventListener('change', submitForm);
+        roleSelect.addEventListener('change', submitForm);
     </script>
 {% endblock %}

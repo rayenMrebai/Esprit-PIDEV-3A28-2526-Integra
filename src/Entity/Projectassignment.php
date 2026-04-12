@@ -77,7 +77,7 @@ class Projectassignment
         }
     }
 
-    // Getters et Setters
+    // Getters et setters
     public function getIdAssignment(): ?int { return $this->idAssignment; }
 
     public function getProject(): ?Project { return $this->project; }
@@ -87,10 +87,10 @@ class Projectassignment
     public function setUserAccount(?UserAccount $userAccount): self { $this->userAccount = $userAccount; return $this; }
 
     public function getRole(): ?string { return $this->role; }
-    public function setRole(string $role): self { $this->role = $role; return $this; }
+    public function setRole(?string $role): self { $this->role = $role; return $this; }                    // ✅ ?string
 
     public function getAllocationRate(): ?int { return $this->allocationRate; }
-    public function setAllocationRate(int $allocationRate): self { $this->allocationRate = $allocationRate; return $this; }
+    public function setAllocationRate(?int $allocationRate): self { $this->allocationRate = $allocationRate; return $this; } // ✅ ?int
 
     public function getAssignedFrom(): ?\DateTimeInterface { return $this->assignedFrom; }
     public function setAssignedFrom(?\DateTimeInterface $assignedFrom): self { $this->assignedFrom = $assignedFrom; return $this; }

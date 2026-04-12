@@ -28,54 +28,53 @@
         </a>
     </div>
 
-    {# FILTRES #}
+    {# FILTRES PHP #}
     <div class="integra-card">
-        <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
+        <form method="get" action="{{ path('app_project_index') }}" id="filterForm" style="display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
             <div style="flex:2; min-width:200px; position:relative;">
                 <i class="fas fa-search" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:13px;"></i>
-                <input type="text" id="liveSearch" placeholder="Recherche par nom ou ID..."
+                <input type="text" name="search" value="{{ app.request.query.get('search') }}" id="searchInput"
+                       placeholder="Recherche par nom ou ID..."
                        style="width:100%; border-radius:30px; border:1px solid #dbeafe; padding:10px 15px 10px 38px; font-size:14px; outline:none; background:white;">
             </div>
             <div style="min-width:160px;">
-                <select id="liveStatus" style="width:100%; border-radius:30px; border:1px solid #dbeafe; padding:10px 15px; font-size:14px; background:white; cursor:pointer; outline:none;">
+                <select name="status" id="statusSelect" style="width:100%; border-radius:30px; border:1px solid #dbeafe; padding:10px 15px; font-size:14px; background:white; cursor:pointer; outline:none;">
                     <option value="">Tous les statuts</option>
-                    <option value="PLANNING">PLANNING</option>
-                    <option value="IN PROGRESS">IN PROGRESS</option>
-                    <option value="ACTIVE">ACTIVE</option>
-                    <option value="ON HOLD">ON HOLD</option>
-                    <option value="COMPLETED">COMPLETED</option>
+                    <option value="PLANNING" {% if app.request.query.get('status') == 'PLANNING' %}selected{% endif %}>PLANNING</option>
+                    <option value="IN PROGRESS" {% if app.request.query.get('status') == 'IN PROGRESS' %}selected{% endif %}>IN PROGRESS</option>
+                    <option value="ACTIVE" {% if app.request.query.get('status') == 'ACTIVE' %}selected{% endif %}>ACTIVE</option>
+                    <option value="ON HOLD" {% if app.request.query.get('status') == 'ON HOLD' %}selected{% endif %}>ON HOLD</option>
+                    <option value="COMPLETED" {% if app.request.query.get('status') == 'COMPLETED' %}selected{% endif %}>COMPLETED</option>
                 </select>
             </div>
-            <form method="get" action="{{ path('app_project_index') }}" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                <div>
-                    <input type="date" name="startFrom" value="{{ app.request.query.get('startFrom') }}"
-                           style="border-radius:30px; border:1px solid #dbeafe; padding:9px 14px; font-size:14px; outline:none; background:white; cursor:pointer;">
-                </div>
-                <div>
-                    <input type="date" name="startTo" value="{{ app.request.query.get('startTo') }}"
-                           style="border-radius:30px; border:1px solid #dbeafe; padding:9px 14px; font-size:14px; outline:none; background:white; cursor:pointer;">
-                </div>
-                <button type="submit"
-                        style="background:linear-gradient(135deg,#0B63CE,#0FA36B); color:white; border:none; border-radius:30px; padding:10px 22px; font-weight:bold; cursor:pointer; font-size:14px; white-space:nowrap;">
-                    <i class="fas fa-filter mr-1"></i> Filtrer
-                </button>
-                {% if app.request.query.get('startFrom') or app.request.query.get('startTo') %}
-                    <a href="{{ path('app_project_index') }}"
-                       style="background:#e2e8f0; color:#1e293b; border-radius:30px; padding:10px 18px; text-decoration:none; font-weight:bold; font-size:14px; white-space:nowrap;">
-                        ↺ Reset
-                    </a>
-                {% endif %}
-            </form>
-        </div>
+            <div>
+                <input type="date" name="startFrom" value="{{ app.request.query.get('startFrom') }}" id="startFromInput"
+                       style="border-radius:30px; border:1px solid #dbeafe; padding:9px 14px; font-size:14px; outline:none; background:white; cursor:pointer;">
+            </div>
+            <div>
+                <input type="date" name="startTo" value="{{ app.request.query.get('startTo') }}" id="startToInput"
+                       style="border-radius:30px; border:1px solid #dbeafe; padding:9px 14px; font-size:14px; outline:none; background:white; cursor:pointer;">
+            </div>
+            <button type="submit"
+                    style="background:linear-gradient(135deg,#0B63CE,#0FA36B); color:white; border:none; border-radius:30px; padding:10px 22px; font-weight:bold; cursor:pointer; font-size:14px; white-space:nowrap;">
+                <i class="fas fa-filter mr-1"></i> Filtrer
+            </button>
+            {% if app.request.query.all|length > 0 %}
+                <a href="{{ path('app_project_index') }}"
+                   style="background:#e2e8f0; color:#1e293b; border-radius:30px; padding:10px 18px; text-decoration:none; font-weight:bold; font-size:14px; white-space:nowrap;">
+                    ↺ Reset
+                </a>
+            {% endif %}
+        </form>
     </div>
 
     {# LISTE PROJETS #}
     <div class="integra-card">
         <h3 style="color:#1e3a5f; font-weight:700; margin-bottom:15px; font-size:17px;">
             📊 HR Projects
-            <span id="countBadge" style="background:#dbeafe; color:#0B63CE; border-radius:20px; padding:2px 12px; font-size:13px; margin-left:8px; font-weight:600;">
-            {{ projects|length }}
-        </span>
+            <span style="background:#dbeafe; color:#0B63CE; border-radius:20px; padding:2px 12px; font-size:13px; margin-left:8px; font-weight:600;">
+                {{ projects|length }}
+            </span>
         </h3>
 
         <div style="display:flex; align-items:center; padding:8px 12px; border-bottom:2px solid #dbeafe; font-weight:700; color:#1e3a5f; font-size:13px; background:#f8fafc; border-radius:10px 10px 0 0;">
@@ -178,17 +177,14 @@
             <h3 style="font-size:18px; font-weight:bold; color:#1e3a5f; border-bottom:1px solid #b0c4de; padding-bottom:10px; margin-bottom:15px;">
                 ⚡ Quick Actions
             </h3>
-            <a id="editBtn" href="#" class="action-btn orange">✏️ Edit Project</a>
-            <form id="deleteForm" method="post" action="#" onsubmit="return confirm('Supprimer ce projet ?')">
-                <input type="hidden" id="deleteToken" name="_token" value="">
-                <button type="submit" class="action-btn red">🗑️ Delete Project</button>
-            </form>
             {# Boutons PDF #}
             <a id="exportAllPdfBtn" href="{{ path('app_project_export_all') }}" class="action-btn" style="background:#8b5cf6;">📄 Exporter tout en PDF</a>
             <a id="exportSinglePdfBtn" href="#" class="action-btn" style="background:#0B63CE;">📄 Exporter ce projet</a>
             {# Boutons Excel #}
             <a id="exportAllExcelBtn" href="{{ path('app_project_export_excel_all') }}" class="action-btn" style="background:#10b981;">📊 Exporter tout en Excel</a>
             <a id="exportSingleExcelBtn" href="#" class="action-btn" style="background:#059669;">📊 Exporter ce projet</a>
+            {# Bouton IA #}
+            <a id="aiRecommendBtn" href="#" class="action-btn" style="background:#0B63CE;">🤖 Recommandation IA</a>
         </div>
     </div>
 
@@ -216,52 +212,31 @@
             document.getElementById('detailBudget').innerText = row.dataset.budget ? row.dataset.budget + ' TND' : '—';
 
             const id = row.dataset.id;
-            document.getElementById('editBtn').href         = `/project/${id}/edit`;
-            document.getElementById('deleteForm').action    = `/project/${id}`;
-            document.getElementById('deleteToken').value    = (document.getElementById('csrf_' + id) || {}).dataset?.token || '';
             document.getElementById('exportSinglePdfBtn').href = `/project/${id}/export`;
             document.getElementById('exportSingleExcelBtn').href = `/project/${id}/export/excel`;
+            document.getElementById('aiRecommendBtn').href = `/ai/recommend/${id}`;
         }
 
-        function liveFilter() {
-            const search = document.getElementById('liveSearch').value.toLowerCase().trim();
-            const status = document.getElementById('liveStatus').value;
-            let visible = 0;
+        // Vérifications pour les exports et l'IA
+        document.getElementById('exportSinglePdfBtn').addEventListener('click', e => { if (!selectedRow) { e.preventDefault(); alert('Veuillez sélectionner un projet.'); }});
+        document.getElementById('exportSingleExcelBtn').addEventListener('click', e => { if (!selectedRow) { e.preventDefault(); alert('Veuillez sélectionner un projet.'); }});
+        document.getElementById('aiRecommendBtn').addEventListener('click', e => { if (!selectedRow) { e.preventDefault(); alert('Veuillez sélectionner un projet.'); }});
 
-            document.querySelectorAll('.project-row').forEach(row => {
-                const matchSearch = !search
-                    || row.dataset.name.toLowerCase().includes(search)
-                    || row.dataset.id.toString().includes(search);
-                const matchStatus = !status || row.dataset.status === status;
+        // Soumission automatique des filtres
+        const filterForm = document.getElementById('filterForm');
+        const searchInput = document.getElementById('searchInput');
+        const statusSelect = document.getElementById('statusSelect');
+        const startFromInput = document.getElementById('startFromInput');
+        const startToInput = document.getElementById('startToInput');
 
-                if (matchSearch && matchStatus) {
-                    row.style.display = 'flex';
-                    visible++;
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-
-            document.getElementById('countBadge').textContent = visible;
+        let debounceTimer;
+        function submitForm() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => filterForm.submit(), 500);
         }
-
-        // ===== VÉRIFICATION EXPORT UNITAIRE =====
-        document.getElementById('exportSinglePdfBtn').addEventListener('click', function(e) {
-            if (!selectedRow) {
-                e.preventDefault();
-                alert('Veuillez d\'abord sélectionner un projet.');
-            }
-        });
-        document.getElementById('exportSingleExcelBtn').addEventListener('click', function(e) {
-            if (!selectedRow) {
-                e.preventDefault();
-                alert('Veuillez d\'abord sélectionner un projet.');
-            }
-        });
-
-        document.getElementById('liveSearch').addEventListener('input', liveFilter);
-        document.getElementById('liveStatus').addEventListener('change', liveFilter);
-
-        document.getElementById('countBadge').textContent = document.querySelectorAll('.project-row').length;
+        searchInput.addEventListener('input', submitForm);
+        statusSelect.addEventListener('change', submitForm);
+        startFromInput.addEventListener('change', submitForm);
+        startToInput.addEventListener('change', submitForm);
     </script>
 {% endblock %}

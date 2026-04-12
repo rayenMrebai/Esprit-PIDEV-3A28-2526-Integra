@@ -23,37 +23,61 @@
 
                 {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
 
+                {# Projet #}
                 <div style="margin-bottom:18px;">
                     <label class="integra-form-label">📌 Projet <span style="color:#ef4444;">*</span></label>
                     {{ form_widget(form.project, {'attr': {'class': 'integra-form-control'}}) }}
+                    {% if form_errors(form.project) %}
+                        <div class="form-error">{{ form_errors(form.project) }}</div>
+                    {% endif %}
                 </div>
 
+                {# Employé #}
                 <div style="margin-bottom:18px;">
                     <label class="integra-form-label">👤 Employé <span style="color:#ef4444;">*</span></label>
                     {{ form_widget(form.userAccount, {'attr': {'class': 'integra-form-control'}}) }}
+                    {% if form_errors(form.userAccount) %}
+                        <div class="form-error">{{ form_errors(form.userAccount) }}</div>
+                    {% endif %}
                 </div>
 
+                {# Rôle #}
                 <div style="margin-bottom:18px;">
                     <label class="integra-form-label">🔧 Rôle <span style="color:#ef4444;">*</span></label>
                     {{ form_widget(form.role, {'attr': {'class': 'integra-form-control'}}) }}
+                    {% if form_errors(form.role) %}
+                        <div class="form-error">{{ form_errors(form.role) }}</div>
+                    {% endif %}
                 </div>
 
+                {# Allocation #}
                 <div style="margin-bottom:18px;">
                     <label class="integra-form-label">⚖️ Allocation (%) <span style="color:#ef4444;">*</span></label>
                     {{ form_widget(form.allocationRate, {'attr': {'class': 'integra-form-control'}}) }}
+                    {% if form_errors(form.allocationRate) %}
+                        <div class="form-error">{{ form_errors(form.allocationRate) }}</div>
+                    {% endif %}
                 </div>
 
+                {# Dates #}
                 <div style="display:flex; gap:15px; margin-bottom:18px;">
                     <div style="flex:1;">
                         <label class="integra-form-label">📅 Début <span style="color:#ef4444;">*</span></label>
                         {{ form_widget(form.assignedFrom, {'attr': {'class': 'integra-form-control'}}) }}
+                        {% if form_errors(form.assignedFrom) %}
+                            <div class="form-error">{{ form_errors(form.assignedFrom) }}</div>
+                        {% endif %}
                     </div>
                     <div style="flex:1;">
                         <label class="integra-form-label">📆 Fin <span style="color:#ef4444;">*</span></label>
                         {{ form_widget(form.assignedTo, {'attr': {'class': 'integra-form-control'}}) }}
+                        {% if form_errors(form.assignedTo) %}
+                            <div class="form-error">{{ form_errors(form.assignedTo) }}</div>
+                        {% endif %}
                     </div>
                 </div>
 
+                {# Boutons #}
                 <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:25px; padding-top:15px; border-top:1px solid #f1f5f9;">
                     <a href="{{ path('app_projectassignment_index') }}" style="background:#e2e8f0; color:#1e293b; border-radius:30px; padding:11px 25px; text-decoration:none; font-weight:bold; font-size:14px;">
                         Annuler
@@ -65,6 +89,7 @@
 
                 {{ form_end(form) }}
 
+                {# Zone dangereuse #}
                 <div style="margin-top:15px; padding-top:15px; border-top:1px solid #fee2e2;">
                     <p style="color:#94a3b8; font-size:12px; margin-bottom:8px;">Zone dangereuse</p>
                     <form method="post" action="{{ path('app_projectassignment_delete', {'idAssignment': assignment.idAssignment}) }}"
