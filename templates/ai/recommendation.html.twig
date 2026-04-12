@@ -1,0 +1,123 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Recommandation IA - {{ project.name }}{% endblock %}
+
+{% block content %}
+    <style>
+        .podium-card {
+            background: rgba(255,255,255,0.08);
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 14px 10px;
+            text-align: center;
+            color: white;
+            transition: transform 0.2s;
+            width: 190px;
+        }
+        .podium-card.gold {
+            background: rgba(255,215,0,0.12);
+            border: 2px solid rgba(255,215,0,0.45);
+            transform: scale(1.05);
+            width: 210px;
+        }
+        .podium-card .medal { font-size: 30px; }
+        .podium-card .name { font-size: 14px; font-weight: bold; }
+        .podium-card .role { font-size: 11px; color: #90bfff; }
+        .podium-card .score { font-size: 22px; font-weight: bold; }
+        .ai-table th { background: #f1f5f9; color: #1e3a5f; font-weight: 700; padding: 10px 14px; }
+        .ai-table td { padding: 12px 14px; border-bottom: 1px solid #e2e8f0; }
+    </style>
+
+    <div style="background: linear-gradient(to right, #0b1e33, #0B63CE); padding: 20px 28px; border-radius: 20px 20px 0 0;">
+        <div class="d-flex align-items-center gap-3">
+            <span style="font-size:26px;">🤖</span>
+            <div>
+                <h2 style="color:white; margin:0;">AI Resource Recommendation Engine</h2>
+                <span style="color:#90bfff;">Project: {{ project.name }}</span>
+            </div>
+            <span style="margin-left:auto; color:#34d399;">● READY</span>
+        </div>
+    </div>
+
+    <!-- PODIUM -->
+    <div style="background: linear-gradient(to bottom, #1e3a5f, #145493); padding: 18px 28px 20px;">
+        <div class="d-flex justify-content-center align-items-end gap-3">
+            {% set top3 = results|slice(0,3) %}
+            {# 2nd #}
+            {% if top3[1] is defined %}
+                <div class="podium-card">
+                    <div class="medal">🥈</div>
+                    <div class="name">{{ top3[1].username }}</div>
+                    <div class="role">{{ top3[1].dominantRole }}</div>
+                    <div class="score">{{ (top3[1].finalScore*100)|round }}%</div>
+                    <div>Alloc: {{ top3[1].currentAllocation|round }}%</div>
+                    <form method="post" action="{{ path('ai_assign', {projectId: project.projectId, userId: top3[1].userId}) }}">
+                        <button class="btn btn-sm mt-2" style="background:#2563eb; color:white; border-radius:20px;">Affecter</button>
+                    </form>
+                </div>
+            {% endif %}
+            {# 1st #}
+            {% if top3[0] is defined %}
+                <div class="podium-card gold">
+                    <div class="medal">🥇</div>
+                    <div class="name" style="color:#fde68a;">{{ top3[0].username }}</div>
+                    <div class="role" style="color:#fcd34d;">{{ top3[0].dominantRole }}</div>
+                    <div class="score" style="color:#fde68a; font-size:28px;">{{ (top3[0].finalScore*100)|round }}%</div>
+                    <div>Alloc: {{ top3[0].currentAllocation|round }}%</div>
+                    <form method="post" action="{{ path('ai_assign', {projectId: project.projectId, userId: top3[0].userId}) }}">
+                        <button class="btn btn-sm mt-2" style="background:linear-gradient(to right, #f59e0b, #d97706); color:white; border-radius:20px; padding:8px 22px;">⚡ Affecter</button>
+                    </form>
+                </div>
+            {% endif %}
+            {# 3rd #}
+            {% if top3[2] is defined %}
+                <div class="podium-card">
+                    <div class="medal">🥉</div>
+                    <div class="name">{{ top3[2].username }}</div>
+                    <div class="role">{{ top3[2].dominantRole }}</div>
+                    <div class="score" style="color:#cd7f32;">{{ (top3[2].finalScore*100)|round }}%</div>
+                    <div>Alloc: {{ top3[2].currentAllocation|round }}%</div>
+                    <form method="post" action="{{ path('ai_assign', {projectId: project.projectId, userId: top3[2].userId}) }}">
+                        <button class="btn btn-sm mt-2" style="background:#2563eb; color:white; border-radius:20px;">Affecter</button>
+                    </form>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- TABLEAU COMPLET -->
+    <div class="integra-card" style="border-radius:0 0 20px 20px; margin-top:0;">
+        <div class="d-flex align-items-center mb-3">
+            <h3 style="color:#1e3a5f; margin:0;">📋 Tous les candidats</h3>
+            <span class="badge bg-secondary" style="margin-left: 12px;">{{ results|length }}</span>
+            <div style="flex:1;"></div>  <!-- espaceur flexible -->
+            <a href="{{ path('ai_recommend', {projectId: project.projectId}) }}"
+               class="btn-add"
+               style="padding:8px 18px; font-size:13px;">
+                🔍 Rafraîchir l'analyse
+            </a>
+        </div>
+        <table class="ai-table w-100">
+            <thead>
+            <tr><th>Rang</th><th>Employé</th><th>Rôle dominant</th><th>Score IA</th><th>Dispo</th><th>Score Final</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+            {% for r in results %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ r.username }}</td>
+                    <td>{{ r.dominantRole }}</td>
+                    <td>{{ (r.similarity*100)|round }}%</td>
+                    <td>{{ 100 - r.currentAllocation }}%</td>
+                    <td>{{ (r.finalScore*100)|round }}%</td>
+                    <td>
+                        <form method="post" action="{{ path('ai_assign', {projectId: project.projectId, userId: r.userId}) }}">
+                            <button class="btn btn-sm" style="background:#0B63CE; color:white; border-radius:20px;">Affecter</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
