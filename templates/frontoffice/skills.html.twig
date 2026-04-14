@@ -1,46 +1,57 @@
 {% extends 'frontoffice/base_frontoffice.html.twig' %}
 
-{% block title %}Mes compétences{% endblock %}
+{% block title %}Mes compétences – ESPRI TECH{% endblock %}
+{% block page_heading %}Mes compétences{% endblock %}
+{% block page_subheading %}Consultez et suivez vos compétences acquises{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="card">
-        <div class="card-header bg-primary text-white">
-            <h4 class="mb-0">Mes compétences</h4>
-        </div>
-        <div class="card-body">
-            {% if userSkills is defined and userSkills|length > 0 %}
-                <div class="row">
-                    {% for skill in userSkills %}
-                        <div class="col-md-6 col-lg-4 mb-3">
-                            <div class="card h-100">
-                                <div class="card-body">
-                                    <h5 class="card-title">{{ skill.nom }}</h5>
-                                    <p class="card-text text-muted small">{{ skill.description|slice(0, 100) }}...</p>
-                                    <div class="mb-2">
-                                        <span class="badge 
-                                            {% if skill.categorie == 'technique' %}bg-primary
-                                            {% elseif skill.categorie == 'soft' %}bg-success
-                                            {% elseif skill.categorie == 'management' %}bg-warning
-                                            {% else %}bg-secondary{% endif %}">
-                                            {{ skill.categorie }}
-                                        </span>
-                                    </div>
-                                    <div class="progress" style="height: 8px;">
-                                        <div class="progress-bar bg-info" style="width: {{ skill.levelRequired * 20 }}%;"></div>
-                                    </div>
-                                    <small class="text-muted">Niveau requis: {{ skill.levelRequired }}/5</small>
-                                </div>
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="alert alert-info">
-                    <i class="bi bi-info-circle"></i> Vous n'avez aucune compétence associée pour le moment.
-                </div>
-            {% endif %}
-        </div>
+
+    <div class="post-preview">
+        <h2 class="post-title" style="color: #0B63CE;">
+            <i class="fas fa-code me-2"></i>Toutes mes compétences
+        </h2>
+        <p class="post-subtitle">L'ensemble des compétences qui vous ont été attribuées.</p>
     </div>
-</div>
+    <hr class="my-4" />
+
+    {% if userSkills is defined and userSkills|length > 0 %}
+        {% for skill in userSkills %}
+            <div class="post-preview">
+                <h3 class="post-title" style="color: #0B63CE;">{{ skill.nom }}</h3>
+                <p class="post-subtitle">
+                    {{ skill.description|length > 120 ? skill.description|slice(0, 120) ~ '...' : skill.description }}
+                </p>
+                <p class="post-meta">
+                    <span class="badge-status"
+                        style="background: {% if skill.categorie == 'technique' %}#0B63CE{% elseif skill.categorie == 'soft' %}#0FA36B{% elseif skill.categorie == 'management' %}#e67e22{% else %}#6c757d{% endif %}; color: white;">
+                        {% if skill.categorie == 'technique' %}<i class="fas fa-code me-1"></i>
+                        {% elseif skill.categorie == 'soft' %}<i class="fas fa-people-group me-1"></i>
+                        {% elseif skill.categorie == 'management' %}<i class="fas fa-briefcase me-1"></i>
+                        {% else %}<i class="fas fa-star me-1"></i>{% endif %}
+                        {{ skill.categorie }}
+                    </span>
+                    <span class="ms-3">
+                        <i class="fas fa-chart-bar"></i> Niveau {{ skill.levelRequired }}/5
+                    </span>
+                    {% if skill.trainingProgram is defined and skill.trainingProgram %}
+                        <span class="ms-3">
+                            <i class="fas fa-graduation-cap"></i> {{ skill.trainingProgram.title }}
+                        </span>
+                    {% endif %}
+                </p>
+                <div class="skill-progress-wrap">
+                    <div class="progress" style="height: 6px; border-radius: 10px; background: #e9ecef;">
+                        <div class="progress-bar"
+                            style="width: {{ skill.levelRequired * 20 }}%; border-radius: 10px;
+                            background: {% if skill.categorie == 'technique' %}#0B63CE{% elseif skill.categorie == 'soft' %}#0FA36B{% else %}#e67e22{% endif %};">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% if not loop.last %}<hr class="my-4" />{% endif %}
+        {% endfor %}
+    {% else %}
+        <p class="text-muted fst-italic">Vous n'avez aucune compétence associée pour le moment.</p>
+    {% endif %}  {# ← endif, pas endfor #}
+
 {% endblock %}

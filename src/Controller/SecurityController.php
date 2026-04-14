@@ -37,15 +37,15 @@ class SecurityController extends AbstractController
         throw new \LogicException('Intercepted by firewall.');
     }
 
-private function redirectBasedOnRole(): Response
-{
-    $roles = $this->getUser()->getRoles();
+    private function redirectBasedOnRole(): Response
+    {
+        $roles = $this->getUser()->getRoles();
 
-    if (in_array('ROLE_ADMIN', $roles)) {
-        return $this->redirectToRoute('app_backoffice_dashboard');
+        if (in_array('ROLE_ADMIN', $roles)) {
+            return $this->redirectToRoute('app_backoffice_dashboard');
+        }
+
+        // ✅ Corrigé : app_frontoffice_index → app_frontoffice_dashboard
+        return $this->redirectToRoute('app_frontoffice_dashboard');
     }
-
-    // MANAGER ou EMPLOYE
-    return $this->redirectToRoute('app_frontoffice_index');
-}
 }
