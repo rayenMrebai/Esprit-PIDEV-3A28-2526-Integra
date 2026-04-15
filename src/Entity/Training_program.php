@@ -9,6 +9,7 @@ use App\Repository\Training_programRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[ORM\Entity(repositoryClass: Training_programRepository::class)]
 class Training_program
@@ -18,7 +19,7 @@ class Training_program
     #[ORM\Column(type: "integer")]
     private ?int $id = null;
 
-    #[ORM\Column(type: "string", length: 150)]
+    #[ORM\Column(type: "string", length: 150, nullable: true)]
     #[Assert\NotBlank(message: "Le titre est obligatoire.")]
     #[Assert\Length(
         min: 3,
@@ -26,9 +27,10 @@ class Training_program
         minMessage: "Le titre doit contenir au moins {{ limit }} caractères.",
         maxMessage: "Le titre ne peut pas dépasser {{ limit }} caractères."
     )]
-    private string $title;
+    private ?string $title = null;
 
     #[ORM\Column(type: "text", nullable: true)]
+    #[Assert\NotBlank(message: "La description est obligatoire.")]
     #[Assert\Length(
         max: 1000,
         maxMessage: "La description ne peut pas dépasser {{ limit }} caractères."
@@ -36,11 +38,12 @@ class Training_program
     private ?string $description = null;
 
     #[ORM\Column(type: "integer", nullable: true)]
+    #[Assert\NotBlank(message: "La durée est obligatoire.")]
     #[Assert\Positive(message: "La durée doit être un nombre positif.")]
-    #[Assert\Type(type: "integer", message: "La durée doit être un nombre entier.")]
     private ?int $duration = null;
 
     #[ORM\Column(type: "string", length: 50, nullable: true)]
+    #[Assert\NotBlank(message: "Le type de formation est obligatoire.")]
     #[Assert\Choice(
         choices: ["présentiel", "en ligne", "hybride"],
         message: "Le type doit être: présentiel, en ligne ou hybride."
@@ -48,13 +51,15 @@ class Training_program
     private ?string $type = null;
 
     #[ORM\Column(type: "date", nullable: true)]
-    #[Assert\LessThanOrEqual(propertyPath: "endDate", message: "La date de début doit être antérieure à la date de fin.")]
+    #[Assert\NotBlank(message: "La date de début est obligatoire.")]
     private ?\DateTimeInterface $startDate = null;
 
     #[ORM\Column(type: "date", nullable: true)]
+    #[Assert\NotBlank(message: "La date de fin est obligatoire.")]
     private ?\DateTimeInterface $endDate = null;
 
     #[ORM\Column(type: "string", length: 20, nullable: true)]
+    #[Assert\NotBlank(message: "Le statut est obligatoire.")]
     #[Assert\Choice(
         choices: ["PROGRAMMÉ", "EN COURS", "TERMINÉ", "ANNULÉ"],
         message: "Le statut doit être: PROGRAMMÉ, EN COURS, TERMINÉ ou ANNULÉ."
@@ -64,7 +69,6 @@ class Training_program
     #[ORM\OneToMany(mappedBy: "training", targetEntity: Quiz_result::class)]
     private Collection $quizResults;
 
-    // Relation OneToMany avec Skill
     #[ORM\OneToMany(mappedBy: "trainingProgram", targetEntity: Skill::class)]
     #[Assert\Count(
         min: 1,
@@ -78,10 +82,22 @@ class Training_program
         $this->skills = new ArrayCollection();
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // GETTERS & SETTERS
-    // ──────────────────────────────────────────────────────────────
+    /**
+     * Validation personnalisée pour vérifier que la date de fin est après la date de début
+     */
+    #[Assert\Callback]
+    public function validateDates(ExecutionContextInterface $context): void
+    {
+        if ($this->startDate !== null && $this->endDate !== null) {
+            if ($this->endDate <= $this->startDate) {
+                $context->buildViolation('La date de fin doit être postérieure à la date de début.')
+                    ->atPath('endDate')
+                    ->addViolation();
+            }
+        }
+    }
 
+    // Getters et Setters
     public function getId(): ?int
     {
         return $this->id;
@@ -92,7 +108,7 @@ class Training_program
         return $this->title;
     }
 
-    public function setTitle(string $title): self
+    public function setTitle(?string $title): self
     {
         $this->title = $title;
         return $this;

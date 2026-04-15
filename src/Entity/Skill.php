@@ -17,7 +17,7 @@ class Skill
     #[ORM\Column(type: "integer")]
     private ?int $id = null;
 
-    #[ORM\Column(type: "string", length: 100)]
+    #[ORM\Column(type: "string", length: 100, nullable: true)]  // Garder nullable: true
     #[Assert\NotBlank(message: "Le nom de la compétence est obligatoire.")]
     #[Assert\Length(
         min: 2,
@@ -25,9 +25,10 @@ class Skill
         minMessage: "Le nom doit contenir au moins {{ limit }} caractères.",
         maxMessage: "Le nom ne peut pas dépasser {{ limit }} caractères."
     )]
-    private string $nom;
+    private ?string $nom = null;  // Changer string à ?string
 
     #[ORM\Column(type: "text", nullable: true)]
+    #[Assert\NotBlank(message: "La description est obligatoire.")]
     #[Assert\Length(
         max: 500,
         maxMessage: "La description ne peut pas dépasser {{ limit }} caractères."
@@ -35,6 +36,7 @@ class Skill
     private ?string $description = null;
 
     #[ORM\Column(type: "integer", nullable: true)]
+    #[Assert\NotBlank(message: "Le niveau requis est obligatoire.")]
     #[Assert\Range(
         min: 1,
         max: 5,
@@ -43,6 +45,7 @@ class Skill
     private ?int $level_required = null;
 
     #[ORM\Column(type: "string", length: 50, nullable: true)]
+    #[Assert\NotBlank(message: "La catégorie est obligatoire.")]
     #[Assert\Choice(
         choices: ["technique", "soft", "management", "autre"],
         message: "La catégorie doit être: technique, soft, management ou autre."
@@ -51,9 +54,9 @@ class Skill
 
     #[ORM\ManyToOne(targetEntity: Training_program::class, inversedBy: "skills")]
     #[ORM\JoinColumn(name: "trainingprogram_id", referencedColumnName: "id", nullable: true)]
+    #[Assert\NotBlank(message: "Le programme de formation est obligatoire.")]
     private ?Training_program $trainingProgram = null;
 
-    // Relation ManyToMany avec UserAccount
     #[ORM\ManyToMany(targetEntity: UserAccount::class, mappedBy: "skills")]
     private Collection $users;
 
@@ -62,21 +65,18 @@ class Skill
         $this->users = new ArrayCollection();
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // GETTERS & SETTERS
-    // ──────────────────────────────────────────────────────────────
-
+    // Getters et Setters
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getNom(): string
+    public function getNom(): ?string  // Changer string à ?string
     {
         return $this->nom;
     }
 
-    public function setNom(string $nom): self
+    public function setNom(?string $nom): self  // Changer string à ?string
     {
         $this->nom = $nom;
         return $this;
