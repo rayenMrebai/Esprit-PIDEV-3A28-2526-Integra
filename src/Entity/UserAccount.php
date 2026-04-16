@@ -6,10 +6,12 @@ use App\Repository\UserAccountRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: UserAccountRepository::class)]
-#[ORM\Table(name: 'user_account')]
-class UserAccount
+#[ORM\Table(name: 'user_account')] 
+class UserAccount implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -50,50 +52,125 @@ class UserAccount
     private ?string $accountStatus = 'ACTIVE';
 
     #[ORM\OneToMany(
-    mappedBy: 'user', 
-    targetEntity: Salaire::class, 
-    orphanRemoval: true, 
-    cascade: ['persist', 'remove']
+        mappedBy: 'user', 
+        targetEntity: Salaire::class, 
+        orphanRemoval: true, 
+        cascade: ['persist', 'remove']
     )]
     private Collection $salaires;
 
     public function __construct()
     {
-        $this->salaires           = new ArrayCollection();
+        $this->salaires = new ArrayCollection();
         $this->accountCreatedDate = new \DateTime();
-        $this->isActive           = true;
-        $this->accountStatus      = 'ACTIVE';
+        $this->isActive = true;
+        $this->accountStatus = 'ACTIVE';
     }
 
-    // Alias getId() pour que Doctrine reconnaisse la PK
-    public function getId(): ?int { return $this->userId; }
-    public function getUserId(): ?int { return $this->userId; }
+    // Getters et Setters
+    public function getId(): ?int 
+    { 
+        return $this->userId; 
+    }
+    
+    public function getUserId(): ?int 
+    { 
+        return $this->userId; 
+    }
 
-    public function getUsername(): ?string { return $this->username; }
-    public function setUsername(string $username): static { $this->username = $username; return $this; }
+    public function getUsername(): ?string 
+    { 
+        return $this->username; 
+    }
+    
+    public function setUsername(string $username): static 
+    { 
+        $this->username = $username; 
+        return $this; 
+    }
 
-    public function getEmail(): ?string { return $this->email; }
-    public function setEmail(string $email): static { $this->email = $email; return $this; }
+    public function getEmail(): ?string 
+    { 
+        return $this->email; 
+    }
+    
+    public function setEmail(string $email): static 
+    { 
+        $this->email = $email; 
+        return $this; 
+    }
 
-    public function getPasswordHash(): ?string { return $this->passwordHash; }
-    public function setPasswordHash(string $passwordHash): static { $this->passwordHash = $passwordHash; return $this; }
+    public function getPasswordHash(): ?string 
+    { 
+        return $this->passwordHash; 
+    }
+    
+    public function setPasswordHash(string $passwordHash): static 
+    { 
+        $this->passwordHash = $passwordHash; 
+        return $this; 
+    }
 
-    public function getRole(): ?string { return $this->role; }
-    public function setRole(string $role): static { $this->role = $role; return $this; }
+    public function getRole(): ?string 
+    { 
+        return $this->role; 
+    }
+    
+    public function setRole(string $role): static 
+    { 
+        $this->role = $role; 
+        return $this; 
+    }
 
-    public function isActive(): ?bool { return $this->isActive; }
-    public function setIsActive(?bool $isActive): static { $this->isActive = $isActive; return $this; }
+    public function isActive(): ?bool 
+    { 
+        return $this->isActive; 
+    }
+    
+    public function setIsActive(?bool $isActive): static 
+    { 
+        $this->isActive = $isActive; 
+        return $this; 
+    }
 
-    public function getLastLogin(): ?\DateTime { return $this->lastLogin; }
-    public function setLastLogin(?\DateTime $lastLogin): static { $this->lastLogin = $lastLogin; return $this; }
+    public function getLastLogin(): ?\DateTime 
+    { 
+        return $this->lastLogin; 
+    }
+    
+    public function setLastLogin(?\DateTime $lastLogin): static 
+    { 
+        $this->lastLogin = $lastLogin; 
+        return $this; 
+    }
 
-    public function getAccountCreatedDate(): ?\DateTime { return $this->accountCreatedDate; }
-    public function setAccountCreatedDate(\DateTime $accountCreatedDate): static { $this->accountCreatedDate = $accountCreatedDate; return $this; }
+    public function getAccountCreatedDate(): ?\DateTime 
+    { 
+        return $this->accountCreatedDate; 
+    }
+    
+    public function setAccountCreatedDate(\DateTime $accountCreatedDate): static 
+    { 
+        $this->accountCreatedDate = $accountCreatedDate; 
+        return $this; 
+    }
 
-    public function getAccountStatus(): ?string { return $this->accountStatus; }
-    public function setAccountStatus(?string $accountStatus): static { $this->accountStatus = $accountStatus; return $this; }
+    public function getAccountStatus(): ?string 
+    { 
+        return $this->accountStatus; 
+    }
+    
+    public function setAccountStatus(?string $accountStatus): static 
+    { 
+        $this->accountStatus = $accountStatus; 
+        return $this; 
+    }
 
-    public function getSalaires(): Collection { return $this->salaires; }
+    public function getSalaires(): Collection 
+    { 
+        return $this->salaires; 
+    }
+    
     public function addSalaire(Salaire $salaire): static
     {
         if (!$this->salaires->contains($salaire)) {
@@ -102,6 +179,7 @@ class UserAccount
         }
         return $this;
     }
+    
     public function removeSalaire(Salaire $salaire): static
     {
         if ($this->salaires->removeElement($salaire)) {
@@ -110,5 +188,32 @@ class UserAccount
             }
         }
         return $this;
+    }
+
+    // Méthodes requises par UserInterface
+    public function getUserIdentifier(): string { return $this->username; }
+
+    public function getRoles(): array
+    {
+        return match ($this->role) {
+            'ADMINISTRATEUR' => ['ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_EMPLOYE', 'ROLE_USER'],
+            'MANAGER'        => ['ROLE_MANAGER', 'ROLE_EMPLOYE', 'ROLE_USER'],
+            default          => ['ROLE_EMPLOYE', 'ROLE_USER'],
+        };
+    }
+
+    public function getPassword(): string
+    {
+        return $this->passwordHash;
+    }
+
+    public function getSalt(): ?string 
+    { 
+        return null; 
+    }
+
+    public function eraseCredentials(): void
+    {
+        // Nettoyez ici les données sensibles temporaires
     }
 }

@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container">
+        <h1>Register</h1>
+
+        {% for flash_error in app.flashes('error') %}
+            <div class="alert alert-danger">{{ flash_error }}</div>
+        {% endfor %}
+
+        {% for flash_success in app.flashes('success') %}
+            <div class="alert alert-success">{{ flash_success }}</div>
+        {% endfor %}
+
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            {{ form_row(form.email) }}
+            {{ form_row(form.username) }}
+            {{ form_row(form.plainPassword.first) }}
+            {{ form_row(form.plainPassword.second) }}
+            
+            <button type="submit" class="btn btn-primary">Register</button>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

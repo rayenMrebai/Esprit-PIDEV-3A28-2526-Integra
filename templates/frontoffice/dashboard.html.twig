@@ -1,104 +1,107 @@
-{# templates/frontoffice/dashboard.html.twig #}
-{% extends 'frontoffice/base.html.twig' %}
+{% extends 'frontoffice/base_frontoffice.html.twig' %}
 
-{% block title %}Dashboard - Mon Espace{% endblock %}
+{% block title %}Accueil – ESPRI TECH{% endblock %}
 
-{% set fake_name = app.session.get('fake_user_name') ?? 'Utilisateur' %}
-{% set fake_role = app.session.get('fake_user_role') ?? '' %}
+{% block page_heading %}Mon Espace{% endblock %}
+{% block page_subheading %}Bienvenue, {{ app.user.username ?? 'Utilisateur' }} – Gérez vos formations et compétences{% endblock %}
 
-{% block body %}
-    <h1 class="mt-4">
-        <i class="bi bi-speedometer2 me-2"></i>Dashboard
-    </h1>
-    <p class="text-muted">
-        Bienvenue <strong>{{ fake_name }}</strong>
-        <span class="badge bg-{{
-            fake_role == 'ADMINISTRATEUR' ? 'danger' :
-            fake_role == 'MANAGER' ? 'warning' : 'success'
-        }}">{{ fake_role }}</span>
-    </p>
+{% block content %}
 
-    <div class="row mt-4">
+    <!-- Résumé chiffres -->
+    <div class="post-preview">
+        <h2 class="post-title" style="color: #0B63CE;">
+            <i class="fas fa-chart-bar me-2"></i>Vue d'ensemble
+        </h2>
+        <p class="post-subtitle">Retrouvez ici l'ensemble de vos activités de formation.</p>
+    </div>
+    <hr class="my-4" />
 
-        {# Carte Formations #}
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-start border-4 border-primary shadow h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="text-muted text-uppercase small mb-1">Formations</div>
-                            <div class="h4 mb-0 fw-bold">—</div>
-                        </div>
-                        <div class="text-primary fs-2"><i class="bi bi-mortarboard"></i></div>
-                    </div>
+    <!-- Cartes stats -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-6">
+            <div class="post-preview text-center" style="border: 1px solid #e9ecef; border-radius: 12px; padding: 1.5rem;">
+                <div style="font-size: 2rem; font-weight: 700; color: #0B63CE;">
+                    {{ trainings_count|default(0) }}
                 </div>
-                <div class="card-footer bg-transparent border-0">
-                    <a href="{{ path('app_formations') }}" class="text-primary text-decoration-none small">
-                        Voir <i class="bi bi-arrow-right"></i>
-                    </a>
-                </div>
+                <p class="post-subtitle mb-1">Formations</p>
+                <a href="{{ path('app_frontoffice_trainings') }}" style="font-size: 0.82rem; color: #0B63CE;">
+                    Voir tout →
+                </a>
             </div>
         </div>
 
-        {# Carte Salaires #}
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-start border-4 border-success shadow h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="text-muted text-uppercase small mb-1">Bulletins</div>
-                            <div class="h4 mb-0 fw-bold">—</div>
-                        </div>
-                        <div class="text-success fs-2"><i class="bi bi-cash-stack"></i></div>
-                    </div>
+        <div class="col-6">
+            <div class="post-preview text-center" style="border: 1px solid #e9ecef; border-radius: 12px; padding: 1.5rem;">
+                <div style="font-size: 2rem; font-weight: 700; color: #0FA36B;">
+                    {{ skills_count|default(0) }}
                 </div>
-                <div class="card-footer bg-transparent border-0">
-                    <a href="{{ path('app_salaires') }}" class="text-success text-decoration-none small">
-                        Voir <i class="bi bi-arrow-right"></i>
-                    </a>
-                </div>
+                <p class="post-subtitle mb-1">Compétences</p>
+                <a href="{{ path('app_frontoffice_skills') }}" style="font-size: 0.82rem; color: #0FA36B;">
+                    Voir tout →
+                </a>
             </div>
         </div>
 
-        {# Carte Projets #}
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-start border-4 border-warning shadow h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="text-muted text-uppercase small mb-1">Projets</div>
-                            <div class="h4 mb-0 fw-bold">—</div>
-                        </div>
-                        <div class="text-warning fs-2"><i class="bi bi-kanban"></i></div>
-                    </div>
+        <div class="col-6">
+            <div class="post-preview text-center" style="border: 1px solid #e9ecef; border-radius: 12px; padding: 1.5rem;">
+                <div style="font-size: 2rem; font-weight: 700; color: #e67e22;">
+                    {{ quiz_count|default(0) }}
                 </div>
-                <div class="card-footer bg-transparent border-0">
-                    <a href="{{ path('app_projets') }}" class="text-warning text-decoration-none small">
-                        Voir <i class="bi bi-arrow-right"></i>
-                    </a>
-                </div>
+                <p class="post-subtitle mb-1">Quiz effectués</p>
+                <a href="{{ path('app_frontoffice_quiz') }}" style="font-size: 0.82rem; color: #e67e22;">
+                    Voir tout →
+                </a>
             </div>
         </div>
 
-        {# Carte Recrutement #}
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-start border-4 border-info shadow h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="text-muted text-uppercase small mb-1">Candidatures</div>
-                            <div class="h4 mb-0 fw-bold">—</div>
-                        </div>
-                        <div class="text-info fs-2"><i class="bi bi-people"></i></div>
-                    </div>
+        <div class="col-6">
+            <div class="post-preview text-center" style="border: 1px solid #e9ecef; border-radius: 12px; padding: 1.5rem;">
+                <div style="font-size: 2rem; font-weight: 700; color: #8e44ad;">
+                    {{ quiz_passed|default(0) }}
                 </div>
-                <div class="card-footer bg-transparent border-0">
-                    <a href="{{ path('app_recrutements') }}" class="text-info text-decoration-none small">
-                        Voir <i class="bi bi-arrow-right"></i>
-                    </a>
-                </div>
+                <p class="post-subtitle mb-1">Quiz réussis</p>
+                <a href="{{ path('app_frontoffice_quiz') }}" style="font-size: 0.82rem; color: #8e44ad;">
+                    Voir tout →
+                </a>
             </div>
         </div>
 
     </div>
+
+    <hr class="my-4" />
+
+    <!-- Dernières formations -->
+    <h3 class="mb-3" style="font-weight: 300;">📚 Dernières formations</h3>
+
+    {% for training in latestTrainings|default([]) %}
+        <div class="post-preview">
+            <a href="{{ path('app_frontoffice_training_show', {id: training.id}) }}" style="text-decoration: none;">
+                <h3 class="post-title" style="color: #0B63CE;">{{ training.title }}</h3>
+                <p class="post-subtitle">
+                    {{ training.description|length > 120 ? training.description|slice(0, 120) ~ '...' : training.description }}
+                </p>
+            </a>
+            <p class="post-meta">
+                <span class="badge-status"
+                    style="background: {% if training.status == 'EN COURS' %}#0B63CE{% elseif training.status == 'PROGRAMMÉ' %}#0FA36B{% else %}#6c757d{% endif %}; color: white;">
+                    {{ training.status }}
+                </span>
+                <span class="ms-3"><i class="far fa-clock"></i> {{ training.duration }} h</span>
+                <span class="ms-3"><i class="far fa-calendar-alt"></i> {{ training.startDate ? training.startDate|date('d/m/Y') : '—' }}</span>
+            </p>
+        </div>
+        {% if not loop.last %}<hr class="my-4" />{% endif %}
+    {% else %}
+        <p class="text-muted fst-italic">Aucune formation disponible pour le moment.</p>
+    {% endfor %}
+
+    <hr class="my-4" />
+    <div class="d-flex justify-content-end mb-4">
+        <a class="btn btn-outline-primary" href="{{ path('app_frontoffice_trainings') }}"
+            style="border-color: #0B63CE; color: #0B63CE; border-radius: 30px; padding: 10px 24px;">
+            Voir toutes les formations →
+        </a>
+    </div>
+
 {% endblock %}

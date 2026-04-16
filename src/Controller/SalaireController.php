@@ -32,10 +32,8 @@ class SalaireController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // ✅ CONTRÔLE MÉTIER: Calcul du total (logique métier)
             $salaire->setTotalAmount($salaire->getBaseAmount() + $salaire->getBonusAmount());
             
-            // ✅ CONTRÔLE MÉTIER: Initialisation du statut
             $salaire->setStatus('CREÉ');
             
             $em->persist($salaire);
@@ -45,8 +43,7 @@ class SalaireController extends AbstractController
             return $this->redirectToRoute('app_backoffice_salaires_index');
         }
 
-        // Les erreurs de validation (NotBlank, Positive, etc.) 
-        // sont automatiquement affichées par le formulaire
+        
         
         return $this->render('backoffice/salaires/salaire/new.html.twig', [
             'form' => $form->createView(),
@@ -64,7 +61,7 @@ class SalaireController extends AbstractController
     #[Route('/{id<\d+>}/edit', name: 'salaire_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Salaire $salaire, EntityManagerInterface $em): Response
     {
-        // ✅ CONTRÔLE MÉTIER: Bloquer si déjà payé (état système)
+        
         if ($salaire->getStatus() === 'PAYÉ') {
             $this->addFlash('error', 'Impossible de modifier un salaire déjà payé.');
             return $this->redirectToRoute('app_backoffice_salaires_index');
@@ -74,7 +71,6 @@ class SalaireController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // ✅ CONTRÔLE MÉTIER: Si passage à PAYÉ, date doit être aujourd'hui
             if ($salaire->getStatus() === 'PAYÉ') {
                 $today = new \DateTime('today');
                 if ($salaire->getDatePaiement()->format('Y-m-d') !== $today->format('Y-m-d')) {
@@ -86,7 +82,7 @@ class SalaireController extends AbstractController
                 }
             }
 
-            // ✅ CONTRÔLE MÉTIER: Recalculer le total après modification
+            
             $salaire->setTotalAmount($salaire->getBaseAmount() + $salaire->getBonusAmount());
             $salaire->setUpdatedAt(new \DateTime());
             
@@ -105,13 +101,13 @@ class SalaireController extends AbstractController
     #[Route('/{id<\d+>}/delete', name: 'salaire_delete', methods: ['POST'])]
     public function delete(Request $request, Salaire $salaire, EntityManagerInterface $em): Response
     {
-        // ✅ CONTRÔLE MÉTIER: Bloquer suppression si payé
+        
         if ($salaire->getStatus() === 'PAYÉ') {
             $this->addFlash('error', 'Impossible de supprimer un salaire déjà payé.');
             return $this->redirectToRoute('app_backoffice_salaires_index');
         }
 
-        // ✅ CONTRÔLE SÉCURITÉ: Token CSRF
+        
         if (!$this->isCsrfTokenValid('delete' . $salaire->getId(), $request->request->get('_token'))) {
             $this->addFlash('error', 'Token de sécurité invalide.');
             return $this->redirectToRoute('app_backoffice_salaires_index');
