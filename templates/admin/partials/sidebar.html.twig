@@ -18,6 +18,21 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    {% if is_granted('ROLE_ADMIN') %}
+                        {# Admin voit tous les salaires #}
+                        <a href="{{ path('app_backoffice_salaires_index') }}" class="nav-link">
+                            <i class="nav-icon fas fa-money-bill-wave"></i>
+                            <p>Salaires</p>
+                        </a>
+                    {% else %}
+                        {# Manager voit seulement ses salaires #}
+                        <a href="{{ path('app_backoffice_salaires_mes_salaires') }}" class="nav-link">
+                            <i class="nav-icon fas fa-money-bill-wave"></i>
+                            <p>Mes Salaires</p>
+                        </a>
+                    {% endif %}
+                </li>
+                <li class="nav-item">
                     <a href="{{ path('app_profile') }}" class="nav-link">
                         <i class="nav-icon fas fa-user"></i>
                         <p>My Profile</p>

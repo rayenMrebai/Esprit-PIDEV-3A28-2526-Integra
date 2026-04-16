@@ -12,8 +12,9 @@ class SecurityController extends AbstractController
     #[Route(path: '/login', name: 'app_login')]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
+        // Si déjà connecté, rediriger selon le rôle
         if ($this->getUser()) {
-            return $this->redirectToRoute('app_dashboard');
+            return $this->redirectToDashboard();
         }
 
         $error = $authenticationUtils->getLastAuthenticationError();
@@ -23,6 +24,17 @@ class SecurityController extends AbstractController
             'last_username' => $lastUsername,
             'error' => $error,
         ]);
+    }
+
+    private function redirectToDashboard(): Response
+    {
+        // Si Admin ou Manager → Dashboard AdminLTE
+        if ($this->isGranted('ROLE_MANAGER')) {
+            return $this->redirectToRoute('app_dashboard');
+        }
+        
+        // Si Employé simple → Dashboard Clean Blog
+        return $this->redirectToRoute('app_employee_dashboard');
     }
 
     #[Route(path: '/logout', name: 'app_logout')]

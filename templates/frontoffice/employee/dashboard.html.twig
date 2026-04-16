@@ -1,0 +1,58 @@
+{% extends 'frontoffice/base_employee.html.twig' %}
+
+{% block title %}Mon Espace Employé{% endblock %}
+{% block page_heading %}Mon Dashboard{% endblock %}
+{% block page_subheading %}Espace personnel de {{ app.user.username }}{% endblock %}
+
+{% block body %}
+
+<!-- Carte de bienvenue -->
+<div class="post-preview mb-5 text-center">
+    <h2 class="post-title">Bienvenue dans votre espace employé</h2>
+    <p class="post-meta">
+        <i class="fas fa-user-circle fa-2x text-primary mb-3 d-block"></i>
+        Connecté en tant que <strong>{{ app.user.username }}</strong><br>
+        Email : {{ app.user.email }}
+    </p>
+</div>
+
+<!-- Les boutons d'action -->
+<div class="row mb-5">
+    <div class="col-md-6 mb-4">
+        <div class="card h-100 border-0 shadow-sm text-center p-4">
+            <div class="card-body">
+                <i class="fas fa-user-edit fa-3x text-primary mb-3"></i>
+                <h4 class="card-title">Mon Profil</h4>
+                <p class="card-text text-muted">Consulter mes informations personnelles</p>
+                {# Lien vers le profil employé #}
+                <a href="{{ path('app_employee_profile') }}" class="btn btn-outline-primary rounded-pill">
+                    <i class="fas fa-arrow-right me-2"></i>Accéder
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card h-100 border-0 shadow-sm text-center p-4">
+            <div class="card-body">
+                <i class="fas fa-money-bill-wave fa-3x text-success mb-3"></i>
+                <h4 class="card-title">Mes Salaires</h4>
+                <p class="card-text text-muted">Consulter mes fiches de paie et historique</p>
+                {# Lien activé vers la page des salaires #}
+                <a href="{{ path('app_employee_salaires') }}" class="btn btn-success rounded-pill">
+                    <i class="fas fa-eye me-2"></i>Voir mes salaires
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Informations rapides -->
+<div class="alert alert-light border">
+    <h5><i class="fas fa-info-circle me-2"></i>Informations</h5>
+    <p class="mb-0">
+        Cet espace est réservé aux employés. Consultez vos salaires et gérez vos informations personnelles ici.
+    </p>
+</div>
+
+{% endblock %}

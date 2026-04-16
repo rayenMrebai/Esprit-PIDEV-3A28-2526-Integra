@@ -50,13 +50,13 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
         $user = $token->getUser();
         $roles = $user->getRoles();
 
-        // Redirect to admin dashboard if user has ROLE_ADMIN or ROLE_MANAGER
+        // Admin/Manager → Dashboard Admin
         if (in_array('ROLE_ADMIN', $roles) || in_array('ROLE_MANAGER', $roles)) {
             return new RedirectResponse($this->urlGenerator->generate('app_dashboard'));
         }
 
-        // Default redirect for regular employees
-        return new RedirectResponse($this->urlGenerator->generate('app_profile'));
+        // ✅ CORRIGÉ : Employé → Dashboard Clean Blog
+        return new RedirectResponse($this->urlGenerator->generate('app_employee_dashboard'));
     }
 
     protected function getLoginUrl(Request $request): string

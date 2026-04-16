@@ -1,0 +1,90 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Ajouter un Salaire{% endblock %}
+{% block page_title %}Ajouter un Salaire{% endblock %}
+{% block breadcrumb %}Salaires / Ajouter{% endblock %}
+
+{% block admin_content %}
+
+{# Messages flash #}
+{% for msg in app.flashes('success') %}
+  <div class="alert alert-success alert-dismissible fade show rounded-3 border-0 shadow-sm" role="alert">
+    <i class="bi bi-check-circle-fill me-2"></i>{{ msg }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+{% endfor %}
+{% for msg in app.flashes('error') %}
+  <div class="alert alert-danger alert-dismissible fade show rounded-3 border-0 shadow-sm" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ msg }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+{% endfor %}
+
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+      <div class="card-header bg-gradient bg-success text-white py-3">
+        <h5 class="mb-0 fw-semibold"><i class="bi bi-plus-circle-fill me-2"></i>Nouveau Salaire</h5>
+      </div>
+      <div class="card-body p-4 p-lg-5 bg-light">
+        
+        {# Formulaire avec validation côté serveur uniquement (novalidate) #}
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class': 'needs-validation'}}) }}
+        
+        <div class="row g-4">
+          {# Champ Employé #}
+          <div class="col-12">
+            <div class="form-group">
+              {{ form_label(form.user, "Employé", {'label_attr': {'class': 'form-label fw-bold mb-2 text-secondary'}}) }}
+              {{ form_widget(form.user, {'attr': {'class': 'form-select form-select-lg rounded-3 border-2', 'style': 'background-color: #fff'}}) }}
+              <div class="mt-1">
+                {{ form_errors(form.user, {'attr': {'class': 'text-danger small fw-semibold'}}) }}
+              </div>
+            </div>
+          </div>
+          
+          {# Champ Salaire de Base #}
+          <div class="col-12">
+            <div class="form-group">
+              {{ form_label(form.baseAmount, "Salaire de Base (DT)", {'label_attr': {'class': 'form-label fw-bold mb-2 text-secondary'}}) }}
+              {{ form_widget(form.baseAmount, {'attr': {'class': 'form-control form-control-lg rounded-3 border-2', 'placeholder': 'Ex: 3000.00', 'style': 'background-color: #fff'}}) }}
+              <div class="mt-1">
+                {{ form_errors(form.baseAmount, {'attr': {'class': 'text-danger small fw-semibold'}}) }}
+              </div>
+            </div>
+          </div>
+          
+          {# Champ Date de Paiement #}
+          <div class="col-12">
+            <div class="form-group">
+              {{ form_label(form.datePaiement, "Date de Paiement", {'label_attr': {'class': 'form-label fw-bold mb-2 text-secondary'}}) }}
+              {{ form_widget(form.datePaiement, {'attr': {'class': 'form-control form-control-lg rounded-3 border-2', 'style': 'background-color: #fff'}}) }}
+              <div class="mt-1">
+                {{ form_errors(form.datePaiement, {'attr': {'class': 'text-danger small fw-semibold'}}) }}
+              </div>
+            </div>
+          </div>
+          
+          {# Bouton Submit #}
+          <div class="col-12 mt-4">
+            {{ form_widget(form.save, {'attr': {'class': 'btn btn-success btn-lg w-100 rounded-3 fw-semibold py-2 shadow-sm', 'style': 'transition: all 0.3s ease'}}) }}
+          </div>
+        </div>
+        
+        {# Rendu des champs cachés (CSRF token, etc.) #}
+        {{ form_rest(form) }}
+        
+        {{ form_end(form) }}
+        
+        <div class="mt-4 text-center">
+            <a href="{{ path('app_backoffice_salaires_index') }}" class="btn btn-outline-secondary rounded-3 px-4">
+                <i class="bi bi-arrow-left-circle me-1"></i> Retour à la liste
+            </a>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
