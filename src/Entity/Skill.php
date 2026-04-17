@@ -17,7 +17,7 @@ class Skill
     #[ORM\Column(type: "integer")]
     private ?int $id = null;
 
-    #[ORM\Column(type: "string", length: 100, nullable: true)]  // Garder nullable: true
+    #[ORM\Column(type: "string", length: 100, nullable: true)]
     #[Assert\NotBlank(message: "Le nom de la compétence est obligatoire.")]
     #[Assert\Length(
         min: 2,
@@ -25,7 +25,7 @@ class Skill
         minMessage: "Le nom doit contenir au moins {{ limit }} caractères.",
         maxMessage: "Le nom ne peut pas dépasser {{ limit }} caractères."
     )]
-    private ?string $nom = null;  // Changer string à ?string
+    private ?string $nom = null;
 
     #[ORM\Column(type: "text", nullable: true)]
     #[Assert\NotBlank(message: "La description est obligatoire.")]
@@ -57,6 +57,8 @@ class Skill
     #[Assert\NotBlank(message: "Le programme de formation est obligatoire.")]
     private ?Training_program $trainingProgram = null;
 
+    // Relation ManyToMany avec UserAccount (côté propriétaire ou inverse)
+    // Puisque UserAccount a déjà inversedBy="skills", ici c'est mappedBy
     #[ORM\ManyToMany(targetEntity: UserAccount::class, mappedBy: "skills")]
     private Collection $users;
 
@@ -71,12 +73,12 @@ class Skill
         return $this->id;
     }
 
-    public function getNom(): ?string  // Changer string à ?string
+    public function getNom(): ?string
     {
         return $this->nom;
     }
 
-    public function setNom(?string $nom): self  // Changer string à ?string
+    public function setNom(?string $nom): self
     {
         $this->nom = $nom;
         return $this;
@@ -131,17 +133,21 @@ class Skill
         return $this->users;
     }
 
-    public function addUser(UserAccount $user): self
-    {
-        if (!$this->users->contains($user)) {
-            $this->users->add($user);
-        }
-        return $this;
+   // Skill.php
+public function addUser(UserAccount $user): self
+{
+    if (!$this->users->contains($user)) {
+        $this->users->add($user);
+        $user->addSkill($this);  // Synchronisation
     }
+    return $this;
+}
 
-    public function removeUser(UserAccount $user): self
-    {
-        $this->users->removeElement($user);
-        return $this;
+public function removeUser(UserAccount $user): self
+{
+    if ($this->users->removeElement($user)) {
+        $user->removeSkill($this);  // Synchronisation
     }
+    return $this;
+}
 }

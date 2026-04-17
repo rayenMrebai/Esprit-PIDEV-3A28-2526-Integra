@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\Skill;
+use App\Entity\UserAccount;
 use App\Entity\Training_program;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -28,11 +29,7 @@ class SkillType extends AbstractType
                 'attr' => ['class' => 'form-control'],
                 'constraints' => [
                     new NotBlank(message: 'Le nom est obligatoire.'),
-                    new Length(
-                        min: 2, max: 100,
-                        minMessage: 'Minimum {{ limit }} caractères.',
-                        maxMessage: 'Maximum {{ limit }} caractères.'
-                    ),
+                    new Length(min: 2, max: 100),
                 ],
             ])
             ->add('description', TextareaType::class, [
@@ -41,7 +38,7 @@ class SkillType extends AbstractType
                 'attr' => ['class' => 'form-control', 'rows' => 4],
                 'constraints' => [
                     new NotBlank(message: 'La description est obligatoire.'),
-                    new Length(max: 500, maxMessage: 'Maximum {{ limit }} caractères.'),
+                    new Length(max: 500),
                 ],
             ])
             ->add('level_required', IntegerType::class, [
@@ -50,10 +47,7 @@ class SkillType extends AbstractType
                 'attr' => ['class' => 'form-control'],
                 'constraints' => [
                     new NotBlank(message: 'Le niveau requis est obligatoire.'),
-                    new Range(
-                        min: 1, max: 5,
-                        notInRangeMessage: 'Le niveau doit être entre {{ min }} et {{ max }}.'
-                    ),
+                    new Range(min: 1, max: 5),
                 ],
             ])
             ->add('categorie', ChoiceType::class, [
@@ -81,6 +75,21 @@ class SkillType extends AbstractType
                 'constraints' => [
                     new NotBlank(message: 'Le programme de formation est obligatoire.'),
                 ],
+            ])
+            ->add('users', EntityType::class, [
+                'class' => UserAccount::class,
+                'choice_label' => 'email',
+                'label' => 'Utilisateurs associés',
+                'multiple' => true,
+                'expanded' => false,
+                'required' => false,
+                'by_reference' => false,  // 👈 CRUCIAL !
+                'attr' => [
+                    'class' => 'form-select select2-multi',
+                    'style' => 'width: 100%;'
+                ],
+                'help' => 'Sélectionnez les utilisateurs qui auront cette compétence.',
+                'help_attr' => ['class' => 'text-muted small']
             ]);
 
         // Transformers pour convertir les chaînes vides en null
@@ -94,15 +103,8 @@ class SkillType extends AbstractType
     private function addNullTransformer(FormBuilderInterface $builder, string $field): void
     {
         $builder->get($field)->addModelTransformer(new CallbackTransformer(
-            function ($value) {
-                return $value;
-            },
-            function ($value) {
-                if ($value === null || $value === '') {
-                    return null;
-                }
-                return $value;
-            }
+            function ($value) { return $value; },
+            function ($value) { return ($value === null || $value === '') ? null : $value; }
         ));
     }
 

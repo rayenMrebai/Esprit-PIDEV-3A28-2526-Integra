@@ -79,7 +79,33 @@
         {% endif %}
     </div>
 
-    {{ form_rest(form) }}
+    {# Champ users #}
+    <div class="mb-3">
+        {{ form_label(form.users, 'Utilisateurs associés', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+        {{ form_widget(form.users, {'attr': {
+            'class': form.users.vars.errors|length > 0 ? 'form-select is-invalid select2-multi' : 'form-select select2-multi'
+        }}) }}
+        {% if form.users.vars.errors|length > 0 %}
+            <div class="invalid-feedback d-block">
+                {% for error in form.users.vars.errors %}
+                    <span>{{ error.message }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <div class="alert alert-info mt-2 small">
+            <i class="bi bi-info-circle"></i> 
+            <strong>Note :</strong> Vous pouvez sélectionner plusieurs utilisateurs.
+            {% if form.users.vars.value is not empty %}
+                <span class="badge bg-success ms-2">{{ form.users.vars.value|length }} utilisateur(s) sélectionné(s)</span>
+            {% endif %}
+        </div>
+    </div>
+
+    {# Rendre les champs cachés restants (CSRF token, etc.) #}
+    {{ form_widget(form._token) }}
+    {% if form._token is defined %}
+        {# Le token CSRF est déjà rendu #}
+    {% endif %}
 
     <div class="mt-3">
         <button type="submit" class="btn btn-success">
