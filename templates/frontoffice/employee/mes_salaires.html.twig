@@ -264,6 +264,16 @@
                     {{ salaire.totalAmount|number_format(2, ',', ' ') }} DT
                 </span>
             </div>
+
+            <!-- 🔽 BOUTON PDF AJOUTÉ ICI -->
+            <div class="salary-row" style="border-top: 2px solid #e9ecef; margin-top: 10px; padding-top: 15px; border-bottom: none; justify-content: flex-end;">
+                <a href="{{ path('salaire_download_pdf', {'id': salaire.id}) }}" 
+                   class="btn btn-outline-primary btn-sm rounded-pill"
+                   style="font-size: 13px;">
+                    <i class="fas fa-file-pdf me-2"></i>Télécharger ma fiche de paie
+                </a>
+            </div>
+
         </div>
     </div>
 {% endfor %}

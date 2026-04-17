@@ -64,6 +64,7 @@ class BackofficeSalaireController extends AbstractController
                 'show'        => $this->generateUrl('salaire_show', ['id' => $salaire->getId()]),
                 'delete'      => $this->generateUrl('salaire_delete', ['id' => $salaire->getId()]),
                 'deleteToken' => $csrf->getToken('delete' . $salaire->getId())->getValue(),
+                'pdf'         => $this->generateUrl('salaire_download_pdf', ['id' => $salaire->getId()]),
             ];
         }
 
@@ -113,6 +114,7 @@ class BackofficeSalaireController extends AbstractController
         foreach ($salaires as $salaire) {
             $salaireUrls[$salaire->getId()] = [
                 'show' => $this->generateUrl('salaire_show', ['id' => $salaire->getId()]),
+                'pdf'  => $this->generateUrl('salaire_download_pdf', ['id' => $salaire->getId()])
             ];
         }
         
