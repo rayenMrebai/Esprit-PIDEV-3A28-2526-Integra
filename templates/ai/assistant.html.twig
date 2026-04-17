@@ -314,16 +314,15 @@
             }
         }
 
-        // ===== DICTÉE VOCALE =====
+        // ===== DICTÉE VOCALE (VOSK) =====
         const recordBtn       = document.getElementById('recordBtn');
         const statusSpan      = document.getElementById('recordingStatus');
         const transcribedText = document.getElementById('transcribedText');
         const interimPreview  = document.getElementById('interimPreview');
-        const speechApiInfo   = document.getElementById('speechApiInfo');
 
-        let recognition  = null;
-        let isRecording  = false;
-        let finalText    = '';   // Accumule UNIQUEMENT les résultats finaux
+        let mediaRecorder = null;
+        let audioChunks   = [];
+        let isRecording   = false;
 
         function setStatus(type, text) {
             statusSpan.className = 'status-badge ' + type;
@@ -336,102 +335,74 @@
             recordBtn.innerHTML = '<i class="fas fa-microphone mr-2"></i> Démarrer l\'enregistrement';
             recordBtn.classList.remove('recording');
             interimPreview.style.display = 'none';
-            interimPreview.textContent   = '';
+            interimPreview.textContent = '';
             setStatus('', '');
         }
 
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        recordBtn.addEventListener('click', async () => {
+            if (!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
 
-            const SR  = window.SpeechRecognition || window.webkitSpeechRecognition;
-            recognition = new SR();
+                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
 
-            // Configuration pour la meilleure précision
-            recognition.continuous     = true;   // Ne s'arrête pas entre les phrases
-            recognition.interimResults = true;   // Affiche le texte en temps réel
-            recognition.lang           = 'fr-FR'; // Français
+                    mediaRecorder.onstop = async () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        const formData = new FormData();
+                        formData.append('audio', audioBlob, 'recording.webm');
 
-            recognition.onstart = () => {
-                isRecording = true;
-                recordBtn.innerHTML = '<i class="fas fa-stop mr-2"></i> Arrêter l\'enregistrement';
-                recordBtn.classList.add('recording');
-                interimPreview.style.display = 'block';
-                setStatus('recording', '🔴 &nbsp;Enregistrement en cours...');
-            };
+                        setStatus('processing', '⏳ Transcription en cours...');
+                        try {
+                            const resp = await fetch('/ai/transcribe-audio', {
+                                method: 'POST',
+                                body: formData
+                            });
+                            const data = await resp.json();
+                            if (data.text) {
+                                // Formatage : majuscule début + point final
+                                let formatted = data.text.trim();
+                                if (formatted) {
+                                    formatted = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+                                    if (!/[.!?]$/.test(formatted)) {
+                                        formatted += '.';
+                                    }
+                                }
+                                transcribedText.value = formatted;
+                                transcribedText.dispatchEvent(new Event('input'));
+                                setStatus('processing', '✅ Transcription terminée');
+                            } else {
+                                setStatus('recording', '❌ Aucun texte reconnu');
+                            }
+                        } catch (e) {
+                            setStatus('recording', '❌ Erreur réseau');
+                        } finally {
+                            setTimeout(() => setStatus('', ''), 3000);
+                        }
+                        resetRecordBtn();
+                    };
 
-            recognition.onresult = (event) => {
-                let interim = '';
-
-                for (let i = event.resultIndex; i < event.results.length; i++) {
-                    const transcript = event.results[i][0].transcript;
-
-                    if (event.results[i].isFinal) {
-                        // Résultat définitif → on l'ajoute au texte final
-                        finalText += (finalText ? ' ' : '') + transcript.trim();
-                        transcribedText.value = finalText;
-                        transcribedText.dispatchEvent(new Event('input'));
-                    } else {
-                        // Résultat intermédiaire → aperçu seulement
-                        interim += transcript;
-                    }
+                    mediaRecorder.start();
+                    isRecording = true;
+                    recordBtn.innerHTML = '<i class="fas fa-stop mr-2"></i> Arrêter l\'enregistrement';
+                    recordBtn.classList.add('recording');
+                    interimPreview.style.display = 'block';
+                    setStatus('recording', '🔴 Enregistrement en cours...');
+                } catch (err) {
+                    alert('Impossible d\'accéder au microphone.');
                 }
+            } else {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                // Le onstop s'occupera du reset
+            }
+        });
 
-                // Afficher l'aperçu intermédiaire sous la zone de texte
-                interimPreview.textContent = interim ? '💬 ' + interim : '';
-            };
-
-            recognition.onerror = (event) => {
-                let msg = '';
-                switch (event.error) {
-                    case 'no-speech':      msg = 'Aucune parole détectée.';       break;
-                    case 'audio-capture':  msg = 'Microphone inaccessible.';       break;
-                    case 'not-allowed':    msg = 'Permission micro refusée.';      break;
-                    case 'network':        msg = 'Erreur réseau.';                 break;
-                    default:               msg = 'Erreur : ' + event.error;
-                }
-                setStatus('recording', '❌ &nbsp;' + msg);
-                resetRecordBtn();
-            };
-
-            recognition.onend = () => {
-                // Si toujours en mode enregistrement → redémarre automatiquement
-                // (évite l'arrêt automatique après silence)
-                if (isRecording) {
-                    try { recognition.start(); }
-                    catch (e) { resetRecordBtn(); }
-                }
-            };
-
-            recordBtn.addEventListener('click', () => {
-                if (!isRecording) {
-                    finalText = transcribedText.value.trim(); // Reprend le texte existant
-                    try {
-                        recognition.start();
-                    } catch (e) {
-                        alert('Impossible de démarrer la reconnaissance vocale.');
-                    }
-                } else {
-                    isRecording = false; // Empêche le redémarrage dans onend
-                    recognition.stop();
-                    resetRecordBtn();
-                    if (finalText) {
-                        setStatus('processing', '✅ &nbsp;Transcription terminée');
-                        setTimeout(() => setStatus('', ''), 3000);
-                    }
-                }
-            });
-
-        } else {
-            // Navigateur non compatible
-            recordBtn.disabled = true;
-            recordBtn.style.opacity = '0.5';
-            speechApiInfo.style.display = 'block';
-        }
-
-        // ===== ACTIONS DICTÉE =====
+        // Actions (Effacer, Copier, Utiliser) inchangées
         document.getElementById('clearTranscriptionBtn').addEventListener('click', () => {
             if (transcribedText.value && !confirm('Effacer le texte transcrit ?')) return;
             transcribedText.value = '';
-            finalText = '';
             transcribedText.dispatchEvent(new Event('input'));
         });
 
@@ -443,8 +414,8 @@
 
         document.getElementById('useTranscriptionBtn').addEventListener('click', async function () {
             const text = transcribedText.value.trim();
-            if (!text) { alert('Le texte est vide. Parlez d\'abord.'); return; }
-            if (!confirm('Remplacer la description du projet par le texte transcrit ?\n\n"' + text.substring(0, 100) + (text.length > 100 ? '...' : '') + '"')) return;
+            if (!text) { alert('Le texte est vide.'); return; }
+            if (!confirm('Remplacer la description du projet par le texte transcrit ?')) return;
             await replaceDescription(this, text);
         });
     </script>

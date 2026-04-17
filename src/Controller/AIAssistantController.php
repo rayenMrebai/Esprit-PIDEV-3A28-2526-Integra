@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use App\Service\VoskService;
 
 #[Route('/ai')]
 class AIAssistantController extends AbstractController
@@ -196,5 +197,37 @@ PROMPT;
         }
 
         return $this->redirectToRoute('app_project_index');
+    }
+
+    #[Route('/transcribe-audio', name: 'ai_transcribe', methods: ['POST'])]
+    public function transcribeAudio(Request $request, VoskService $vosk): JsonResponse
+    {
+        $file = $request->files->get('audio');
+        if (!$file) {
+            return $this->json(['text' => '', 'error' => 'Aucun fichier audio'], 400);
+        }
+
+        $tmpDir = $this->getParameter('kernel.project_dir') . '/var/';
+        $tmpName = 'audio_' . uniqid() . '.' . $file->getClientOriginalExtension();
+        $tmpPath = $tmpDir . $tmpName;
+
+        try {
+            $file->move($tmpDir, $tmpName);
+        } catch (\Exception $e) {
+            return $this->json(['text' => '', 'error' => 'Erreur sauvegarde fichier'], 500);
+        }
+
+        $text = '';
+        try {
+            $text = $vosk->transcribeFile($tmpPath);
+        } catch (\Exception $e) {
+            $text = 'Erreur transcription : ' . $e->getMessage();
+        } finally {
+            if (file_exists($tmpPath)) {
+                unlink($tmpPath);
+            }
+        }
+
+        return $this->json(['text' => $text]);
     }
 }
