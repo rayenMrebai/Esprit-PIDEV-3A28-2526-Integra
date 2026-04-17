@@ -183,8 +183,9 @@
             {# Boutons Excel #}
             <a id="exportAllExcelBtn" href="{{ path('app_project_export_excel_all') }}" class="action-btn" style="background:#10b981;">📊 Exporter tout en Excel</a>
             <a id="exportSingleExcelBtn" href="#" class="action-btn" style="background:#059669;">📊 Exporter ce projet</a>
-            {# Bouton IA #}
+            {# Boutons IA #}
             <a id="aiRecommendBtn" href="#" class="action-btn" style="background:#0B63CE;">🤖 Recommandation IA</a>
+            <a id="aiAssistantBtn" href="#" class="action-btn" style="background:#8b5cf6;">🧠 Assistant IA</a>
         </div>
     </div>
 
@@ -215,12 +216,19 @@
             document.getElementById('exportSinglePdfBtn').href = `/project/${id}/export`;
             document.getElementById('exportSingleExcelBtn').href = `/project/${id}/export/excel`;
             document.getElementById('aiRecommendBtn').href = `/ai/recommend/${id}`;
+            document.getElementById('aiAssistantBtn').href = `/ai/assistant/${id}`;
         }
 
         // Vérifications pour les exports et l'IA
         document.getElementById('exportSinglePdfBtn').addEventListener('click', e => { if (!selectedRow) { e.preventDefault(); alert('Veuillez sélectionner un projet.'); }});
         document.getElementById('exportSingleExcelBtn').addEventListener('click', e => { if (!selectedRow) { e.preventDefault(); alert('Veuillez sélectionner un projet.'); }});
         document.getElementById('aiRecommendBtn').addEventListener('click', e => { if (!selectedRow) { e.preventDefault(); alert('Veuillez sélectionner un projet.'); }});
+        document.getElementById('aiAssistantBtn').addEventListener('click', e => {
+            if (!selectedRow) {
+                e.preventDefault();
+                alert('Veuillez sélectionner un projet.');
+            }
+        });
 
         // Soumission automatique des filtres
         const filterForm = document.getElementById('filterForm');
