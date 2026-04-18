@@ -1,20 +1,23 @@
+<!-- Sidebar -->
 <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
     <div class="sidebar-brand">
         <a href="{{ path('app_backoffice_dashboard') }}" class="brand-link">
-            <span class="brand-text fw-bold">Admin<span class="text-primary">Panel</span></span>
+            <span class="brand-text fw-bold">ESPRI TECH Admin</span>
         </a>
     </div>
-    
+
     <div class="sidebar-wrapper">
         <nav class="mt-2">
-            <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu">
+            <ul class="nav sidebar-menu flex-column" data-lte-toggle="false" role="menu">
+                <!-- Dashboard -->
                 <li class="nav-item">
                     <a href="{{ path('app_backoffice_dashboard') }}" class="nav-link">
                         <i class="nav-icon bi bi-speedometer2"></i>
                         <p>Dashboard</p>
                     </a>
                 </li>
-                
+
+                <!-- Gestion des utilisateurs -->
                 <li class="nav-header">GESTION</li>
                 
                 <li class="nav-item">
@@ -23,36 +26,54 @@
                         <p>Utilisateurs</p>
                     </a>
                 </li>
-                
+
                 <li class="nav-item">
                     <a href="{{ path('app_backoffice_formations') }}" class="nav-link">
-                        <i class="nav-icon bi bi-mortarboard"></i>
+                        <i class="nav-icon bi bi-book"></i>
                         <p>Formations</p>
                     </a>
                 </li>
-                
+
                 <li class="nav-item">
                     <a href="{{ path('app_backoffice_competences') }}" class="nav-link">
-                        <i class="nav-icon bi bi-code-slash"></i>
+                        <i class="nav-icon bi bi-code-square"></i>
                         <p>Compétences</p>
                     </a>
                 </li>
-                
+
                 <li class="nav-item">
                     <a href="{{ path('app_backoffice_quiz') }}" class="nav-link">
                         <i class="nav-icon bi bi-question-circle"></i>
                         <p>Quiz</p>
                     </a>
+                </li>
 
-                <li class="nav-header">COMPTE</li>
+                <li class="nav-item">
+                    <a href="{{ path('app_backoffice_planning') }}" class="nav-link">
+                        <i class="nav-icon bi bi-calendar"></i>
+                        <p>Planning</p>
+                    </a>
+                </li>
+
+                <!-- NOUVEAU LIEN POUR LES INSCRIPTIONS -->
+                <li class="nav-item">
+                    <a href="{{ path('app_backoffice_inscriptions') }}" class="nav-link">
+                        <i class="nav-icon bi bi-envelope"></i>
+                        <p>Demandes d'inscription</p>
+                    </a>
+                </li>
+
+                <!-- Mon profil -->
+                <li class="nav-header">MON COMPTE</li>
                 
                 <li class="nav-item">
                     <a href="{{ path('app_backoffice_profile') }}" class="nav-link">
-                        <i class="nav-icon bi bi-person"></i>
-                        <p>Mon Profil</p>
+                        <i class="nav-icon bi bi-person-circle"></i>
+                        <p>Mon profil</p>
                     </a>
                 </li>
-                
+
+                <!-- Déconnexion -->
                 <li class="nav-item">
                     <a href="{{ path('app_logout') }}" class="nav-link text-danger">
                         <i class="nav-icon bi bi-box-arrow-right"></i>

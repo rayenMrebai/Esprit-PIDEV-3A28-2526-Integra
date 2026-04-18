@@ -1,17 +1,20 @@
 <?php
+// src/Controller/BackofficeController.php
 
 namespace App\Controller;
+
 use App\Entity\FormationSession;
 use App\Form\FormationSessionType;
 use App\Entity\UserAccount;
 use App\Entity\Training_program;
 use App\Entity\Skill;
 use App\Entity\Quiz_result;
+use App\Entity\Inscription;
 use App\Form\SkillType; 
 use App\Form\ProfileFormType;
-use App\Form\TrainingProgramType;  // ← AJOUTEZ CETTE LIGNE (IMPORTANT)
+use App\Form\TrainingProgramType;
 use App\Form\UserEditFormType;
-
+use App\Service\AIQuizGenerator;
 use App\Repository\UserAccountRepository;
 use App\Repository\Training_programRepository;
 use App\Repository\SkillRepository;
@@ -28,22 +31,22 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 #[IsGranted('ROLE_ADMIN')]
 class BackofficeController extends AbstractController
 {
-// ========== DASHBOARD ==========
-#[Route('/', name: 'app_backoffice_dashboard')]
-public function dashboard(
-    UserAccountRepository $userRepo,
-    Training_programRepository $trainingRepo,
-    SkillRepository $skillRepo,
-    Quiz_resultRepository $quizRepo
-): Response {
-    return $this->render('backoffice/index.html.twig', [  // ← CHANGEMENT ICI
-        'total_users'      => $userRepo->count([]),
-        'total_formations' => $trainingRepo->count([]),
-        'total_competences'=> $skillRepo->count([]),
-        'total_quiz'       => $quizRepo->count([]),
-        'recent_users'     => $userRepo->findBy([], ['userId' => 'DESC'], 5),
-    ]);
-}
+    // ========== DASHBOARD ==========
+    #[Route('/', name: 'app_backoffice_dashboard')]
+    public function dashboard(
+        UserAccountRepository $userRepo,
+        Training_programRepository $trainingRepo,
+        SkillRepository $skillRepo,
+        Quiz_resultRepository $quizRepo
+    ): Response {
+        return $this->render('backoffice/index.html.twig', [
+            'total_users'      => $userRepo->count([]),
+            'total_formations' => $trainingRepo->count([]),
+            'total_competences'=> $skillRepo->count([]),
+            'total_quiz'       => $quizRepo->count([]),
+            'recent_users'     => $userRepo->findBy([], ['userId' => 'DESC'], 5),
+        ]);
+    }
 
     // ========== GESTION DES UTILISATEURS ==========
     #[Route('/users', name: 'app_backoffice_users')]
@@ -69,7 +72,7 @@ public function dashboard(
         ]);
     }
 
-    #[Route('/users/new', name: 'app_backoffice_users_new')]  // ✅ new AVANT {id}
+    #[Route('/users/new', name: 'app_backoffice_users_new')]
     #[IsGranted('ROLE_ADMIN')]
     public function userNew(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher): Response
     {
@@ -97,42 +100,39 @@ public function dashboard(
         return $this->render('backoffice/admin/user_show.html.twig', ['user' => $user]);
     }
 
-#[Route('/user/{id}/edit', name: 'app_backoffice_users_edit')]
-#[IsGranted('ROLE_ADMIN')]
-public function userEdit(UserAccount $user, Request $request, EntityManagerInterface $em, SkillRepository $skillRepo): Response
-{
-    // Créer le formulaire
-    $form = $this->createForm(UserEditFormType::class, $user);
-    $form->handleRequest($request);
+    #[Route('/user/{id}/edit', name: 'app_backoffice_users_edit')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function userEdit(UserAccount $user, Request $request, EntityManagerInterface $em, SkillRepository $skillRepo): Response
+    {
+        $form = $this->createForm(UserEditFormType::class, $user);
+        $form->handleRequest($request);
 
-    if ($form->isSubmitted() && $form->isValid()) {
-        // Gérer les compétences
-        $skillIds = $request->request->all('skills') ?? [];
-        $skills = $skillRepo->findBy(['id' => $skillIds]);
-        
-        // Supprimer les anciennes compétences
-        foreach ($user->getSkills() as $oldSkill) {
-            $user->removeSkill($oldSkill);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $skillIds = $request->request->all('skills') ?? [];
+            $skills = $skillRepo->findBy(['id' => $skillIds]);
+            
+            foreach ($user->getSkills() as $oldSkill) {
+                $user->removeSkill($oldSkill);
+            }
+            
+            foreach ($skills as $skill) {
+                $user->addSkill($skill);
+            }
+            
+            $em->flush();
+            $this->addFlash('success', 'Utilisateur modifié avec succès.');
+            return $this->redirectToRoute('app_backoffice_users');
         }
         
-        // Ajouter les nouvelles compétences
-        foreach ($skills as $skill) {
-            $user->addSkill($skill);
-        }
+        $allSkills = $skillRepo->findAll();
         
-        $em->flush();
-        $this->addFlash('success', 'Utilisateur modifié avec succès.');
-        return $this->redirectToRoute('app_backoffice_users');
+        return $this->render('backoffice/admin/user_edit.html.twig', [
+            'user' => $user,
+            'form' => $form->createView(),
+            'allSkills' => $allSkills,
+        ]);
     }
-    
-    $allSkills = $skillRepo->findAll();
-    
-    return $this->render('backoffice/admin/user_edit.html.twig', [
-        'user' => $user,
-        'form' => $form->createView(),  // ← AJOUTEZ CETTE LIGNE
-        'allSkills' => $allSkills,
-    ]);
-}
+
     #[Route('/user/{id}/toggle', name: 'app_backoffice_users_toggle')]
     public function userToggle(UserAccount $user, EntityManagerInterface $em): Response
     {
@@ -155,57 +155,55 @@ public function userEdit(UserAccount $user, Request $request, EntityManagerInter
     }
 
     // ========== GESTION DES FORMATIONS ==========
-#[Route('/formations', name: 'app_backoffice_formations')]
-#[Route('/formations', name: 'app_backoffice_formations')]
-public function formationsList(Training_programRepository $repo, Request $request): Response
-{
-    $search = $request->query->get('search', '');
-    $type = $request->query->get('type', '');
-    $status = $request->query->get('status', '');
-    
-    $qb = $repo->createQueryBuilder('t');
-    
-    if ($search) {
-        $qb->andWhere('t.title LIKE :search OR t.description LIKE :search')
-           ->setParameter('search', '%' . $search . '%');
-    }
-    if ($type) {
-        $qb->andWhere('t.type = :type')->setParameter('type', $type);
-    }
-    if ($status) {
-        $qb->andWhere('t.status = :status')->setParameter('status', $status);
-    }
-    
-    $formations = $qb->getQuery()->getResult();
-    
-    return $this->render('backoffice/training_program/index.html.twig', [
-        'training_programs' => $formations,
-        'search' => $search,                    
-        'selectedType' => $type,                
-        'selectedStatus' => $status,            
-    ]);
-}
-#[Route('/formations/new', name: 'app_backoffice_formations_new')]
-public function formationNew(Request $request, EntityManagerInterface $em): Response
-{
-    $formation = new Training_program();
-    
-    // Créez le formulaire avec TrainingProgramType
-    $form = $this->createForm(TrainingProgramType::class, $formation);
-    $form->handleRequest($request);
-
-    if ($form->isSubmitted() && $form->isValid()) {
-        $em->persist($formation);
-        $em->flush();
-        $this->addFlash('success', 'Formation créée avec succès.');
-        return $this->redirectToRoute('app_backoffice_formations');
+    #[Route('/formations', name: 'app_backoffice_formations')]
+    public function formationsList(Training_programRepository $repo, Request $request): Response
+    {
+        $search = $request->query->get('search', '');
+        $type = $request->query->get('type', '');
+        $status = $request->query->get('status', '');
+        
+        $qb = $repo->createQueryBuilder('t');
+        
+        if ($search) {
+            $qb->andWhere('t.title LIKE :search OR t.description LIKE :search')
+               ->setParameter('search', '%' . $search . '%');
+        }
+        if ($type) {
+            $qb->andWhere('t.type = :type')->setParameter('type', $type);
+        }
+        if ($status) {
+            $qb->andWhere('t.status = :status')->setParameter('status', $status);
+        }
+        
+        $formations = $qb->getQuery()->getResult();
+        
+        return $this->render('backoffice/training_program/index.html.twig', [
+            'training_programs' => $formations,
+            'search' => $search,                    
+            'selectedType' => $type,                
+            'selectedStatus' => $status,            
+        ]);
     }
 
-    return $this->render('backoffice/training_program/new.html.twig', [
-        'form' => $form->createView(),  // ← AJOUTEZ CETTE LIGNE
-        'training_program' => $formation,
-    ]);
-}
+    #[Route('/formations/new', name: 'app_backoffice_formations_new')]
+    public function formationNew(Request $request, EntityManagerInterface $em): Response
+    {
+        $formation = new Training_program();
+        $form = $this->createForm(TrainingProgramType::class, $formation);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->persist($formation);
+            $em->flush();
+            $this->addFlash('success', 'Formation créée avec succès.');
+            return $this->redirectToRoute('app_backoffice_formations');
+        }
+
+        return $this->render('backoffice/training_program/new.html.twig', [
+            'form' => $form->createView(),
+            'training_program' => $formation,
+        ]);
+    }
 
     #[Route('/formation/{id}', name: 'app_backoffice_formations_show')]
     public function formationShow(Training_program $formation): Response
@@ -215,98 +213,97 @@ public function formationNew(Request $request, EntityManagerInterface $em): Resp
         ]);
     }
 
-#[Route('/formation/{id}/edit', name: 'app_backoffice_formations_edit')]
-public function formationEdit(Training_program $formation, Request $request, EntityManagerInterface $em): Response
-{
-    $form = $this->createForm(TrainingProgramType::class, $formation);
-    $form->handleRequest($request);
+    #[Route('/formation/{id}/edit', name: 'app_backoffice_formations_edit')]
+    public function formationEdit(Training_program $formation, Request $request, EntityManagerInterface $em): Response
+    {
+        $form = $this->createForm(TrainingProgramType::class, $formation);
+        $form->handleRequest($request);
 
-    if ($form->isSubmitted() && $form->isValid()) {
-        $em->flush();
-        $this->addFlash('success', 'Formation modifiée avec succès.');
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->flush();
+            $this->addFlash('success', 'Formation modifiée avec succès.');
+            return $this->redirectToRoute('app_backoffice_formations');
+        }
+
+        return $this->render('backoffice/training_program/edit.html.twig', [
+            'training_program' => $formation,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/formation/{id}/delete', name: 'app_backoffice_formations_delete')]
+    public function formationDelete(Training_program $formation, EntityManagerInterface $em, Request $request): Response
+    {
+        if ($this->isCsrfTokenValid('delete'.$formation->getId(), $request->request->get('_token'))) {
+            $em->remove($formation);
+            $em->flush();
+            $this->addFlash('success', 'Formation supprimée avec succès.');
+        } else {
+            $this->addFlash('error', 'Token CSRF invalide.');
+        }
+        
         return $this->redirectToRoute('app_backoffice_formations');
     }
 
-    return $this->render('backoffice/training_program/edit.html.twig', [
-        'training_program' => $formation,
-        'form' => $form->createView(),  // ← AJOUTEZ CETTE LIGNE
-    ]);
-}
-
-#[Route('/formation/{id}/delete', name: 'app_backoffice_formations_delete')]
-public function formationDelete(Training_program $formation, EntityManagerInterface $em, Request $request): Response
-{
-    // Vérifier le token CSRF
-    if ($this->isCsrfTokenValid('delete'.$formation->getId(), $request->request->get('_token'))) {
-        $em->remove($formation);
-        $em->flush();
-        $this->addFlash('success', 'Formation supprimée avec succès.');
-    } else {
-        $this->addFlash('error', 'Token CSRF invalide.');
-    }
-    
-    return $this->redirectToRoute('app_backoffice_formations');
-}
-
     // ========== GESTION DES COMPÉTENCES ==========
-#[Route('/competences', name: 'app_backoffice_competences')]
-public function competencesList(SkillRepository $repo, Request $request): Response
-{
-    $search = $request->query->get('search', '');
-    $categorie = $request->query->get('categorie', '');
-    $level = $request->query->get('level', '');
-    $page = max(1, $request->query->getInt('page', 1));
-    $limit = 10;
-    
-    $qb = $repo->createQueryBuilder('s');
-    
-    if ($search) {
-        $qb->andWhere('s.nom LIKE :search OR s.description LIKE :search')
-           ->setParameter('search', '%' . $search . '%');
-    }
-    if ($categorie) {
-        $qb->andWhere('s.categorie = :categorie')->setParameter('categorie', $categorie);
-    }
-    if ($level) {
-        $qb->andWhere('s.level_required = :level')->setParameter('level', $level);
-    }
-    
-    $total = count($qb->getQuery()->getResult());
-    $totalPages = ceil($total / $limit);
-    
-    $skills = $qb->setFirstResult(($page - 1) * $limit)
-                 ->setMaxResults($limit)
-                 ->getQuery()
-                 ->getResult();
-    
-    return $this->render('backoffice/skill/index.html.twig', [
-        'skills' => $skills,
-        'search' => $search,
-        'selectedCategorie' => $categorie,
-        'selectedLevel' => $level,
-        'page' => $page,
-        'total_pages' => $totalPages,
-    ]);
-}
-
-  #[Route('/competences/new', name: 'app_backoffice_competences_new')]
-public function competenceNew(Request $request, EntityManagerInterface $em): Response
-{
-    $competence = new Skill();
-    $form = $this->createForm(SkillType::class, $competence);  // ← Créez le formulaire
-    $form->handleRequest($request);
-
-    if ($form->isSubmitted() && $form->isValid()) {
-        $em->persist($competence);
-        $em->flush();
-        $this->addFlash('success', 'Compétence créée avec succès.');
-        return $this->redirectToRoute('app_backoffice_competences');
+    #[Route('/competences', name: 'app_backoffice_competences')]
+    public function competencesList(SkillRepository $repo, Request $request): Response
+    {
+        $search = $request->query->get('search', '');
+        $categorie = $request->query->get('categorie', '');
+        $level = $request->query->get('level', '');
+        $page = max(1, $request->query->getInt('page', 1));
+        $limit = 10;
+        
+        $qb = $repo->createQueryBuilder('s');
+        
+        if ($search) {
+            $qb->andWhere('s.nom LIKE :search OR s.description LIKE :search')
+               ->setParameter('search', '%' . $search . '%');
+        }
+        if ($categorie) {
+            $qb->andWhere('s.categorie = :categorie')->setParameter('categorie', $categorie);
+        }
+        if ($level) {
+            $qb->andWhere('s.level_required = :level')->setParameter('level', $level);
+        }
+        
+        $total = count($qb->getQuery()->getResult());
+        $totalPages = ceil($total / $limit);
+        
+        $skills = $qb->setFirstResult(($page - 1) * $limit)
+                     ->setMaxResults($limit)
+                     ->getQuery()
+                     ->getResult();
+        
+        return $this->render('backoffice/skill/index.html.twig', [
+            'skills' => $skills,
+            'search' => $search,
+            'selectedCategorie' => $categorie,
+            'selectedLevel' => $level,
+            'page' => $page,
+            'total_pages' => $totalPages,
+        ]);
     }
 
-    return $this->render('backoffice/skill/new.html.twig', [
-        'form' => $form->createView(),  // ← PASSEZ LE FORMULAIRE
-    ]);
-}
+    #[Route('/competences/new', name: 'app_backoffice_competences_new')]
+    public function competenceNew(Request $request, EntityManagerInterface $em): Response
+    {
+        $competence = new Skill();
+        $form = $this->createForm(SkillType::class, $competence);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->persist($competence);
+            $em->flush();
+            $this->addFlash('success', 'Compétence créée avec succès.');
+            return $this->redirectToRoute('app_backoffice_competences');
+        }
+
+        return $this->render('backoffice/skill/new.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
 
     #[Route('/competence/{id}', name: 'app_backoffice_competences_show')]
     public function competenceShow(Skill $competence): Response
@@ -316,23 +313,23 @@ public function competenceNew(Request $request, EntityManagerInterface $em): Res
         ]);
     }
 
- #[Route('/competence/{id}/edit', name: 'app_backoffice_competences_edit')]
-public function competenceEdit(Skill $competence, Request $request, EntityManagerInterface $em): Response
-{
-    $form = $this->createForm(SkillType::class, $competence);
-    $form->handleRequest($request);
+    #[Route('/competence/{id}/edit', name: 'app_backoffice_competences_edit')]
+    public function competenceEdit(Skill $competence, Request $request, EntityManagerInterface $em): Response
+    {
+        $form = $this->createForm(SkillType::class, $competence);
+        $form->handleRequest($request);
 
-    if ($form->isSubmitted() && $form->isValid()) {
-        $em->flush();
-        $this->addFlash('success', 'Compétence modifiée avec succès.');
-        return $this->redirectToRoute('app_backoffice_competences');
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->flush();
+            $this->addFlash('success', 'Compétence modifiée avec succès.');
+            return $this->redirectToRoute('app_backoffice_competences');
+        }
+
+        return $this->render('backoffice/skill/edit.html.twig', [
+            'skill' => $competence,
+            'form' => $form->createView(),
+        ]);
     }
-
-    return $this->render('backoffice/skill/edit.html.twig', [
-        'skill' => $competence,
-        'form' => $form->createView(),
-    ]);
-}
 
     #[Route('/competence/{id}/delete', name: 'app_backoffice_competences_delete')]
     public function competenceDelete(Skill $competence, EntityManagerInterface $em): Response
@@ -352,7 +349,7 @@ public function competenceEdit(Skill $competence, Request $request, EntityManage
         ]);
     }
 
-    #[Route('/quiz/new', name: 'app_backoffice_quiz_new')]  // ✅ new AVANT {id}
+    #[Route('/quiz/new', name: 'app_backoffice_quiz_new')]
     public function quizNew(Request $request, EntityManagerInterface $em): Response
     {
         if ($request->isMethod('POST')) {
@@ -402,108 +399,213 @@ public function competenceEdit(Skill $competence, Request $request, EntityManage
         return $this->redirectToRoute('app_backoffice_quiz');
     }
 
-// ========== MON PROFIL ==========
-#[Route('/profile', name: 'app_backoffice_profile')]
-public function profile(): Response
-{
-    return $this->render('backoffice/profile/show.html.twig', [
-        'user' => $this->getUser(),
-    ]);
-}
+    // ========== MON PROFIL ==========
+    #[Route('/profile', name: 'app_backoffice_profile')]
+    public function profile(): Response
+    {
+        return $this->render('backoffice/profile/show.html.twig', [
+            'user' => $this->getUser(),
+        ]);
+    }
 
-#[Route('/profile/edit', name: 'app_backoffice_profile_edit')]
-public function profileEdit(Request $request, EntityManagerInterface $em): Response
-{
-    $user = $this->getUser();
-    $form = $this->createForm(ProfileFormType::class, $user);  // ← Utilise ProfileFormType::class
-    $form->handleRequest($request);
+    #[Route('/profile/edit', name: 'app_backoffice_profile_edit')]
+    public function profileEdit(Request $request, EntityManagerInterface $em): Response
+    {
+        $user = $this->getUser();
+        $form = $this->createForm(ProfileFormType::class, $user);
+        $form->handleRequest($request);
 
-    if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->flush();
+            $this->addFlash('success', 'Profil mis à jour avec succès.');
+            return $this->redirectToRoute('app_backoffice_profile');
+        }
+
+        return $this->render('backoffice/profile/edit.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+
+    // ========== PLANNING DES FORMATIONS ==========
+    #[Route('/planning', name: 'app_backoffice_planning')]
+    public function planning(Request $request, EntityManagerInterface $em): Response
+    {
+        $search = $request->query->get('search', '');
+        $status = $request->query->get('status', '');
+        $month = $request->query->get('month', date('Y-m'));
+        
+        $qb = $em->getRepository(FormationSession::class)->createQueryBuilder('s')
+            ->join('s.formation', 'f');
+        
+        if ($search) {
+            $qb->andWhere('f.title LIKE :search OR s.trainer LIKE :search OR s.location LIKE :search')
+               ->setParameter('search', '%' . $search . '%');
+        }
+        if ($status) {
+            $qb->andWhere('s.status = :status')->setParameter('status', $status);
+        }
+        
+        $sessions = $qb->getQuery()->getResult();
+        
+        return $this->render('backoffice/planning/index.html.twig', [
+            'sessions' => $sessions,
+            'search' => $search,
+            'selectedStatus' => $status,
+            'currentMonth' => $month,
+        ]);
+    }
+
+    #[Route('/planning/new', name: 'app_backoffice_planning_new')]
+    public function planningNew(Request $request, EntityManagerInterface $em): Response
+    {
+        $session = new FormationSession();
+        $form = $this->createForm(FormationSessionType::class, $session);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $session->setCurrentParticipants(0);
+            $session->setStatus('planifie');
+            $em->persist($session);
+            $em->flush();
+            $this->addFlash('success', 'Session de formation ajoutée avec succès.');
+            return $this->redirectToRoute('app_backoffice_planning');
+        }
+
+        return $this->render('backoffice/planning/new.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/planning/{id}/edit', name: 'app_backoffice_planning_edit')]
+    public function planningEdit(FormationSession $session, Request $request, EntityManagerInterface $em): Response
+    {
+        $form = $this->createForm(FormationSessionType::class, $session);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->flush();
+            $this->addFlash('success', 'Session modifiée avec succès.');
+            return $this->redirectToRoute('app_backoffice_planning');
+        }
+
+        return $this->render('backoffice/planning/edit.html.twig', [
+            'form' => $form->createView(),
+            'session' => $session,
+        ]);
+    }
+
+    #[Route('/planning/{id}/delete', name: 'app_backoffice_planning_delete')]
+    public function planningDelete(FormationSession $session, EntityManagerInterface $em): Response
+    {
+        $em->remove($session);
         $em->flush();
-        $this->addFlash('success', 'Profil mis à jour avec succès.');
-        return $this->redirectToRoute('app_backoffice_profile');
-    }
-
-    return $this->render('backoffice/profile/edit.html.twig', [
-        'form' => $form->createView(),
-    ]);
-}
-// ========== PLANNING DES FORMATIONS ==========
-
-#[Route('/planning', name: 'app_backoffice_planning')]
-public function planning(Request $request, EntityManagerInterface $em): Response
-{
-    $search = $request->query->get('search', '');
-    $status = $request->query->get('status', '');
-    $month = $request->query->get('month', date('Y-m'));
-    
-    $qb = $em->getRepository(FormationSession::class)->createQueryBuilder('s')
-        ->join('s.formation', 'f');
-    
-    if ($search) {
-        $qb->andWhere('f.title LIKE :search OR s.trainer LIKE :search OR s.location LIKE :search')
-           ->setParameter('search', '%' . $search . '%');
-    }
-    if ($status) {
-        $qb->andWhere('s.status = :status')->setParameter('status', $status);
-    }
-    
-    $sessions = $qb->getQuery()->getResult();
-    
-    return $this->render('backoffice/planning/index.html.twig', [
-        'sessions' => $sessions,
-        'search' => $search,
-        'selectedStatus' => $status,
-        'currentMonth' => $month,
-    ]);
-}
-
-#[Route('/planning/new', name: 'app_backoffice_planning_new')]
-public function planningNew(Request $request, EntityManagerInterface $em): Response
-{
-    $session = new FormationSession();
-    $form = $this->createForm(FormationSessionType::class, $session);
-    $form->handleRequest($request);
-
-    if ($form->isSubmitted() && $form->isValid()) {
-        $session->setCurrentParticipants(0);
-        $session->setStatus('planifie');
-        $em->persist($session);
-        $em->flush();
-        $this->addFlash('success', 'Session de formation ajoutée avec succès.');
+        $this->addFlash('success', 'Session supprimée avec succès.');
         return $this->redirectToRoute('app_backoffice_planning');
     }
 
-    return $this->render('backoffice/planning/new.html.twig', [
-        'form' => $form->createView(),
-    ]);
-}
+    // ========== GESTION DES INSCRIPTIONS ==========
 
-#[Route('/planning/{id}/edit', name: 'app_backoffice_planning_edit')]
-public function planningEdit(FormationSession $session, Request $request, EntityManagerInterface $em): Response
-{
-    $form = $this->createForm(FormationSessionType::class, $session);
-    $form->handleRequest($request);
-
-    if ($form->isSubmitted() && $form->isValid()) {
-        $em->flush();
-        $this->addFlash('success', 'Session modifiée avec succès.');
-        return $this->redirectToRoute('app_backoffice_planning');
+    #[Route('/inscriptions', name: 'app_backoffice_inscriptions')]
+    public function inscriptionsList(EntityManagerInterface $em, Request $request): Response
+    {
+        $status = $request->query->get('status', 'EN_ATTENTE');
+        
+        $inscriptions = $em->getRepository(Inscription::class)
+            ->createQueryBuilder('i')
+            ->leftJoin('i.user', 'u')
+            ->leftJoin('i.formation', 'f')
+            ->addSelect('u', 'f')
+            ->where('i.status = :status')
+            ->setParameter('status', $status)
+            ->orderBy('i.dateDemande', 'ASC')
+            ->getQuery()
+            ->getResult();
+        
+        return $this->render('backoffice/inscription/index.html.twig', [
+            'inscriptions' => $inscriptions,
+            'currentStatus' => $status,
+        ]);
     }
 
-    return $this->render('backoffice/planning/edit.html.twig', [
-        'form' => $form->createView(),
-        'session' => $session,
-    ]);
-}
+#[Route('/inscription/{id}/accepter', name: 'app_backoffice_inscription_accepter')]
+public function inscriptionAccepter(
+    Inscription $inscription,
+    Request $request,
+    EntityManagerInterface $em,
+    AIQuizGenerator $quizGenerator
+): Response {
+    if (!$this->isCsrfTokenValid('accepter'.$inscription->getId(), $request->request->get('_token'))) {
+        $this->addFlash('error', 'Token CSRF invalide.');
+        return $this->redirectToRoute('app_backoffice_inscriptions', ['status' => 'EN_ATTENTE']);
+    }
 
-#[Route('/planning/{id}/delete', name: 'app_backoffice_planning_delete')]
-public function planningDelete(FormationSession $session, EntityManagerInterface $em): Response
-{
-    $em->remove($session);
+    $user = $inscription->getUser();
+    if (!$user) {
+        $this->addFlash('error', 'Aucun utilisateur associé à cette inscription.');
+        return $this->redirectToRoute('app_backoffice_inscriptions', ['status' => 'EN_ATTENTE']);
+    }
+
+    $formation = $inscription->getFormation();
+    if (!$formation) {
+        $this->addFlash('error', 'Aucune formation associée à cette inscription.');
+        return $this->redirectToRoute('app_backoffice_inscriptions', ['status' => 'EN_ATTENTE']);
+    }
+
+    $inscription->setStatus('ACCEPTEE');
+    $inscription->setDateReponse(new \DateTime());
+
+$quizExistant = $em->getRepository(Quiz_result::class)
+    ->findOneBy(['user' => $user, 'training' => $formation]);
+
+    if (!$quizExistant) {
+        try {
+            $questions = $quizGenerator->generateQuiz(
+                $formation->getTitle(),
+                $formation->getDescription() ?? ''
+            );
+
+            $quizResult = new Quiz_result();
+$quizResult->setUser($user);
+            $quizResult->setTraining($formation);
+            $quizResult->setScore(null);
+            $quizResult->setTotalQuestions(count($questions));
+            $quizResult->setPercentage(null);
+            $quizResult->setPassed(null);
+            $quizResult->setCompletedAt(null);
+            $quizResult->setQuestions($questions);
+
+            $em->persist($quizResult);
+
+            $this->addFlash('success', sprintf(
+                'Inscription acceptée. Un quiz de %d questions a été généré.',
+                count($questions)
+            ));
+        } catch (\Exception $e) {
+            $this->addFlash('warning', 'Inscription acceptée, mais la génération du quiz a échoué : ' . $e->getMessage());
+        }
+    } else {
+        $this->addFlash('success', 'Inscription acceptée. Un quiz existait déjà pour cette formation.');
+    }
+
     $em->flush();
-    $this->addFlash('success', 'Session supprimée avec succès.');
-    return $this->redirectToRoute('app_backoffice_planning');
-}
 
+    return $this->redirectToRoute('app_backoffice_inscriptions', ['status' => 'EN_ATTENTE']);
+}
+    #[Route('/inscription/{id}/refuser', name: 'app_backoffice_inscription_refuser')]
+    public function inscriptionRefuser(Inscription $inscription, Request $request, EntityManagerInterface $em): Response
+    {
+        if ($this->isCsrfTokenValid('refuser'.$inscription->getId(), $request->request->get('_token'))) {
+            $commentaire = $request->request->get('commentaire', '');
+
+            $inscription->setStatus('REFUSEE');
+            $inscription->setDateReponse(new \DateTime());
+            $inscription->setCommentaireAdmin($commentaire);
+
+            $em->flush();
+
+            $this->addFlash('success', 'Inscription refusée.');
+        }
+
+        return $this->redirectToRoute('app_backoffice_inscriptions', ['status' => 'EN_ATTENTE']);
+    }
 }

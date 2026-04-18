@@ -69,6 +69,24 @@
                             <i class="fas fa-question-circle me-1"></i> Quiz
                         </a>
                     </li>
+                    <!-- NOUVEAUX LIENS POUR LES INSCRIPTIONS -->
+                    <li class="nav-item">
+                        <a class="nav-link px-lg-3 py-3 py-lg-4" href="{{ path('app_frontoffice_inscription_formations') }}">
+                            <i class="fas fa-pen-alt me-1"></i> S'inscrire
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-lg-3 py-3 py-lg-4" href="{{ path('app_frontoffice_mes_inscriptions') }}">
+                            <i class="fas fa-list-check me-1"></i> Mes inscriptions
+                        </a>
+                    </li>
+                    <!-- BOUTON DE DÉCONNEXION -->
+                    <li class="nav-item">
+                        <a class="nav-link px-lg-3 py-3 py-lg-4 text-danger" href="{{ path('app_logout') }}" 
+                           onclick="return confirm('Êtes-vous sûr de vouloir vous déconnecter ?')">
+                            <i class="fas fa-sign-out-alt me-1"></i> Déconnexion
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>

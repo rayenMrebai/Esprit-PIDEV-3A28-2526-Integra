@@ -1,0 +1,73 @@
+{% extends 'frontoffice/base_frontoffice.html.twig' %}
+
+{% block title %}Mes demandes d'inscription{% endblock %}
+{% block page_heading %}Mes demandes d'inscription{% endblock %}
+{% block page_subheading %}Suivez l'état de vos demandes de formation{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-end mb-4">
+    <a href="{{ path('app_frontoffice_inscription_formations') }}" class="btn btn-primary" style="border-radius: 30px;">
+        <i class="fas fa-plus-circle me-1"></i> Nouvelle inscription
+    </a>
+</div>
+
+{% if inscriptions|length > 0 %}
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>Formation</th>
+                    <th>Date de la demande</th>
+                    <th>Motivation</th>
+                    <th>Statut</th>
+                    <th>Réponse</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for inscription in inscriptions %}
+                    <tr>
+                        <td>
+                            <strong>{{ inscription.formation.title }}</strong><br>
+                            <small class="text-muted">
+                                {{ inscription.formation.startDate|date('d/m/Y') }} – {{ inscription.formation.endDate|date('d/m/Y') }}
+                            </small>
+                        </td>
+                        <td>{{ inscription.dateDemande|date('d/m/Y H:i') }}</td>
+                        <td>{{ inscription.motivation|slice(0, 80) }}...</td>
+                        <td>
+                            {% if inscription.status == 'EN_ATTENTE' %}
+                                <span class="badge bg-warning text-dark">En attente</span>
+                            {% elseif inscription.status == 'ACCEPTEE' %}
+                                <span class="badge bg-success">Acceptée</span>
+                            {% else %}
+                                <span class="badge bg-danger">Refusée</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if inscription.dateReponse %}
+                                {{ inscription.dateReponse|date('d/m/Y H:i') }}
+                                {% if inscription.commentaireAdmin and inscription.status == 'REFUSEE' %}
+                                    <br>
+                                    <small class="text-danger">Motif : {{ inscription.commentaireAdmin }}</small>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="alert alert-info text-center">
+        <i class="fas fa-inbox me-2"></i> Vous n'avez aucune demande d'inscription.
+        <br>
+        <a href="{{ path('app_frontoffice_inscription_formations') }}" class="btn btn-primary mt-3" style="border-radius: 30px;">
+            Voir les formations disponibles
+        </a>
+    </div>
+{% endif %}
+
+{% endblock %}

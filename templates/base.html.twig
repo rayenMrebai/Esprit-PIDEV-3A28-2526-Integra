@@ -24,17 +24,17 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ path('app_backoffice_users') }}">Utilisateurs</a>
                             </li>
-                        {% else %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ path('app_frontoffice_index') }}">Accueil</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ path('app_frontoffice_trainings') }}">Formations</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ path('app_frontoffice_skills') }}">Compétences</a>
-                            </li>
-                        {% endif %}
+  {% else %}
+    <li class="nav-item">
+        <a class="nav-link" href="{{ path('app_frontoffice_dashboard') }}">Accueil</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{{ path('app_frontoffice_trainings') }}">Formations</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{{ path('app_frontoffice_skills') }}">Compétences</a>
+    </li>
+{% endif %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ path('app_logout') }}">Déconnexion</a>
                         </li>

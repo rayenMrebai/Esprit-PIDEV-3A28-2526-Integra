@@ -7,54 +7,108 @@
 
 {% block content %}
 
-    <div class="post-preview">
-        <h2 class="post-title" style="color: #0B63CE;">
-            <i class="fas fa-question-circle me-2"></i>Résultats des quiz
-        </h2>
-        <p class="post-subtitle">Retrouvez ici l'historique de tous vos quiz effectués.</p>
-    </div>
-    <hr class="my-4" />
-
-    {% for quiz in quizResults %}
+    <!-- Quiz disponibles (non complétés) -->
+    {% set availableQuizzes = quizResults|filter(q => q.completedAt is null and q.questions is not empty) %}
+    
+    {% if availableQuizzes|length > 0 %}
         <div class="post-preview">
-            <!-- Titre : formation liée -->
-            <h3 class="post-title" style="color: #0B63CE;">
-                {{ quiz.training is defined and quiz.training ? quiz.training.title : 'Formation inconnue' }}
-            </h3>
-
-            <!-- Score affiché en sous-titre -->
-            <p class="post-subtitle">
-                Score obtenu : <strong>{{ quiz.score }} / {{ quiz.totalQuestions }}</strong>
-            </p>
-
-            <!-- Barre de progression -->
-            <div class="skill-progress-wrap mb-2">
-                <div class="progress" style="height: 8px; border-radius: 10px; background: #e9ecef;">
-                    <div class="progress-bar"
-                        style="width: {{ quiz.percentage }}%; border-radius: 10px;
-                        background: {{ quiz.percentage >= 60 ? '#0FA36B' : '#dc3545' }};">
-                    </div>
-                </div>
-                <small class="text-muted">{{ quiz.percentage }}%</small>
-            </div>
-
-            <p class="post-meta">
-                <!-- Réussi / Échoué -->
-                <span class="badge-status"
-                    style="background: {{ quiz.passed ? '#0FA36B' : '#dc3545' }}; color: white;">
-                    {{ quiz.passed ? '✅ Réussi' : '❌ Échoué' }}
-                </span>
-
-                <!-- Date -->
-                <span class="ms-3">
-                    <i class="far fa-calendar-alt"></i>
-                    {{ quiz.completedAt is defined and quiz.completedAt ? quiz.completedAt|date('d/m/Y H:i') : '—' }}
-                </span>
-            </p>
+            <h2 class="post-title" style="color: #0B63CE;">
+                <i class="fas fa-hourglass-half me-2"></i>Quiz à compléter
+            </h2>
+            <p class="post-subtitle">Ces quiz sont disponibles pour les formations que vous avez suivies.</p>
         </div>
-        {% if not loop.last %}<hr class="my-4" />{% endif %}
-    {% else %}
-        <p class="text-muted fst-italic">Aucun résultat de quiz disponible pour le moment.</p>
-    {% endfor %}
+        <hr class="my-4" />
+
+        {% for quiz in availableQuizzes %}
+            <div class="post-preview">
+                <h3 class="post-title" style="color: #0B63CE;">
+                    {{ quiz.training is defined and quiz.training ? quiz.training.title : 'Formation inconnue' }}
+                </h3>
+
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Un quiz de <strong>{{ quiz.questions|length }} questions</strong> est disponible pour cette formation.
+                    <a href="{{ path('app_frontoffice_quiz_take', {id: quiz.id}) }}" class="btn btn-primary btn-sm ms-3">
+                        <i class="fas fa-play me-1"></i> Commencer le quiz
+                    </a>
+                </div>
+            </div>
+            {% if not loop.last %}<hr class="my-4" />{% endif %}
+        {% endfor %}
+    {% endif %}
+
+    <!-- Quiz déjà complétés -->
+    {% set completedQuizzes = quizResults|filter(q => q.completedAt is not null) %}
+    
+    {% if completedQuizzes|length > 0 %}
+        <div class="post-preview mt-5">
+            <h2 class="post-title" style="color: #0B63CE;">
+                <i class="fas fa-check-circle me-2"></i>Quiz complétés
+            </h2>
+            <p class="post-subtitle">Historique de vos résultats.</p>
+        </div>
+        <hr class="my-4" />
+
+        {% for quiz in completedQuizzes %}
+            <div class="post-preview">
+                <h3 class="post-title" style="color: #0B63CE;">
+                    {{ quiz.training is defined and quiz.training ? quiz.training.title : 'Formation inconnue' }}
+                </h3>
+
+                <p class="post-subtitle">
+                    Score obtenu : <strong>{{ quiz.score }} / {{ quiz.totalQuestions }}</strong>
+                </p>
+
+                <div class="skill-progress-wrap mb-2">
+                    <div class="progress" style="height: 8px; border-radius: 10px; background: #e9ecef;">
+                        <div class="progress-bar"
+                            style="width: {{ quiz.percentage }}%; border-radius: 10px;
+                            background: {{ quiz.percentage >= 60 ? '#0FA36B' : '#dc3545' }};">
+                        </div>
+                    </div>
+                    <small class="text-muted">{{ quiz.percentage }}%</small>
+                </div>
+
+                <p class="post-meta">
+    <span class="badge-status"
+        style="background: {{ quiz.passed ? '#0FA36B' : '#dc3545' }}; color: white;">
+        {{ quiz.passed ? '✅ Réussi' : '❌ Échoué' }}
+    </span>
+
+    <span class="ms-3">
+        <i class="far fa-calendar-alt"></i>
+        {{ quiz.completedAt is defined and quiz.completedAt ? quiz.completedAt|date('d/m/Y H:i') : '—' }}
+    </span>
+
+    {% if not quiz.passed and quiz.questions is not empty %}
+        <span class="ms-3">
+            <a href="{{ path('app_frontoffice_quiz_take', {id: quiz.id}) }}" class="btn btn-outline-warning btn-sm">
+                <i class="fas fa-redo me-1"></i> Re-tenter
+            </a>
+        </span>
+    {% endif %}
+
+    {% if quiz.passed %}
+        <span class="ms-3">
+            <a href="{{ path('app_frontoffice_quiz_certificat', {id: quiz.id}) }}"
+               class="btn btn-success btn-sm">
+                <i class="fas fa-certificate me-1"></i> Télécharger mon certificat
+            </a>
+        </span>
+    {% endif %}
+</p>
+            </div>
+            {% if not loop.last %}<hr class="my-4" />{% endif %}
+        {% endfor %}
+    {% endif %}
+
+    <!-- Message si aucun quiz -->
+    {% if availableQuizzes|length == 0 and completedQuizzes|length == 0 %}
+        <div class="alert alert-info text-center">
+            <i class="fas fa-info-circle fa-2x mb-2"></i>
+            <p class="mb-0">Aucun quiz disponible pour le moment.</p>
+            <p class="small mt-2">Les quiz apparaîtront ici une fois vos inscriptions acceptées par l'administrateur.</p>
+        </div>
+    {% endif %}
 
 {% endblock %}

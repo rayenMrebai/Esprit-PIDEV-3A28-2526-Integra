@@ -19,6 +19,13 @@ services:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
+    # config/services.yaml
+    
+    App\Service\AIQuizGenerator:
+        arguments:
+            $apiKey: '%env(GROQ_API_KEY)%'
+            $apiUrl: '%env(GROQ_API_URL)%'
+            $model: '%env(GROQ_MODEL)%'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

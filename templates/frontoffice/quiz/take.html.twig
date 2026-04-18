@@ -1,0 +1,57 @@
+{% extends 'frontoffice/base_frontoffice.html.twig' %}
+
+{% block title %}Quiz - {{ quiz.training.title }}{% endblock %}
+
+{% block page_heading %}Quiz : {{ quiz.training.title }}{% endblock %}
+{% block page_subheading %}Répondez aux questions ci-dessous{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">
+            <i class="fas fa-question-circle me-2"></i>
+            Questionnaire
+        </h4>
+        <small>Répondez à toutes les questions avant de soumettre</small>
+    </div>
+    <div class="card-body">
+        <form method="post" action="{{ path('app_frontoffice_quiz_submit', {id: quiz.id}) }}">
+            {% for i, question in questions %}
+                <div class="mb-4 p-3 border rounded">
+                    <h5 class="mb-3">
+                        <span class="badge bg-secondary me-2">{{ i + 1 }}</span>
+                        {{ question.question }}
+                    </h5>
+                    <div class="ms-4">
+                        {% for j, option in question.options %}
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" 
+                                       name="question_{{ i }}" 
+                                       value="{{ j }}" 
+                                       id="q{{ i }}_{{ j }}" required>
+                                <label class="form-check-label" for="q{{ i }}_{{ j }}">
+                                    <strong>{{ ['A', 'B', 'C', 'D'][j] }}</strong> - {{ option }}
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+            
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-success btn-lg px-5">
+                    <i class="fas fa-check-circle me-2"></i> Soumettre mes réponses
+                </button>
+                <a href="{{ path('app_frontoffice_quiz') }}" class="btn btn-secondary btn-lg ms-2">
+                    <i class="fas fa-times-circle me-2"></i> Annuler
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="alert alert-info">
+    <i class="fas fa-info-circle me-2"></i>
+    <strong>Conseil :</strong> Prenez votre temps pour répondre. Chaque question vaut 1 point. Le score minimum pour réussir est 60%.
+</div>
+{% endblock %}
