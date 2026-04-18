@@ -20,12 +20,11 @@ class ExcelExportController extends AbstractController
     #[Route('/export-excel', name: 'salaires_export_excel', methods: ['GET', 'POST'])]
     public function export(Request $request): Response
     {
-        // GET → afficher le modal (rien à faire, le modal est dans index.html.twig)
-        // POST → générer le fichier
         if ($request->isMethod('POST')) {
             $filters = [
                 'periode_type'         => $request->request->get('periode_type', 'TOUS'),
                 'mois'                 => (int)$request->request->get('mois', date('n')),
+                'annee_mois'           => (int)$request->request->get('annee_mois', date('Y')), // ← manquait
                 'annee'                => (int)$request->request->get('annee', date('Y')),
                 'date_debut'           => $request->request->get('date_debut'),
                 'date_fin'             => $request->request->get('date_fin'),
@@ -48,7 +47,6 @@ class ExcelExportController extends AbstractController
             ]);
         }
 
-        // GET sans POST → rediriger vers l'index
         return $this->redirectToRoute('app_backoffice_salaires_index');
     }
 }

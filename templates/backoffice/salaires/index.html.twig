@@ -13,25 +13,21 @@
     box-shadow: 0 4px 20px rgba(0,0,0,0.04);
     border: 1px solid rgba(230, 232, 236, 0.8);
   }
-  
   .modern-btn {
     border-radius: 8px;
     font-weight: 600;
     transition: all 0.2s ease;
   }
-  
   .modern-btn:hover:not(:disabled) {
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.08);
   }
-  
   .search-box {
     background: #f8fafc;
     border-radius: 12px;
     border: 1px solid #e2e8f0;
     padding: 12px;
   }
-  
   .salary-item {
     background: #ffffff;
     border-radius: 10px;
@@ -40,26 +36,22 @@
     transition: all 0.2s ease;
     cursor: pointer;
   }
-  
   .salary-item:hover {
     background: #f8fafc;
     border-color: #e2e8f0;
     transform: translateX(2px);
   }
-  
   .salary-item.active-row {
     background: #eff6ff;
     border-color: #3b82f6;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
-  
   .gradient-header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border-radius: 12px;
     padding: 24px;
   }
-  
   .status-badge-modern {
     padding: 4px 12px;
     border-radius: 20px;
@@ -68,7 +60,6 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
-  
   .bonus-rule-row {
     background: white;
     border-radius: 8px;
@@ -78,7 +69,6 @@
     font-size: 12px;
     align-items: center;
   }
-  
   .btn-action-sm {
     border-radius: 6px;
     padding: 4px 8px;
@@ -87,34 +77,110 @@
     cursor: pointer;
     transition: all 0.2s;
   }
-  
   .btn-action-sm:hover:not(:disabled) {
     opacity: 0.8;
   }
-  
   .btn-action-sm:disabled {
     opacity: 0.4;
     cursor: not-allowed;
     background-color: #e2e8f0 !important;
     color: #64748b !important;
   }
-  
   .text-truncate-custom {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 100%;
   }
+
+  /* ── Modal Excel ── */
+  .excel-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(15, 23, 42, 0.55);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+  }
+  .excel-modal-overlay.open {
+    display: flex;
+  }
+  .excel-modal-box {
+    background: white;
+    border-radius: 16px;
+    width: 820px;
+    max-width: 95vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.25);
+  }
+  .excel-modal-header {
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    padding: 22px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 16px 16px 0 0;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  .excel-section {
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid #e2e8f0;
+  }
+  .excel-section-title {
+    font-weight: 700;
+    font-size: 13px;
+    color: #1e293b;
+    margin-bottom: 12px;
+  }
+  .excel-radio-label,
+  .excel-check-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #334155;
+  }
+  .excel-radio-label input,
+  .excel-check-label input {
+    accent-color: #16a34a;
+    width: 15px;
+    height: 15px;
+  }
+  .excel-panel {
+    display: none;
+    padding-left: 22px;
+    gap: 8px;
+    align-items: center;
+    margin-top: 4px;
+    flex-wrap: wrap;
+  }
+  .excel-panel.active {
+    display: flex;
+  }
+  .status-pill-paye    { background:rgba(22,163,74,0.12); color:#166534; padding:2px 10px; border-radius:20px; font-weight:700; font-size:10px; }
+  .status-pill-encours { background:rgba(3,105,161,0.12);  color:#0369a1; padding:2px 10px; border-radius:20px; font-weight:700; font-size:10px; }
+  .status-pill-cree    { background:rgba(133,77,14,0.12);  color:#854d0e; padding:2px 10px; border-radius:20px; font-weight:700; font-size:10px; }
 </style>
 
+{# ── Flashs ── #}
 {% for msg in app.flashes('success') %}
-  <div class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius: 10px; border: none; background: #ecfdf5; color: #065f46;">
+  <div class="alert alert-success alert-dismissible fade show" role="alert"
+       style="border-radius:10px; border:none; background:#ecfdf5; color:#065f46;">
     <i class="bi bi-check-circle-fill me-2"></i>{{ msg }}
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
   </div>
 {% endfor %}
 {% for msg in app.flashes('error') %}
-  <div class="alert alert-danger alert-dismissible fade show" role="alert" style="border-radius: 10px; border: none; background: #fef2f2; color: #991b1b;">
+  <div class="alert alert-danger alert-dismissible fade show" role="alert"
+       style="border-radius:10px; border:none; background:#fef2f2; color:#991b1b;">
     <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ msg }}
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
   </div>
@@ -122,10 +188,10 @@
 
 <div class="row g-4">
 
-  {# Panneau Gauche #}
+  {# ══════════════ PANNEAU GAUCHE ══════════════ #}
   <div class="col-lg-6" id="leftPanel">
     <div class="modern-card h-100">
-      <div class="card-body d-flex flex-column" style="padding: 20px;">
+      <div class="card-body d-flex flex-column" style="padding:20px;">
 
         {# Header #}
         <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
@@ -133,65 +199,107 @@
             <h5 class="fw-bold text-dark mb-1" style="font-size:15px;">Employee Salaries</h5>
             <span class="text-muted" style="font-size:11px;">Manage employee compensation</span>
           </div>
-          {# BOUTON AJOUTER - Grisé pour Manager #}
-          <a href="{{ path('salaire_new') }}" 
+          <a href="{{ path('salaire_new') }}"
              class="btn btn-success btn-sm modern-btn {{ not is_granted('ROLE_ADMIN') ? 'disabled' : '' }}"
-             style="border-radius: 8px; padding: 6px 16px; font-size: 12px; {{ not is_granted('ROLE_ADMIN') ? 'opacity: 0.5; pointer-events: none; background-color: #6c757d; border-color: #6c757d;' : '' }}"
+             style="border-radius:8px; padding:6px 16px; font-size:12px;
+                    {{ not is_granted('ROLE_ADMIN') ? 'opacity:.5;pointer-events:none;background-color:#6c757d;border-color:#6c757d;' : '' }}"
              {% if not is_granted('ROLE_ADMIN') %}onclick="return false;"{% endif %}>
             <i class="bi bi-plus-lg me-1"></i> Ajouter
           </a>
         </div>
 
-        {# Barre de recherche et filtres - TOUJOURS ACTIFS #}
+        {# ── Barre recherche + filtres + bouton Excel ── #}
         <div class="search-box mb-3">
           <div class="d-flex gap-2 align-items-center flex-wrap">
-            
-            <form method="get" action="{{ path('app_backoffice_salaires_index') }}" class="d-flex gap-1 align-items-center flex-grow-1" style="min-width:160px;">
-              <div class="input-group input-group-sm" style="max-width:220px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border-radius: 6px; overflow: hidden;">
-                <span class="input-group-text bg-white border-end-0" style="padding: 4px 10px;"><i class="bi bi-search text-muted" style="font-size:11px;"></i></span>
-                <input type="text" name="search" class="form-control border-start-0" placeholder="Rechercher..." value="{{ search|default('') }}" style="font-size:12px;">
+
+            {# Recherche #}
+            <form method="get" action="{{ path('app_backoffice_salaires_index') }}"
+                  class="d-flex gap-1 align-items-center flex-grow-1" style="min-width:160px;">
+              <div class="input-group input-group-sm"
+                   style="max-width:220px; box-shadow:0 1px 2px rgba(0,0,0,0.05);
+                          border-radius:6px; overflow:hidden;">
+                <span class="input-group-text bg-white border-end-0" style="padding:4px 10px;">
+                  <i class="bi bi-search text-muted" style="font-size:11px;"></i>
+                </span>
+                <input type="text" name="search" class="form-control border-start-0"
+                       placeholder="Rechercher..." value="{{ search|default('') }}"
+                       style="font-size:12px;">
                 {% if hasSearch|default(false) %}
-                  <a href="{{ path('app_backoffice_salaires_index') }}" class="btn btn-outline-danger btn-sm" style="border-radius: 0; padding: 4px 8px;" title="Effacer"><i class="bi bi-x" style="font-size:12px;"></i></a>
+                  <a href="{{ path('app_backoffice_salaires_index') }}"
+                     class="btn btn-outline-danger btn-sm"
+                     style="border-radius:0; padding:4px 8px;" title="Effacer">
+                    <i class="bi bi-x" style="font-size:12px;"></i>
+                  </a>
                 {% endif %}
-                <button type="submit" class="btn btn-primary btn-sm" style="border-radius: 0 6px 6px 0; padding: 4px 12px; font-size:11px;">OK</button>
+                <button type="submit" class="btn btn-primary btn-sm"
+                        style="border-radius:0 6px 6px 0; padding:4px 12px; font-size:11px;">OK</button>
               </div>
             </form>
 
             <div style="width:1px; height:24px; background:#cbd5e1;"></div>
 
-            <form method="get" action="{{ path('app_backoffice_salaires_index') }}" class="d-flex gap-1 align-items-center">
+            {# Filtre statut #}
+            <form method="get" action="{{ path('app_backoffice_salaires_index') }}"
+                  class="d-flex gap-1 align-items-center">
               {% if hasSearch|default(false) %}
                 <input type="hidden" name="search" value="{{ search }}">
               {% endif %}
-              <select name="filter_status" class="form-select form-select-sm" style="font-size:11px; width:auto; min-width:120px; border-radius: 6px;">
+              <select name="filter_status" class="form-select form-select-sm"
+                      style="font-size:11px; width:auto; min-width:120px; border-radius:6px;">
                 <option value="">Tous les statuts</option>
-                <option value="CREÉ" {% if filterStatus|default('') == 'CREÉ' %}selected{% endif %}>CRÉÉ</option>
-                <option value="EN_COURS" {% if filterStatus|default('') == 'EN_COURS' %}selected{% endif %}>EN COURS</option>
-                <option value="PAYÉ" {% if filterStatus|default('') == 'PAYÉ' %}selected{% endif %}>PAYÉ</option>
+                <option value="CREÉ"    {% if filterStatus|default('') == 'CREÉ'    %}selected{% endif %}>CRÉÉ</option>
+                <option value="EN_COURS"{% if filterStatus|default('') == 'EN_COURS'%}selected{% endif %}>EN COURS</option>
+                <option value="PAYÉ"   {% if filterStatus|default('') == 'PAYÉ'   %}selected{% endif %}>PAYÉ</option>
               </select>
-              <button type="submit" class="btn btn-outline-primary btn-sm modern-btn" style="border-radius: 6px; padding: 4px 10px; font-size:11px;"><i class="bi bi-funnel-fill"></i></button>
+              <button type="submit" class="btn btn-outline-primary btn-sm modern-btn"
+                      style="border-radius:6px; padding:4px 10px; font-size:11px;">
+                <i class="bi bi-funnel-fill"></i>
+              </button>
               {% if hasFilter|default(false) %}
-                <a href="{{ path('app_backoffice_salaires_index', {'search': search}) }}" class="btn btn-outline-danger btn-sm" style="border-radius: 6px; padding: 4px 8px;" title="Effacer filtre"><i class="bi bi-x" style="font-size:12px;"></i></a>
+                <a href="{{ path('app_backoffice_salaires_index', {'search': search}) }}"
+                   class="btn btn-outline-danger btn-sm"
+                   style="border-radius:6px; padding:4px 8px;" title="Effacer filtre">
+                  <i class="bi bi-x" style="font-size:12px;"></i>
+                </a>
               {% endif %}
             </form>
+
+            <div style="width:1px; height:24px; background:#cbd5e1;"></div>
+
+            {# ── BOUTON EXPORT EXCEL ── #}
+            <button type="button"
+                    onclick="openExcelModal()"
+                    class="btn btn-sm modern-btn"
+                    style="background:#16a34a; color:white; border-radius:8px;
+                           padding:4px 12px; font-size:11px; font-weight:600; border:none;">
+              <i class="bi bi-file-earmark-excel-fill me-1"></i> Excel
+            </button>
+
           </div>
 
+          {# Tags actifs #}
           {% if hasSearch|default(false) or hasFilter|default(false) %}
             <div class="d-flex gap-2 mt-2 flex-wrap" style="font-size:11px;">
               {% if hasSearch|default(false) %}
-                <span class="badge bg-secondary fw-normal" style="border-radius: 20px;"><i class="bi bi-search me-1"></i>{{ search }}</span>
+                <span class="badge bg-secondary fw-normal" style="border-radius:20px;">
+                  <i class="bi bi-search me-1"></i>{{ search }}
+                </span>
               {% endif %}
               {% if hasFilter|default(false) %}
-                <span class="badge bg-info text-dark fw-normal" style="border-radius: 20px;"><i class="bi bi-funnel me-1"></i>{{ filterStatus }}</span>
+                <span class="badge bg-info text-dark fw-normal" style="border-radius:20px;">
+                  <i class="bi bi-funnel me-1"></i>{{ filterStatus }}
+                </span>
               {% endif %}
             </div>
           {% endif %}
         </div>
 
-        <hr class="my-2" style="border-color: #f1f5f9;">
+        <hr class="my-2" style="border-color:#f1f5f9;">
 
         {# En-têtes tableau #}
-        <div class="row px-2 mb-2" style="font-size:10px; text-transform:uppercase; letter-spacing:.05em; color:#64748b; font-weight:700;">
+        <div class="row px-2 mb-2"
+             style="font-size:10px; text-transform:uppercase; letter-spacing:.05em;
+                    color:#64748b; font-weight:700;">
           <div class="col-1">ID</div>
           <div class="col-3">Employé</div>
           <div class="col-2">Base</div>
@@ -200,28 +308,27 @@
           <div class="col-2">Statut</div>
         </div>
 
-        {# Liste des salaires #}
+        {# Liste salaires #}
         <div id="salaryRows" style="overflow-y:auto; flex:1;">
           {% if salaires|length > 0 %}
             {% for salaire in salaires %}
               {% if salaire.status == 'EN_COURS' %}
-                {% set badgeStyle = 'background: rgba(13, 202, 240, 0.15); color: #055160;' %}
+                {% set badgeStyle = 'background:rgba(13,202,240,0.15);color:#055160;' %}
               {% elseif salaire.status == 'PAYÉ' %}
-                {% set badgeStyle = 'background: rgba(25, 135, 84, 0.15); color: #0a3622;' %}
+                {% set badgeStyle = 'background:rgba(25,135,84,0.15);color:#0a3622;' %}
               {% else %}
-                {% set badgeStyle = 'background: rgba(255, 193, 7, 0.15); color: #664d03;' %}
+                {% set badgeStyle = 'background:rgba(255,193,7,0.15);color:#664d03;' %}
               {% endif %}
 
               <div class="salary-item row align-items-center px-2 py-2 mb-1"
                    style="font-size:12px;"
-                   onclick="showDetails(this, {{ salaire.id }}, '{{ salaire.user.username | e('js') }}', {{ salaire.baseAmount }}, {{ salaire.bonusAmount }}, {{ salaire.totalAmount }}, '{{ salaire.datePaiement | date('Y-m-d') }}', '{{ salaire.status }}')"
+                   onclick="showDetails(this,{{ salaire.id }},'{{ salaire.user.username|e('js') }}',{{ salaire.baseAmount }},{{ salaire.bonusAmount }},{{ salaire.totalAmount }},'{{ salaire.datePaiement|date('Y-m-d') }}','{{ salaire.status }}')"
                    data-id="{{ salaire.id }}">
-
                 <div class="col-1 fw-bold text-secondary" style="font-size:11px;">#{{ salaire.user.userId }}</div>
-                <div class="col-3" style="color:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight: 500;">{{ salaire.user.username }}</div>
-                <div class="col-2" style="color:#0369a1; font-weight: 600;">{{ salaire.baseAmount | number_format(2, ',', ' ') }} DT</div>
-                <div class="col-2 fw-semibold" style="color:#15803d;">{{ salaire.bonusAmount | number_format(2, ',', ' ') }} DT</div>
-                <div class="col-2 fw-bold" style="color:#4338ca;">{{ salaire.totalAmount | number_format(2, ',', ' ') }} DT</div>
+                <div class="col-3" style="color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;">{{ salaire.user.username }}</div>
+                <div class="col-2" style="color:#0369a1;font-weight:600;">{{ salaire.baseAmount|number_format(2,',',' ') }} DT</div>
+                <div class="col-2 fw-semibold" style="color:#15803d;">{{ salaire.bonusAmount|number_format(2,',',' ') }} DT</div>
+                <div class="col-2 fw-bold" style="color:#4338ca;">{{ salaire.totalAmount|number_format(2,',',' ') }} DT</div>
                 <div class="col-2">
                   <span class="status-badge-modern" style="{{ badgeStyle }}">{{ salaire.status }}</span>
                 </div>
@@ -229,7 +336,7 @@
             {% endfor %}
           {% else %}
             <div class="text-center text-muted py-5">
-              <i class="bi bi-inbox fs-2 d-block mb-2" style="opacity: 0.5;"></i>
+              <i class="bi bi-inbox fs-2 d-block mb-2" style="opacity:0.5;"></i>
               {% if hasSearch|default(false) or hasFilter|default(false) %}
                 Aucun résultat ne correspond aux critères.
               {% else %}
@@ -243,29 +350,35 @@
     </div>
   </div>
 
-  {# Panneau Droit #}
+  {# ══════════════ PANNEAU DROIT ══════════════ #}
   <div class="col-lg-6" id="rightPanel" style="display:none;">
     <div class="modern-card h-100">
-      <div class="card-body" style="padding: 20px;">
+      <div class="card-body" style="padding:20px;">
+
         <div class="d-flex align-items-start justify-content-between mb-4 flex-wrap gap-2">
           <div>
-            <h4 class="fw-bold text-dark mb-0" style="font-size: 16px;">Détails du Salaire</h4>
-            <p class="text-muted small mb-0" style="font-size: 11px;">Vue détaillée de la rémunération</p>
+            <h4 class="fw-bold text-dark mb-0" style="font-size:16px;">Détails du Salaire</h4>
+            <p class="text-muted small mb-0" style="font-size:11px;">Vue détaillée de la rémunération</p>
           </div>
           <div class="d-flex gap-2 flex-wrap">
-            {# BOUTONS ACTIONS - Grisés pour Manager #}
-            <a id="btnPdf" href="#" class="btn btn-sm text-white modern-btn {{ not is_granted('ROLE_ADMIN') ? 'disabled' : '' }}" 
-               style="background: #8b5cf6; border-radius: 8px; font-size: 11px; padding: 6px 12px; {{ not is_granted('ROLE_ADMIN') ? 'opacity: 0.5; background-color: #6c757d !important; pointer-events: none;' : '' }}">
+            <a id="btnPdf" href="#"
+               class="btn btn-sm text-white modern-btn {{ not is_granted('ROLE_ADMIN') ? 'disabled' : '' }}"
+               style="background:#8b5cf6; border-radius:8px; font-size:11px; padding:6px 12px;
+                      {{ not is_granted('ROLE_ADMIN') ? 'opacity:.5;background-color:#6c757d!important;pointer-events:none;' : '' }}">
               <i class="bi bi-file-earmark-pdf me-1"></i> PDF
             </a>
-            <a id="btnEdit" href="#" class="btn btn-sm btn-primary modern-btn {{ not is_granted('ROLE_ADMIN') ? 'disabled' : '' }}" 
-               style="border-radius: 8px; font-size: 11px; padding: 6px 12px; {{ not is_granted('ROLE_ADMIN') ? 'opacity: 0.5; pointer-events: none;' : '' }}">
+            <a id="btnEdit" href="#"
+               class="btn btn-sm btn-primary modern-btn {{ not is_granted('ROLE_ADMIN') ? 'disabled' : '' }}"
+               style="border-radius:8px; font-size:11px; padding:6px 12px;
+                      {{ not is_granted('ROLE_ADMIN') ? 'opacity:.5;pointer-events:none;' : '' }}">
               <i class="bi bi-pencil-square me-1"></i> Modifier
             </a>
-            <form id="deleteForm" method="POST" action="#" onsubmit="return confirm('Supprimer ce salaire ?')" style="display: inline;">
+            <form id="deleteForm" method="POST" action="#"
+                  onsubmit="return confirm('Supprimer ce salaire ?')" style="display:inline;">
               <input type="hidden" name="_token" id="deleteToken" value="">
-              <button type="submit" id="btnDelete" class="btn btn-sm btn-danger modern-btn" 
-                      style="border-radius: 8px; font-size: 11px; padding: 6px 12px;"
+              <button type="submit" id="btnDelete"
+                      class="btn btn-sm btn-danger modern-btn"
+                      style="border-radius:8px; font-size:11px; padding:6px 12px;"
                       {% if not is_granted('ROLE_ADMIN') %}disabled{% endif %}>
                 <i class="bi bi-trash me-1"></i> Supprimer
               </button>
@@ -274,28 +387,28 @@
         </div>
 
         <div class="gradient-header mb-4">
-          <h3 class="fw-bold mb-3" id="detailName" style="font-size: 18px;">—</h3>
+          <h3 class="fw-bold mb-3" id="detailName" style="font-size:18px;">—</h3>
           <div class="d-flex gap-5 mb-3">
             <div>
-              <div class="small fw-bold mb-1" style="opacity: 0.9; font-size: 11px;">Salaire de Base</div>
+              <div class="small fw-bold mb-1" style="opacity:.9; font-size:11px;">Salaire de Base</div>
               <div class="fw-bold fs-5" id="detailBase" style="color:#fff;">—</div>
             </div>
             <div>
-              <div class="small fw-bold mb-1" style="opacity: 0.9; font-size: 11px;">Bonus</div>
-              <div class="fw-bold fs-5" id="detailBonus" style="color: #86efac;">—</div>
+              <div class="small fw-bold mb-1" style="opacity:.9; font-size:11px;">Bonus</div>
+              <div class="fw-bold fs-5" id="detailBonus" style="color:#86efac;">—</div>
             </div>
           </div>
-          <hr style="border-color: rgba(255,255,255,0.3); margin: 16px 0;">
+          <hr style="border-color:rgba(255,255,255,0.3); margin:16px 0;">
           <div class="d-flex align-items-center gap-3">
-            <span class="fw-bold" style="opacity: 0.9; font-size: 13px;">Total</span>
-            <span class="fw-bold" style="font-size: 28px; color: #fff;" id="detailTotal">—</span>
+            <span class="fw-bold" style="opacity:.9; font-size:13px;">Total</span>
+            <span class="fw-bold" style="font-size:28px; color:#fff;" id="detailTotal">—</span>
           </div>
         </div>
 
-        <div class="rounded-3 p-3 mb-4" style="background:#f8fafc; border: 1px solid #f1f5f9;">
+        <div class="rounded-3 p-3 mb-4" style="background:#f8fafc; border:1px solid #f1f5f9;">
           <div class="row mb-2 align-items-center">
             <div class="col-5 text-muted fw-bold" style="font-size:12px;">Date de Paiement</div>
-            <div class="col-7" style="font-size:13px; font-weight: 600; color: #1e293b;" id="detailDate">—</div>
+            <div class="col-7" style="font-size:13px; font-weight:600; color:#1e293b;" id="detailDate">—</div>
           </div>
           <div class="row align-items-center">
             <div class="col-5 text-muted fw-bold" style="font-size:12px;">Statut</div>
@@ -305,23 +418,27 @@
           </div>
         </div>
 
-        <hr style="border-color: #f1f5f9; margin: 24px 0;">
+        <hr style="border-color:#f1f5f9; margin:24px 0;">
 
         <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
           <div>
-            <h5 class="fw-bold mb-0" style="font-size: 14px; color: #1e293b;">Règles de Bonus</h5>
-            <p class="text-muted small mb-0" style="font-size: 11px;">Gestion des règles de calcul</p>
+            <h5 class="fw-bold mb-0" style="font-size:14px; color:#1e293b;">Règles de Bonus</h5>
+            <p class="text-muted small mb-0" style="font-size:11px;">Gestion des règles de calcul</p>
           </div>
-          {# BOUTON AJOUTER RÈGLE - Grisé pour Manager #}
-          <a id="btnAddRule" href="#" onclick="{% if is_granted('ROLE_ADMIN') %}goToAddRule(){% else %}return false;{% endif %}" 
-             class="btn btn-sm text-white modern-btn {{ not is_granted('ROLE_ADMIN') ? 'disabled' : '' }}" 
-             style="background: #8b5cf6; border-radius: 8px; font-size: 11px; padding: 6px 12px; {{ not is_granted('ROLE_ADMIN') ? 'opacity: 0.5; background-color: #6c757d !important; pointer-events: none;' : '' }}">
+          <button type="button"
+                  id="btnAddRule"
+                  onclick="{% if is_granted('ROLE_ADMIN') %}goToAddRule(){% else %}return false;{% endif %}"
+                  class="btn btn-sm modern-btn {{ not is_granted('ROLE_ADMIN') ? 'disabled' : '' }}"
+                  style="background:#8b5cf6 !important; color:white !important; border:none;
+                        border-radius:8px; font-size:11px; padding:6px 12px;
+                        {{ not is_granted('ROLE_ADMIN') ? 'opacity:.5; pointer-events:none; background:#6c757d!important;' : '' }}">
             <i class="bi bi-plus-lg me-1"></i> Ajouter Règle
-          </a>
+          </button>
         </div>
 
-        {# SECTION RÈGLES DE BONUS CORRIGÉE #}
-        <div class="row px-2 mb-2" style="font-size:10px; color: #94a3b8; font-weight:700; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
+        <div class="row px-2 mb-2"
+             style="font-size:10px; color:#94a3b8; font-weight:700;
+                    border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
           <div class="col-1">ID</div>
           <div class="col-3">Nom</div>
           <div class="col-2">%</div>
@@ -329,9 +446,10 @@
           <div class="col-2 text-end">Actions</div>
         </div>
 
-        <div id="bonusRulesList" style="max-height: 250px; overflow-y: auto;">
-          <div class="text-center text-muted py-4" style="background: #f8fafc; border-radius: 8px; font-size: 12px;">
-            <i class="bi bi-arrow-left-circle mb-2 d-block" style="font-size: 24px; opacity: 0.5;"></i>
+        <div id="bonusRulesList" style="max-height:250px; overflow-y:auto;">
+          <div class="text-center text-muted py-4"
+               style="background:#f8fafc; border-radius:8px; font-size:12px;">
+            <i class="bi bi-arrow-left-circle mb-2 d-block" style="font-size:24px; opacity:0.5;"></i>
             Cliquez sur un salaire pour voir les détails
           </div>
         </div>
@@ -340,6 +458,233 @@
   </div>
 </div>
 
+{# ══════════════════════════════════════════════════════════════
+   MODAL EXPORT EXCEL
+══════════════════════════════════════════════════════════════ #}
+<div id="modalExportExcel" class="excel-modal-overlay">
+  <div class="excel-modal-box">
+
+    {# ── Header ── #}
+    <div class="excel-modal-header">
+      <div>
+        <div style="color:white; font-size:17px; font-weight:700;">
+          <i class="bi bi-file-earmark-excel-fill me-2"></i>Export Excel — Salaires
+        </div>
+        <div style="color:rgba(255,255,255,0.8); font-size:11px; margin-top:3px;">
+          Configurez vos critères avant de télécharger
+        </div>
+      </div>
+      <button onclick="closeExcelModal()"
+              style="background:rgba(255,255,255,0.2); border:none; color:white;
+                     border-radius:8px; width:32px; height:32px; cursor:pointer;
+                     font-size:20px; display:flex; align-items:center; justify-content:center;">
+        ×
+      </button>
+    </div>
+
+    {# ── Formulaire ── #}
+    <form id="exportExcelForm"
+          method="POST"
+          action="{{ path('salaires_export_excel') }}">
+      <input type="hidden" name="_token" value="{{ csrf_token('export_excel') }}">
+
+      <div style="padding:22px 26px; display:grid; grid-template-columns:1fr 1fr; gap:18px;">
+
+        {# ─── COLONNE GAUCHE ─── #}
+        <div style="display:flex; flex-direction:column; gap:16px;">
+
+          {# Période #}
+          <div class="excel-section">
+            <div class="excel-section-title">1️⃣ Période d'export</div>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+
+              <label class="excel-radio-label">
+                <input type="radio" name="periode_type" value="TOUS" checked
+                       onchange="switchPeriode('TOUS')">
+                Tous les salaires
+              </label>
+
+              <label class="excel-radio-label">
+                <input type="radio" name="periode_type" value="MOIS"
+                       onchange="switchPeriode('MOIS')">
+                Par mois
+              </label>
+              <div id="panelMois" class="excel-panel">
+                <select name="mois" class="form-select form-select-sm"
+                        style="width:130px; font-size:12px;"
+                        onchange="refreshFilename()">
+                  {% set moisLabels = ['Janvier','Février','Mars','Avril','Mai','Juin',
+                                       'Juillet','Août','Septembre','Octobre','Novembre','Décembre'] %}
+                  {% for i, m in moisLabels %}
+                    <option value="{{ i + 1 }}"
+                      {% if (i + 1) == ("now"|date('n')|number_format) %}selected{% endif %}>
+                      {{ m }}
+                    </option>
+                  {% endfor %}
+                </select>
+                <select name="annee_mois" class="form-select form-select-sm"
+                        style="width:95px; font-size:12px;"
+                        onchange="refreshFilename()">
+                  {% for y in range("now"|date('Y') - 4, "now"|date('Y') + 1) %}
+                    <option value="{{ y }}" {% if y == "now"|date('Y') %}selected{% endif %}>{{ y }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <label class="excel-radio-label">
+                <input type="radio" name="periode_type" value="ANNEE"
+                       onchange="switchPeriode('ANNEE')">
+                Par année
+              </label>
+              <div id="panelAnnee" class="excel-panel">
+                <select name="annee" class="form-select form-select-sm"
+                        style="width:110px; font-size:12px;"
+                        onchange="refreshFilename()">
+                  {% for y in range("now"|date('Y') - 4, "now"|date('Y') + 1) %}
+                    <option value="{{ y }}" {% if y == "now"|date('Y') %}selected{% endif %}>{{ y }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <label class="excel-radio-label">
+                <input type="radio" name="periode_type" value="PERSONNALISEE"
+                       onchange="switchPeriode('PERSONNALISEE')">
+                Période personnalisée
+              </label>
+              <div id="panelPerso" class="excel-panel" style="flex-wrap:wrap;">
+                <input type="date" name="date_debut"
+                       class="form-control form-control-sm"
+                       style="width:145px; font-size:12px;"
+                       value="{{ "now"|date('Y') }}-01-01"
+                       onchange="refreshFilename()">
+                <span style="font-size:12px; color:#64748b; align-self:center;">au</span>
+                <input type="date" name="date_fin"
+                       class="form-control form-control-sm"
+                       style="width:145px; font-size:12px;"
+                       value="{{ "now"|date('Y-m-d') }}"
+                       onchange="refreshFilename()">
+              </div>
+
+            </div>
+          </div>{# /période #}
+
+          {# Nom fichier (readonly, auto-généré) #}
+          <div class="excel-section">
+            <div class="excel-section-title">📁 Nom du fichier généré</div>
+            <input type="text" id="excelFilename" readonly
+                   style="width:100%; padding:7px 10px; border-radius:6px;
+                          border:1px solid #cbd5e1; font-size:12px; color:#334155;
+                          background:#f1f5f9; cursor:default;"
+                   value="salaires_complet_{{ "now"|date('d-m-Y') }}.xlsx">
+          </div>
+
+        </div>{# /col gauche #}
+
+        {# ─── COLONNE DROITE ─── #}
+        <div style="display:flex; flex-direction:column; gap:16px;">
+
+          {# Filtres statut #}
+          <div class="excel-section">
+            <div class="excel-section-title">2️⃣ Filtres statut</div>
+            <div style="font-size:11px; color:#64748b; margin-bottom:8px;">
+              Statuts à inclure dans l'export :
+            </div>
+            <div style="display:flex; gap:18px; flex-wrap:wrap; margin-bottom:14px;">
+              <label class="excel-check-label">
+                <input type="checkbox" name="status_paye" value="1" checked>
+                <span class="status-pill-paye">PAYÉ</span>
+              </label>
+              <label class="excel-check-label">
+                <input type="checkbox" name="status_en_cours" value="1" checked>
+                <span class="status-pill-encours">EN COURS</span>
+              </label>
+              <label class="excel-check-label">
+                <input type="checkbox" name="status_cree" value="1" checked>
+                <span class="status-pill-cree">CRÉÉ</span>
+              </label>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              <label class="excel-check-label">
+                <input type="checkbox" id="chkMontantMin"
+                       onchange="document.getElementById('inputMontantMin').disabled = !this.checked">
+                Montant minimum :
+              </label>
+              <input type="number" id="inputMontantMin" name="montant_min"
+                     min="0" step="0.01" disabled
+                     style="width:90px; padding:4px 8px; border-radius:6px;
+                            border:1px solid #cbd5e1; font-size:12px;"
+                     placeholder="0">
+              <span style="font-size:12px; color:#64748b;">DT</span>
+            </div>
+          </div>{# /filtres #}
+
+          {# Options #}
+          <div class="excel-section">
+            <div class="excel-section-title">3️⃣ Options d'export</div>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+
+              <label class="excel-check-label">
+                <input type="checkbox" name="inclure_statistiques" value="1" checked>
+                <div>
+                  <div style="font-weight:600;">Feuille Statistiques</div>
+                  <div style="font-size:11px; color:#64748b;">
+                    Totaux, moyennes, min/max, répartition par statut
+                  </div>
+                </div>
+              </label>
+
+              <label class="excel-check-label">
+                <input type="checkbox" name="inclure_bonus" value="1">
+                <div>
+                  <div style="font-weight:600;">Feuille Détails Bonus</div>
+                  <div style="font-size:11px; color:#64748b;">
+                    Toutes les règles de bonus par salaire
+                  </div>
+                </div>
+              </label>
+
+              <label class="excel-check-label">
+                <input type="checkbox" name="appliquer_formatage" value="1" checked>
+                <div>
+                  <div style="font-weight:600;">Formatage couleurs</div>
+                  <div style="font-size:11px; color:#64748b;">
+                    Lignes zébrées et badges statuts colorés
+                  </div>
+                </div>
+              </label>
+
+            </div>
+          </div>{# /options #}
+
+        </div>{# /col droite #}
+      </div>{# /grid #}
+
+      {# ── Boutons ── #}
+      <div style="padding:14px 26px 22px; display:flex; justify-content:flex-end;
+                  gap:10px; border-top:1px solid #f1f5f9;">
+        <button type="button" onclick="closeExcelModal()"
+                style="padding:9px 22px; border-radius:8px; border:1px solid #e2e8f0;
+                       background:white; color:#64748b; font-size:13px;
+                       font-weight:600; cursor:pointer;">
+          Annuler
+        </button>
+        <button type="submit"
+                style="padding:9px 26px; border-radius:8px; border:none;
+                       background:linear-gradient(135deg,#16a34a,#15803d);
+                       color:white; font-size:13px; font-weight:700; cursor:pointer;
+                       display:flex; align-items:center; gap:8px;">
+          <i class="bi bi-file-earmark-excel-fill"></i> Télécharger Excel
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+{# ══════════════════════════════════════════════════════════════
+   SCRIPTS
+══════════════════════════════════════════════════════════════ #}
 <script>
 const bonusRulesMap = {{ bonusRulesMap | json_encode(constant('JSON_THROW_ON_ERROR')) | raw }};
 const salaireUrls   = {{ salaireUrls   | json_encode(constant('JSON_THROW_ON_ERROR')) | raw }};
@@ -348,94 +693,82 @@ const isAdmin       = {{ is_granted('ROLE_ADMIN') ? 'true' : 'false' }};
 let activeRow = null;
 
 function showDetails(row, id, name, base, bonus, total, date, status) {
-  
-  if (activeRow) {
-    activeRow.classList.remove('active-row');
-  }
-
+  if (activeRow) activeRow.classList.remove('active-row');
   row.classList.add('active-row');
   activeRow = row;
 
   document.getElementById('rightPanel').style.display = '';
-
   document.getElementById('detailName').textContent  = name;
   document.getElementById('detailBase').textContent  = formatDT(base);
   document.getElementById('detailBonus').textContent = formatDT(bonus);
   document.getElementById('detailTotal').textContent = formatDT(total);
   document.getElementById('detailDate').textContent  = date;
 
-  // Style badge statut
   const badge = document.getElementById('detailStatus');
   badge.textContent = status;
-  if (status === 'PAYÉ') {
-    badge.style.cssText = 'background: rgba(25, 135, 84, 0.15); color: #0a3622; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700;';
-  } else if (status === 'EN_COURS') {
-    badge.style.cssText = 'background: rgba(13, 202, 240, 0.15); color: #055160; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700;';
-  } else {
-    badge.style.cssText = 'background: rgba(255, 193, 7, 0.15); color: #664d03; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700;';
-  }
+  badge.style.cssText = status === 'PAYÉ'
+    ? 'background:rgba(25,135,84,0.15);color:#0a3622;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;'
+    : status === 'EN_COURS'
+    ? 'background:rgba(13,202,240,0.15);color:#055160;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;'
+    : 'background:rgba(255,193,7,0.15);color:#664d03;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;';
 
-  const urls = salaireUrls[id] || {};
+  const urls   = salaireUrls[id] || {};
   const isPaid = (status === 'PAYÉ');
 
-  // Configuration des boutons selon rôle et statut
-  const btnEdit = document.getElementById('btnEdit');
-  const btnDelete = document.getElementById('btnDelete');
-  const btnPdf = document.getElementById('btnPdf');
-  const btnAddRule = document.getElementById('btnAddRule');
+  const btnEdit    = document.getElementById('btnEdit');
+  const btnDelete  = document.getElementById('btnDelete');
+  const btnPdf     = document.getElementById('btnPdf');
+  const btnAddRule = document.getElementById('btnAddRule'); // maintenant un <button>
 
   btnEdit.href = urls.edit || '#';
-  btnPdf.href = urls.pdf || '#';
-  
-  const deleteForm = document.getElementById('deleteForm');
-  deleteForm.action = urls.delete || '#';
+  btnPdf.href  = urls.pdf  || '#';
+  document.getElementById('deleteForm').action = urls.delete    || '#';
   document.getElementById('deleteToken').value = urls.deleteToken || '';
 
-  // Si Manager (isAdmin = false), tout est grisé
   if (!isAdmin) {
-    btnEdit.classList.add('disabled');
-    btnEdit.style.pointerEvents = 'none';
-    btnEdit.style.opacity = '0.5';
-    btnEdit.style.backgroundColor = '#6c757d';
-    
-    btnDelete.disabled = true;
-    btnDelete.style.opacity = '0.5';
-    
-    btnPdf.classList.add('disabled');
-    btnPdf.style.pointerEvents = 'none';
-    btnPdf.style.opacity = '0.5';
-    btnPdf.style.backgroundColor = '#6c757d';
-    
-    btnAddRule.classList.add('disabled');
-    btnAddRule.style.pointerEvents = 'none';
-    btnAddRule.style.opacity = '0.5';
+    // ── Manager : tout grisé ──
+    [btnEdit, btnPdf].forEach(b => {
+      b.classList.add('disabled');
+      b.style.pointerEvents  = 'none';
+      b.style.opacity        = '0.5';
+      b.style.backgroundColor = '#6c757d';
+    });
+    btnDelete.disabled       = true;
+    btnDelete.style.opacity  = '0.5';
+
+    // btnAddRule est un <button> → on utilise .disabled
+    btnAddRule.disabled            = true;
+    btnAddRule.style.opacity       = '0.5';
     btnAddRule.style.backgroundColor = '#6c757d';
+
+  } else if (isPaid) {
+    // ── Admin + salaire payé ──
+    [btnEdit].forEach(b => {
+      b.classList.add('disabled');
+      b.style.pointerEvents = 'none';
+      b.style.opacity       = '0.5';
+    });
+    btnDelete.disabled      = true;
+    btnDelete.style.opacity = '0.5';
+
+    btnAddRule.disabled            = true;
+    btnAddRule.style.opacity       = '0.5';
+    btnAddRule.style.backgroundColor = '#6c757d';
+
   } else {
-    // Si Admin mais salaire payé
-    if (isPaid) {
-      btnEdit.classList.add('disabled');
-      btnEdit.style.pointerEvents = 'none';
-      btnEdit.style.opacity = '0.5';
-      
-      btnDelete.disabled = true;
-      btnDelete.style.opacity = '0.5';
-      
-      btnAddRule.classList.add('disabled');
-      btnAddRule.style.pointerEvents = 'none';
-      btnAddRule.style.opacity = '0.5';
-    } else {
-      btnEdit.classList.remove('disabled');
-      btnEdit.style.pointerEvents = '';
-      btnEdit.style.opacity = '';
-      btnEdit.style.backgroundColor = '';
-      
-      btnDelete.disabled = false;
-      btnDelete.style.opacity = '';
-      
-      btnAddRule.classList.remove('disabled');
-      btnAddRule.style.pointerEvents = '';
-      btnAddRule.style.opacity = '';
-    }
+    // ── Admin + salaire non payé : tout actif ──
+    [btnEdit].forEach(b => {
+      b.classList.remove('disabled');
+      b.style.pointerEvents  = '';
+      b.style.opacity        = '';
+      b.style.backgroundColor = '';
+    });
+    btnDelete.disabled      = false;
+    btnDelete.style.opacity = '';
+
+    btnAddRule.disabled            = false;
+    btnAddRule.style.opacity       = '';
+    btnAddRule.style.backgroundColor = '#8b5cf6';
   }
 
   loadBonusRules(id, status);
@@ -447,51 +780,57 @@ function loadBonusRules(salaireId, salaireStatus) {
 
   if (rules.length === 0) {
     container.innerHTML = `
-      <div class="text-center text-muted py-4" style="background: #f8fafc; border-radius: 8px; font-size: 12px;">
-        <i class="bi bi-inbox mb-2 d-block" style="font-size: 24px; opacity: 0.5;"></i>
+      <div class="text-center text-muted py-4"
+           style="background:#f8fafc;border-radius:8px;font-size:12px;">
+        <i class="bi bi-inbox mb-2 d-block" style="font-size:24px;opacity:0.5;"></i>
         Aucune règle de bonus pour ce salaire.
       </div>`;
     return;
   }
 
   container.innerHTML = rules.map(rule => {
-    // Pour Manager : tout grisé. Pour Admin : grisé si salaire payé ou règle active
-    const isLocked = !isAdmin || rule.status === 'ACTIVE' || salaireStatus === 'PAYÉ';
-    
-    const conditionText = rule.conditionText ? 
-      (rule.conditionText.length > 30 ? rule.conditionText.substring(0, 30) + '...' : rule.conditionText) 
+    const isLocked  = !isAdmin || rule.status === 'ACTIVE' || salaireStatus === 'PAYÉ';
+    const condText  = rule.conditionText
+      ? (rule.conditionText.length > 30 ? rule.conditionText.substring(0, 30) + '...' : rule.conditionText)
       : '-';
+    const lockTitle = !isAdmin ? 'Accès réservé aux administrateurs' : 'Verrouillé';
 
     const editBtn = isLocked
-      ? `<button class="btn-action-sm" style="background: #e2e8f0; color: #64748b;" disabled title="${!isAdmin ? 'Accès réservé aux administrateurs' : 'Verrouillé'}">
+      ? `<button class="btn-action-sm" style="background:#e2e8f0;color:#64748b;"
+                 disabled title="${lockTitle}">
            <i class="bi bi-pencil-square"></i>
          </button>`
-      : `<a href="${rule.editUrl}" class="btn-action-sm" style="background: #0d6efd; color: white; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">
+      : `<a href="${rule.editUrl}" class="btn-action-sm"
+            style="background:#0d6efd;color:white;display:inline-flex;
+                   align-items:center;justify-content:center;text-decoration:none;">
            <i class="bi bi-pencil-square"></i>
          </a>`;
 
     const delBtn = isLocked
-      ? `<button class="btn-action-sm" style="background: #e2e8f0; color: #64748b;" disabled title="${!isAdmin ? 'Accès réservé aux administrateurs' : 'Verrouillé'}">
+      ? `<button class="btn-action-sm" style="background:#e2e8f0;color:#64748b;"
+                 disabled title="${lockTitle}">
            <i class="bi bi-trash"></i>
          </button>`
-      : `<form method="POST" action="${rule.deleteUrl}" style="display:inline; margin:0;" onsubmit="return confirm('Supprimer cette règle ?')">
+      : `<form method="POST" action="${rule.deleteUrl}"
+               style="display:inline;margin:0;"
+               onsubmit="return confirm('Supprimer cette règle ?')">
            <input type="hidden" name="_token" value="${rule.deleteToken}">
-           <button type="submit" class="btn-action-sm" style="background: #dc3545; color: white;">
+           <button type="submit" class="btn-action-sm"
+                   style="background:#dc3545;color:white;">
              <i class="bi bi-trash"></i>
            </button>
          </form>`;
 
     return `
       <div class="bonus-rule-row row">
-        <div class="col-1 fw-bold text-muted" style="font-size: 11px;">#${rule.id}</div>
-        <div class="col-3 fw-semibold text-truncate-custom" style="color: #1e293b;" title="${rule.nomRegle}">${rule.nomRegle}</div>
-        <div class="col-2 fw-bold" style="color: #059669;">${rule.percentage}%</div>
-        <div class="col-4 text-muted text-truncate-custom" style="font-size: 11px;" title="${rule.conditionText ?? ''}">
-          ${conditionText}
-        </div>
+        <div class="col-1 fw-bold text-muted" style="font-size:11px;">#${rule.id}</div>
+        <div class="col-3 fw-semibold text-truncate-custom"
+             style="color:#1e293b;" title="${rule.nomRegle}">${rule.nomRegle}</div>
+        <div class="col-2 fw-bold" style="color:#059669;">${rule.percentage}%</div>
+        <div class="col-4 text-muted text-truncate-custom"
+             style="font-size:11px;" title="${rule.conditionText ?? ''}">${condText}</div>
         <div class="col-2 text-end d-flex gap-1 justify-content-end">
-          ${editBtn}
-          ${delBtn}
+          ${editBtn}${delBtn}
         </div>
       </div>`;
   }).join('');
@@ -499,21 +838,64 @@ function loadBonusRules(salaireId, salaireStatus) {
 
 function formatDT(amount) {
   return parseFloat(amount).toLocaleString('fr-TN', {
-    minimumFractionDigits: 2, maximumFractionDigits: 2
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
   }) + ' DT';
 }
 
 function goToAddRule() {
-  if (!isAdmin) {
-    alert("Cette action est réservée aux administrateurs.");
-    return;
+  if (!isAdmin)   { alert("Cette action est réservée aux administrateurs."); return; }
+  if (!activeRow) { alert("Veuillez sélectionner un salaire"); return; }
+  window.location.href = `/bonus-rule/new?salaireId=${activeRow.dataset.id}`;
+}
+
+// ─── Modal Export Excel ───────────────────────────────────────
+function openExcelModal()  {
+  document.getElementById('modalExportExcel').classList.add('open');
+}
+function closeExcelModal() {
+  document.getElementById('modalExportExcel').classList.remove('open');
+}
+
+document.getElementById('modalExportExcel').addEventListener('click', function(e) {
+  if (e.target === this) closeExcelModal();
+});
+
+function switchPeriode(value) {
+  ['panelMois', 'panelAnnee', 'panelPerso'].forEach(id =>
+    document.getElementById(id).classList.remove('active')
+  );
+  if (value === 'MOIS')          document.getElementById('panelMois').classList.add('active');
+  else if (value === 'ANNEE')    document.getElementById('panelAnnee').classList.add('active');
+  else if (value === 'PERSONNALISEE') document.getElementById('panelPerso').classList.add('active');
+  refreshFilename();
+}
+
+const MOIS_NOMS = ['janvier','fevrier','mars','avril','mai','juin',
+                   'juillet','aout','septembre','octobre','novembre','decembre'];
+
+function refreshFilename() {
+  const input    = document.getElementById('excelFilename');
+  const sel      = document.querySelector('input[name="periode_type"]:checked');
+  const type     = sel ? sel.value : 'TOUS';
+  const today    = new Date();
+  const pad      = n => String(n).padStart(2, '0');
+  const todayStr = `${pad(today.getDate())}-${pad(today.getMonth()+1)}-${today.getFullYear()}`;
+
+  if (type === 'MOIS') {
+    const m = document.querySelector('select[name="mois"]')?.value || (today.getMonth() + 1);
+    const y = document.querySelector('select[name="annee_mois"]')?.value || today.getFullYear();
+    input.value = `salaires_${MOIS_NOMS[parseInt(m) - 1]}_${y}.xlsx`;
+  } else if (type === 'ANNEE') {
+    const y = document.querySelector('select[name="annee"]')?.value || today.getFullYear();
+    input.value = `salaires_${y}.xlsx`;
+  } else if (type === 'PERSONNALISEE') {
+    const d1 = document.querySelector('input[name="date_debut"]')?.value || '';
+    const d2 = document.querySelector('input[name="date_fin"]')?.value   || '';
+    input.value = `salaires_${d1}_au_${d2}.xlsx`;
+  } else {
+    input.value = `salaires_complet_${todayStr}.xlsx`;
   }
-  if (!activeRow) {
-    alert("Veuillez sélectionner un salaire");
-    return;
-  }
-  const salaireId = activeRow.dataset.id;
-  window.location.href = `/bonus-rule/new?salaireId=${salaireId}`;
 }
 </script>
 
