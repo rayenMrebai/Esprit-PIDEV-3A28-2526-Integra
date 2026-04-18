@@ -6,6 +6,7 @@ use App\Entity\UserAccount;
 use App\Form\UserEditFormType;
 use App\Form\RegistrationFormType;
 use App\Repository\UserAccountRepository;
+use App\Service\SalaireStatisticsService;
 use Doctrine\ORM\EntityManagerInterface;
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -21,15 +22,20 @@ class AdminController extends AbstractController
 {
     #[Route('/dashboard', name: 'app_dashboard')]
     #[IsGranted('ROLE_MANAGER')]
-    public function dashboard(UserAccountRepository $repo): Response
-    {
-        $totalUsers = $repo->count([]);
+    public function dashboard(
+        UserAccountRepository    $repo,
+        SalaireStatisticsService $statsService
+    ): Response {
+        $totalUsers  = $repo->count([]);
         $activeUsers = $repo->count(['isActive' => true]);
-        $stats = $repo->countActiveVsInactive();
+        $stats       = $repo->countActiveVsInactive();
+        $salStats    = $statsService->getStatistics();
+
         return $this->render('admin/dashboard.html.twig', [
-            'totalUsers' => $totalUsers,
+            'totalUsers'  => $totalUsers,
             'activeUsers' => $activeUsers,
-            'stats' => $stats,
+            'stats'       => $stats,
+            'salStats'    => $salStats,
         ]);
     }
 
@@ -38,11 +44,12 @@ class AdminController extends AbstractController
     public function list(UserAccountRepository $repo, Request $request): Response
     {
         $search = $request->query->get('search', '');
-        $role = $request->query->get('role', '');
-        $users = $repo->findByRoleAndSearch($role ?: null, $search ?: null);
+        $role   = $request->query->get('role', '');
+        $users  = $repo->findByRoleAndSearch($role ?: null, $search ?: null);
+
         return $this->render('admin/user_list.html.twig', [
-            'users' => $users,
-            'search' => $search,
+            'users'        => $users,
+            'search'       => $search,
             'selectedRole' => $role,
         ]);
     }
@@ -56,8 +63,11 @@ class AdminController extends AbstractController
 
     #[Route('/user/{id}/edit', name: 'admin_user_edit')]
     #[IsGranted('ROLE_ADMIN')]
-    public function edit(UserAccount $user, Request $request, EntityManagerInterface $em): Response
-    {
+    public function edit(
+        UserAccount            $user,
+        Request                $request,
+        EntityManagerInterface $em
+    ): Response {
         $form = $this->createForm(UserEditFormType::class, $user);
         $form->handleRequest($request);
 
@@ -69,27 +79,34 @@ class AdminController extends AbstractController
 
         return $this->render('admin/user_edit.html.twig', [
             'form' => $form->createView(),
-            'user' => $user
+            'user' => $user,
         ]);
     }
 
     #[Route('/add-user', name: 'admin_add_user')]
     #[IsGranted('ROLE_ADMIN')]
-    public function add(Request $request, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $em): Response
-    {
+    public function add(
+        Request                     $request,
+        UserPasswordHasherInterface $passwordHasher,
+        EntityManagerInterface      $em
+    ): Response {
         $user = new UserAccount();
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $user->setPasswordHash($passwordHasher->hashPassword($user, $form->get('plainPassword')->getData()));
+            $user->setPasswordHash(
+                $passwordHasher->hashPassword($user, $form->get('plainPassword')->getData())
+            );
             $em->persist($user);
             $em->flush();
             $this->addFlash('success', 'User added successfully.');
             return $this->redirectToRoute('admin_user_list');
         }
 
-        return $this->render('admin/add_user.html.twig', ['form' => $form->createView()]);
+        return $this->render('admin/add_user.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
 
     #[Route('/user/{id}/toggle', name: 'admin_user_toggle')]
@@ -104,15 +121,19 @@ class AdminController extends AbstractController
 
     #[Route('/user/{id}/delete', name: 'admin_user_delete')]
     #[IsGranted('ROLE_ADMIN')]
-    public function delete(UserAccount $user, EntityManagerInterface $em, Request $request): Response
-    {
-        if ($this->isCsrfTokenValid('delete'.$user->getUserId(), $request->request->get('_token'))) {
+    public function delete(
+        UserAccount            $user,
+        EntityManagerInterface $em,
+        Request                $request
+    ): Response {
+        if ($this->isCsrfTokenValid('delete' . $user->getUserId(), $request->request->get('_token'))) {
             $em->remove($user);
             $em->flush();
             $this->addFlash('success', 'User deleted.');
         } else {
             $this->addFlash('error', 'Invalid CSRF token.');
         }
+
         return $this->redirectToRoute('admin_user_list');
     }
 
@@ -121,22 +142,24 @@ class AdminController extends AbstractController
     public function exportPdf(UserAccountRepository $repo, Request $request): Response
     {
         $search = $request->query->get('search', '');
-        $role = $request->query->get('role', '');
-        $users = $repo->findByRoleAndSearch($role ?: null, $search ?: null);
+        $role   = $request->query->get('role', '');
+        $users  = $repo->findByRoleAndSearch($role ?: null, $search ?: null);
 
         $html = $this->renderView('admin/user_list_pdf.html.twig', [
-            'users' => $users,
+            'users'       => $users,
             'generatedAt' => new \DateTime(),
         ]);
 
         $options = new Options();
         $options->set('defaultFont', 'Arial');
+
         $dompdf = new Dompdf($options);
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'landscape');
         $dompdf->render();
+
         return new Response($dompdf->output(), 200, [
-            'Content-Type' => 'application/pdf',
+            'Content-Type'        => 'application/pdf',
             'Content-Disposition' => 'attachment; filename="users_list.pdf"',
         ]);
     }
