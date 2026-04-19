@@ -61,11 +61,15 @@ class UserAccount implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToOne(mappedBy: "userAccount", cascade: ["persist", "remove"])]
     private ?UserSetting $userSetting = null;
 
+    #[ORM\OneToMany(mappedBy: 'userAccount', targetEntity: PasswordResetToken::class, cascade: ['persist', 'remove'])]
+    private Collection $passwordResetTokens;
+
     public function __construct()
     {
         $this->salaires           = new ArrayCollection();
         $this->accountCreatedDate = new \DateTime();
         $this->role = 'EMPLOYE';
+        $this->passwordResetTokens = new ArrayCollection();
     }
 
     
@@ -93,6 +97,11 @@ class UserAccount implements UserInterface, PasswordAuthenticatedUserInterface
     // UserSetting relation
     public function getUserSetting(): ?UserSetting { return $this->userSetting; }
     public function setUserSetting(?UserSetting $userSetting): self { $this->userSetting = $userSetting; return $this; }
+
+    public function getPasswordResetTokens(): Collection 
+    { 
+        return $this->passwordResetTokens; 
+    }
 
     // Required by UserInterface
     public function getUserIdentifier(): string { return $this->username; }

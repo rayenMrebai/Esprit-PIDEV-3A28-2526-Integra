@@ -13,7 +13,7 @@ class UserSetting
     #[ORM\Column(type: 'integer', name: 'settingsId')]
     private ?int $settingsId = null;
 
-    #[ORM\OneToOne(targetEntity: UserAccount::class)]
+    #[ORM\OneToOne(targetEntity: UserAccount::class, inversedBy: 'userSetting')]
     #[ORM\JoinColumn(name: 'userId', referencedColumnName: 'userId', unique: true)]
     private ?UserAccount $userAccount = null;
 

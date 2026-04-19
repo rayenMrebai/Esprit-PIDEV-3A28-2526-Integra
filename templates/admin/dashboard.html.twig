@@ -341,12 +341,13 @@
               {% endif %}
             </span>
           </div>
-          <div class="r2-bar-wrap">
+          {% set r2Width = salStats.prediction.r2 > 100 ? 100 : salStats.prediction.r2 %}
+        <div class="r2-bar-wrap">
             <div class="r2-bar-fill"
-                 style="width:{{ [salStats.prediction.r2, 100]|min }}%;
+                style="width:{{ r2Width }}%;
                         background:{% if salStats.prediction.r2 >= 70 %}#86efac{% elseif salStats.prediction.r2 >= 50 %}#fde68a{% else %}#fca5a5{% endif %};">
             </div>
-          </div>
+        </div>
           <div style="font-size:10px;margin-top:8px;opacity:.8;line-height:1.6;">
             ≥ 70% Excellente &nbsp;|&nbsp; 50–70% Modérée &nbsp;|&nbsp; &lt; 50% Insuffisante
           </div>
