@@ -7,6 +7,9 @@
 /public/bundles/
 /var/
 /vendor/
+/public/adminlte/
+/public/employee/
+/public/images/
 ###< symfony/framework-bundle ###
 
 ###> phpunit/phpunit ###
