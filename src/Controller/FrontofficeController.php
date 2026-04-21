@@ -258,7 +258,7 @@ public function quizSubmit(
     Quiz_result $quiz,
     Request $request,
     EntityManagerInterface $em,
-    CertificatMailer $certificatMailer  // ✅ injecter ici
+    CertificatMailer $certificatMailer
 ): Response {
     $user = $this->getUser();
 
@@ -267,7 +267,7 @@ public function quizSubmit(
     }
 
     if ($quiz->getCompletedAt() !== null) {
-        $this->addFlash('warning', 'Vous avez déjà complété ce quiz.');
+        $this->addFlash('warning', 'Vous avez deja complete ce quiz.');
         return $this->redirectToRoute('app_frontoffice_quiz');
     }
 
@@ -293,23 +293,25 @@ public function quizSubmit(
 
     $em->flush();
 
-    // ✅ Envoyer le certificat uniquement si réussi
     if ($passed) {
         try {
             $certificatMailer->sendCertificat($quiz);
             $this->addFlash('success', sprintf(
-                'Quiz réussi ! Score : %d/%d (%.0f%%) ✅ — Votre certificat a été envoyé par email.',
-                $score, $totalQuestions, $percentage
+                'Quiz reussi ! Score : %d/%d (%.0f%%) - Votre certificat a ete envoye a %s',
+                $score,
+                $totalQuestions,
+                $percentage,
+                $user->getEmail()  // ✅ affiche l'email destinataire dans le flash
             ));
         } catch (\Exception $e) {
-            $this->addFlash('success', sprintf(
-                'Quiz réussi ! Score : %d/%d (%.0f%%) ✅ — (Erreur envoi email : %s)',
+            $this->addFlash('warning', sprintf(
+                'Quiz reussi ! Score : %d/%d (%.0f%%) - Erreur envoi email : %s',
                 $score, $totalQuestions, $percentage, $e->getMessage()
             ));
         }
     } else {
         $this->addFlash('warning', sprintf(
-            'Quiz échoué. Score : %d/%d (%.0f%%) ❌ — Score minimum requis : 60%%.',
+            'Quiz echoue. Score : %d/%d (%.0f%%) - Score minimum requis : 60%%.',
             $score, $totalQuestions, $percentage
         ));
     }
