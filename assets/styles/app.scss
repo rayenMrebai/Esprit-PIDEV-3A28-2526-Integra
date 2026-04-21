@@ -1,0 +1,48 @@
+// Importer Bootstrap (obligatoire pour AdminLTE)
+@import '~bootstrap/scss/bootstrap';
+
+// Importer FontAwesome
+@import '~@fortawesome/fontawesome-free/css/all.min.css';
+
+// Importer AdminLTE (le chemin correct avec ~)
+@import '~admin-lte/dist/css/adminlte.min.css';
+
+// Vos styles personnalisés
+:root {
+  --integra-blue: #0B63CE;
+  --integra-green: #0FA36B;
+}
+
+.btn-integra {
+  background: linear-gradient(to right, var(--integra-blue), var(--integra-green));
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 10px 28px;
+  font-weight: 600;
+}
+.btn-integra:hover {
+  opacity: 0.9;
+  color: white;
+}
+.brand-link {
+  background: linear-gradient(to right, var(--integra-blue), var(--integra-green)) !important;
+}
+.integra-badge-role {
+  background-color: var(--integra-blue);
+  color: white;
+  padding: 3px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+.integra-badge-status {
+  background-color: var(--integra-green);
+  color: white;
+  padding: 3px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+.card {
+  border-radius: 16px !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.07) !important;
+}

@@ -1,0 +1,13 @@
+{{ form_start(form, {'attr': {'class': 'form-grid', 'novalidate': 'novalidate'}}) }}
+<div class="form-group">{{ form_row(form.firstName, {'attr': {'class': 'form-control'}}) }}</div>
+<div class="form-group">{{ form_row(form.lastName, {'attr': {'class': 'form-control'}}) }}</div>
+<div class="form-group">{{ form_row(form.email, {'attr': {'class': 'form-control'}}) }}</div>
+<div class="form-group">{{ form_row(form.phone, {'attr': {'class': 'form-control'}}) }}</div>
+<div class="form-group">{{ form_row(form.educationLevel, {'attr': {'class': 'form-control'}}) }}</div>
+<div class="form-group">{{ form_row(form.status, {'attr': {'class': 'form-control'}}) }}</div>
+<div class="form-group full">{{ form_row(form.skills, {'attr': {'class': 'form-control', 'rows': 3}}) }}</div>
+<div class="form-group full">{{ form_row(form.jobposition, {'attr': {'class': 'form-control'}}) }}</div>
+<div class="modal-footer" style="grid-column: span 2; padding: 0; margin-top: 20px;">
+    <button class="btn btn-success">{{ button_label|default('Enregistrer') }}</button>
+</div>
+{{ form_end(form) }}

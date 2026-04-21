@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier une offre{% endblock %}
+
+{% block body %}
+    <div class="dashboard-container">
+        <div class="main-header">
+            <div class="logo-area">
+                <div class="logo-icon">IN</div>
+                <div class="logo-text">
+                    <h1>INTEGRA RECRUITMENT</h1>
+                    <p>Modification offre</p>
+                </div>
+            </div>
+            <div>
+                <div class="user-info">
+                    <strong>{{ app.user.username|default('Admin User') }}</strong><br>
+                    <span>{{ app.user.role|default('Administrateur') }}</span>
+                </div>
+                <a href="{{ path('app_recruitment_dashboard') }}" class="btn btn-outline-light">Retour</a>
+            </div>
+        </div>
+
+        <div class="card-modern" style="max-width: 800px; margin: 30px auto;">
+            <div class="section-header">
+                <div class="section-title"><i class="fas fa-edit"></i> Modifier l'offre</div>
+            </div>
+            {{ include('jobposition/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
+        </div>
+    </div>
+{% endblock %}

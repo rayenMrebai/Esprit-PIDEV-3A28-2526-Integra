@@ -1,0 +1,68 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block page_title %}Dashboard{% endblock %}
+{% block breadcrumb %}Dashboard{% endblock %}
+
+{% block admin_content %}
+    <div class="row">
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-info">
+                <div class="inner">
+                    <h3>{{ totalUsers }}</h3>
+                    <p>Total Users</p>
+                </div>
+                <div class="icon"><i class="fas fa-users"></i></div>
+                <a href="{{ path('admin_user_list') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+            </div>
+        </div>
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-success">
+                <div class="inner">
+                    <h3>{{ activeUsers }}</h3>
+                    <p>Active Users</p>
+                </div>
+                <div class="icon"><i class="fas fa-user-check"></i></div>
+                <a href="{{ path('admin_user_list') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Active vs Inactive Users</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="userChart" style="height: 300px; width: 100%;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('userChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Active', 'Inactive'],
+                datasets: [{
+                    data: [{{ stats.active }}, {{ stats.inactive }}],
+                    backgroundColor: ['#28a745', '#dc3545'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'base_front.html.twig' %}
+
+{% block title %}{{ job.title }}{% endblock %}
+
+{% block header_title %}{{ job.title }}{% endblock %}
+{% block header_subtitle %}{{ job.departement }} • {{ job.employeeType }} • {{ job.status }}{% endblock %}
+
+{% block content %}
+    <div class="post-preview">
+        <h2>Description du poste</h2>
+        <p>{{ job.description }}</p>
+        <p><strong>Département :</strong> {{ job.departement }}</p>
+        <p><strong>Type d'emploi :</strong> {{ job.employeeType }}</p>
+        <p><strong>Statut :</strong>
+            <span class="badge {{ job.status == 'Open' ? 'bg-success' : 'bg-secondary' }}">{{ job.status }}</span>
+        </p>
+        <p><strong>Date de publication :</strong> {{ job.postedAt|date('d/m/Y') }}</p>
+    </div>
+    <hr class="my-4" />
+    <div class="text-center">
+        <a href="{{ path('app_login') }}" class="btn btn-primary">Postuler (connexion requise)</a>
+        <a href="{{ path('front_home') }}" class="btn btn-outline-secondary">Retour aux offres</a>
+    </div>
+{% endblock %}

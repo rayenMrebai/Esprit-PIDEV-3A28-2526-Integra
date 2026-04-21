@@ -1,0 +1,34 @@
+{% extends 'base_front.html.twig' %}
+
+{% block title %}Offres d'emploi{% endblock %}
+
+{% block header_title %}INTEGRA RECRUTEMENT{% endblock %}
+{% block header_subtitle %}Découvrez nos offres d'emploi{% endblock %}
+
+{% block content %}
+    <div class="post-preview">
+        <h2 class="post-title">Bienvenue sur INTEGRA RH</h2>
+        <p class="post-subtitle">Plateforme de gestion des ressources humaines et du recrutement.</p>
+    </div>
+    <hr class="my-4" />
+
+    <h3 class="mb-4" id="offres">📌 Offres d'emploi</h3>
+
+    {% for job in jobs %}
+        <div class="post-preview">
+            <a href="{{ path('front_job_show', {'id': job.idJob}) }}" style="text-decoration: none;">
+                <h3 class="post-title" style="color: #0B63CE;">{{ job.title }}</h3>
+                <p class="post-subtitle">{{ job.description|default('')|slice(0, 120) }}{% if job.description|length > 120 %}...{% endif %}</p>
+            </a>
+            <p class="post-meta">
+                <span class="badge bg-primary">{{ job.departement }}</span>
+                <span class="badge bg-secondary">{{ job.employeeType }}</span>
+                <span class="badge {{ job.status == 'Open' ? 'bg-success' : 'bg-secondary' }}">{{ job.status }}</span>
+                <span class="ms-3"><i class="far fa-calendar-alt"></i> Publiée le {{ job.postedAt|date('d/m/Y') }}</span>
+            </p>
+        </div>
+        {% if not loop.last %}<hr class="my-4" />{% endif %}
+    {% else %}
+        <p>Aucune offre d'emploi disponible pour le moment.</p>
+    {% endfor %}
+{% endblock %}

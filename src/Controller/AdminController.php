@@ -1,0 +1,143 @@
+<?php
+
+namespace App\Controller;
+
+use App\Entity\UserAccount;
+use App\Form\UserEditFormType;
+use App\Form\RegistrationFormType;
+use App\Repository\UserAccountRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Dompdf\Dompdf;
+use Dompdf\Options;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+
+#[Route('/admin')]
+class AdminController extends AbstractController
+{
+    #[Route('/dashboard', name: 'app_dashboard')]
+    #[IsGranted('ROLE_MANAGER')]
+    public function dashboard(UserAccountRepository $repo): Response
+    {
+        $totalUsers = $repo->count([]);
+        $activeUsers = $repo->count(['isActive' => true]);
+        $stats = $repo->countActiveVsInactive();
+        return $this->render('admin/dashboard.html.twig', [
+            'totalUsers' => $totalUsers,
+            'activeUsers' => $activeUsers,
+            'stats' => $stats,
+        ]);
+    }
+
+    #[Route('/users', name: 'admin_user_list')]
+    #[IsGranted('ROLE_MANAGER')]
+    public function list(UserAccountRepository $repo, Request $request): Response
+    {
+        $search = $request->query->get('search', '');
+        $role = $request->query->get('role', '');
+        $users = $repo->findByRoleAndSearch($role ?: null, $search ?: null);
+        return $this->render('admin/user_list.html.twig', [
+            'users' => $users,
+            'search' => $search,
+            'selectedRole' => $role,
+        ]);
+    }
+
+    #[Route('/user/{id}', name: 'admin_user_show')]
+    #[IsGranted('ROLE_MANAGER')]
+    public function show(UserAccount $user): Response
+    {
+        return $this->render('admin/user_show.html.twig', ['user' => $user]);
+    }
+
+    #[Route('/user/{id}/edit', name: 'admin_user_edit')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function edit(UserAccount $user, Request $request, EntityManagerInterface $em): Response
+    {
+        $form = $this->createForm(UserEditFormType::class, $user);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->flush();
+            $this->addFlash('success', 'User updated.');
+            return $this->redirectToRoute('admin_user_list');
+        }
+
+        return $this->render('admin/user_edit.html.twig', [
+            'form' => $form->createView(),
+            'user' => $user
+        ]);
+    }
+
+    #[Route('/add-user', name: 'admin_add_user')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function add(Request $request, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $em): Response
+    {
+        $user = new UserAccount();
+        $form = $this->createForm(RegistrationFormType::class, $user);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $user->setPasswordHash($passwordHasher->hashPassword($user, $form->get('plainPassword')->getData()));
+            $em->persist($user);
+            $em->flush();
+            $this->addFlash('success', 'User added successfully.');
+            return $this->redirectToRoute('admin_user_list');
+        }
+
+        return $this->render('admin/add_user.html.twig', ['form' => $form->createView()]);
+    }
+
+    #[Route('/user/{id}/toggle', name: 'admin_user_toggle')]
+    #[IsGranted('ROLE_MANAGER')]
+    public function toggleActive(UserAccount $user, EntityManagerInterface $em): Response
+    {
+        $user->setIsActive(!$user->getIsActive());
+        $em->flush();
+        $this->addFlash('success', 'User status changed.');
+        return $this->redirectToRoute('admin_user_list');
+    }
+
+    #[Route('/user/{id}/delete', name: 'admin_user_delete')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function delete(UserAccount $user, EntityManagerInterface $em, Request $request): Response
+    {
+        if ($this->isCsrfTokenValid('delete'.$user->getUserId(), $request->request->get('_token'))) {
+            $em->remove($user);
+            $em->flush();
+            $this->addFlash('success', 'User deleted.');
+        } else {
+            $this->addFlash('error', 'Invalid CSRF token.');
+        }
+        return $this->redirectToRoute('admin_user_list');
+    }
+
+    #[Route('/users/export-pdf', name: 'admin_export_pdf')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function exportPdf(UserAccountRepository $repo, Request $request): Response
+    {
+        $search = $request->query->get('search', '');
+        $role = $request->query->get('role', '');
+        $users = $repo->findByRoleAndSearch($role ?: null, $search ?: null);
+
+        $html = $this->renderView('admin/user_list_pdf.html.twig', [
+            'users' => $users,
+            'generatedAt' => new \DateTime(),
+        ]);
+
+        $options = new Options();
+        $options->set('defaultFont', 'Arial');
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->render();
+        return new Response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="users_list.pdf"',
+        ]);
+    }
+}
