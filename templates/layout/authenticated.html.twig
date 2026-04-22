@@ -1,0 +1,28 @@
+{# templates/layout/authenticated.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="authenticated-wrapper d-flex">
+        <!-- Sidebar -->
+        {% include 'partials/sidebar.html.twig' %}
+
+        <!-- Main content -->
+        <div class="main-content" style="margin-left: 260px; width: calc(100% - 260px); min-height: 100vh;">
+            <div class="container-fluid py-4">
+                {% for message in app.flashes('success') %}
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+                {% for message in app.flashes('error') %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+                {% block authenticated_content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

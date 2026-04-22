@@ -4,8 +4,73 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b41a7ed28a74b87e2114d5290ef10bac",
+    "content-hash": "877342a7d65d0668ab2b40d309a0f6a1",
     "packages": [
+        {
+            "name": "addweb/gtranslate-bundle",
+            "version": "0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/AddWebSolution/symfony-gtranslate.git",
+                "reference": "fe900468bd47d2b856560063246ab8bc368d1047"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/AddWebSolution/symfony-gtranslate/zipball/fe900468bd47d2b856560063246ab8bc368d1047",
+                "reference": "fe900468bd47d2b856560063246ab8bc368d1047",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.1",
+                "symfony/framework-bundle": "^6.4 || ^7.0"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^1.11",
+                "phpunit/phpunit": "^10.5",
+                "symfony/phpunit-bridge": "^6.4 || ^7.0",
+                "twig/twig": "^3.10"
+            },
+            "suggest": {
+                "symfony/twig-bundle": "Required to use the Twig function `gtranslate_widget`"
+            },
+            "type": "symfony-bundle",
+            "extra": {
+                "symfony": {
+                    "bundle": {
+                        "AddWeb\\GtranslateBundle\\GtranslateBundle": "all"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "AddWeb\\GtranslateBundle\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "AddWeb Solution Pvt Ltd",
+                    "email": "contact@addwebsolution.com"
+                }
+            ],
+            "description": "A Symfony bundle that integrates the GTranslate.io widget, providing a Twig function and configurable service to easily add automatic website translation.",
+            "keywords": [
+                "bundle",
+                "gtranslate",
+                "multilingual",
+                "symfony",
+                "translation",
+                "widget"
+            ],
+            "support": {
+                "issues": "https://github.com/AddWebSolution/symfony-gtranslate/issues",
+                "source": "https://github.com/AddWebSolution/symfony-gtranslate/tree/0.1"
+            },
+            "time": "2025-10-14T07:44:45+00:00"
+        },
         {
             "name": "composer/semver",
             "version": "3.4.4",

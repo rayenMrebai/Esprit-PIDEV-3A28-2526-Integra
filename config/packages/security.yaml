@@ -15,10 +15,12 @@ security:
         main:
             lazy: true
             provider: app_user_provider
+            user_checker: App\Security\UserChecker
             custom_authenticator: App\Security\LoginFormAuthenticator
+            entry_point: App\Security\LoginFormAuthenticator
             logout:
                 path: app_logout
-                target: front_home              # ← redirection après déconnexion vers l'accueil front
+                target: front_home              # ← redirection vers l'accueil front (Wala)
             # remember_me removed as requested
 
     role_hierarchy:
@@ -28,7 +30,15 @@ security:
     access_control:
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/register, roles: PUBLIC_ACCESS }
-        - { path: ^/recruitment, roles: ROLE_MANAGER }   # protège ton dashboard
-        - { path: ^/admin, roles: ROLE_MANAGER }
+        - { path: ^/recruitment, roles: ROLE_MANAGER }   # Dashboard recrutement (Wala)
+        - { path: ^/admin, roles: ROLE_MANAGER }        # Interface admin (ami)
         - { path: ^/profile, roles: ROLE_USER }
-        # Les autres routes (dont /) sont accessibles à tous par défaut
+
+when@test:
+    security:
+        password_hashers:
+            App\Entity\UserAccount:
+                algorithm: auto
+                cost: 4
+                time_cost: 3
+                memory_cost: 10

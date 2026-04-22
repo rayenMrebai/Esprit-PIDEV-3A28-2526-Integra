@@ -61,6 +61,7 @@
                                 <a href="{{ path('admin_user_edit', {id: user.userId}) }}" class="btn btn-sm btn-warning">Edit</a>
                             {% endif %}
                             <a href="{{ path('admin_user_toggle', {id: user.userId}) }}" class="btn btn-sm btn-secondary">Toggle Active</a>
+                            <button class="btn btn-sm btn-primary ai-advice-btn" data-user-id="{{ user.userId }}">✨ AI Advice</button>
                             {% if is_granted('ROLE_ADMIN') %}
                                 <form action="{{ path('admin_user_delete', {id: user.userId}) }}" method="post" style="display:inline-block" onsubmit="return confirm('Delete this user permanently?')">
                                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.userId) }}">
@@ -76,4 +77,49 @@
             </table>
         </div>
     </div>
+
+    <!-- Modal for AI Advice -->
+    <div class="modal fade" id="aiAdviceModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title">✨ AI Recommendation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="aiAdviceBody">
+                    Loading...
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const buttons = document.querySelectorAll('.ai-advice-btn');
+            const modal = new bootstrap.Modal(document.getElementById('aiAdviceModal'));
+            const modalBody = document.getElementById('aiAdviceBody');
+
+            buttons.forEach(button => {
+                button.addEventListener('click', async function() {
+                    const userId = this.dataset.userId;
+                    modalBody.innerHTML = '⏳ Contacting AI, please wait...';
+                    modal.show();
+
+                    try {
+                        const response = await fetch(`/admin/user/${userId}/ai-advice`);
+                        const data = await response.json();
+                        modalBody.innerHTML = data.advice;
+                    } catch (error) {
+                        modalBody.innerHTML = '❌ Error: ' + error.message;
+                    }
+                });
+            });
+        });
+    </script>
 {% endblock %}
