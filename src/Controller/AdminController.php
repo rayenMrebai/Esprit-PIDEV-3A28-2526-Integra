@@ -23,7 +23,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 class AdminController extends AbstractController
 {
     #[Route('/user/{id}/ai-advice', name: 'admin_user_ai_advice')]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted('ROLE_MANAGER')]   // Changed from ROLE_ADMIN to ROLE_MANAGER
     public function aiAdvice(UserAccount $user, HuggingFaceService $ai): JsonResponse
     {
         try {
@@ -44,6 +44,7 @@ class AdminController extends AbstractController
             return $this->json(['advice' => 'AI error: ' . $e->getMessage()], 500);
         }
     }
+
     #[Route('/dashboard', name: 'app_dashboard')]
     #[IsGranted('ROLE_MANAGER')]
     public function dashboard(UserAccountRepository $repo, HttpClientInterface $httpClient): Response
