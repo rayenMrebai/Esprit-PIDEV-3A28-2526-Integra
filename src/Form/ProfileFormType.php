@@ -14,8 +14,14 @@ class ProfileFormType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('email', EmailType::class, ['label' => 'Email'])
-            ->add('username', TextType::class, ['label' => 'Username']);
+            ->add('email', TextType::class, [  // changed from EmailType to TextType to avoid HTML5 validation
+                'label' => 'Email',
+                'required' => false,
+            ])
+            ->add('username', TextType::class, [
+                'label' => 'Username',
+                'required' => false,
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

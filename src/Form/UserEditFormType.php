@@ -15,8 +15,14 @@ class UserEditFormType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('email', EmailType::class, ['label' => 'Email'])
-            ->add('username', TextType::class, ['label' => 'Username'])
+            ->add('email', TextType::class, [
+                'label' => 'Email',
+                'required' => false,
+            ])
+            ->add('username', TextType::class, [
+                'label' => 'Username',
+                'required' => false,
+            ])
             ->add('role', ChoiceType::class, [
                 'label' => 'Role',
                 'choices' => [
@@ -26,8 +32,12 @@ class UserEditFormType extends AbstractType
                 ],
                 'expanded' => false,
                 'multiple' => false,
+                'required' => false,
             ])
-            ->add('isActive', null, ['label' => 'Active']);
+            ->add('isActive', null, [
+                'label' => 'Active',
+                'required' => false,
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

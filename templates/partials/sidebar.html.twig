@@ -1,0 +1,33 @@
+{# templates/partials/sidebar.html.twig #}
+<div class="sidebar bg-dark text-white" style="width: 260px; min-height: 100vh; position: fixed; top: 0; left: 0; z-index: 1000;">
+    <div class="sidebar-brand p-3 text-center border-bottom">
+        <h5>INTEGRA RH</h5>
+    </div>
+    <div class="sidebar-nav p-3">
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link text-white" href="{{ path('app_profile') }}">
+                    <i class="fas fa-user me-2"></i> My Profile
+                </a>
+            </li>
+            {% if is_granted('ROLE_MANAGER') or is_granted('ROLE_ADMIN') %}
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="{{ path('app_dashboard') }}">
+                        <i class="fas fa-tachometer-alt me-2"></i> Admin Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="{{ path('admin_user_list') }}">
+                        <i class="fas fa-users me-2"></i> User Management
+                    </a>
+                </li>
+            {% endif %}
+            {# TODO: Add teammate module links when routes are created #}
+            <li class="nav-item mt-4">
+                <a class="nav-link text-danger" href="{{ path('app_logout') }}">
+                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>

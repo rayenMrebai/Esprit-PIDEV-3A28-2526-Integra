@@ -1,0 +1,212 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}INTEGRA – Inscription{% endblock %}
+
+{% block body %}
+    <div style="min-height:100vh; background:linear-gradient(135deg,#0B63CE 0%,#0FA36B 100%);
+            display:flex; align-items:center; justify-content:center; padding:20px;">
+
+        <div style="width:100%; max-width:500px;">
+
+            <div style="background:white; border-radius:24px;
+                    box-shadow:0 20px 60px rgba(0,0,0,0.15); overflow:hidden;">
+
+                <!-- Header -->
+                <div style="background:linear-gradient(to right,#0B63CE,#0FA36B);
+                        padding:28px 44px 22px; text-align:center;">
+                    <h1 style="font-size:28px; font-weight:800; color:white; margin:0;">INTEGRA</h1>
+                    <p style="color:rgba(255,255,255,0.8); font-size:13px; margin:6px 0 0;">
+                        Créer un nouveau compte
+                    </p>
+                </div>
+
+                <!-- Body -->
+                <div style="padding:32px 44px 40px;">
+
+                    <!-- Flash messages -->
+                    {% for label, messages in app.flashes %}
+                        {% for message in messages %}
+                            <div style="background:{{ label == 'success' ? '#f0fdf4' : '#fef2f2' }};
+                                    color:{{ label == 'success' ? '#16a34a' : '#dc2626' }};
+                                    border-radius:10px; padding:10px 16px;
+                                    font-size:13px; font-weight:600; margin-bottom:16px;">
+                                {{ label == 'success' ? '✅' : '❌' }} {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+
+                    {{ form_start(form, {
+                        'attr': {
+                            'novalidate': 'novalidate',
+                            'style': 'display:flex; flex-direction:column; gap:16px;'
+                        }
+                    }) }}
+
+                    {# Username #}
+                    <div>
+                        {{ form_label(form.username, null, {
+                            'label_attr': {'style': 'display:block; font-weight:600; color:#374151; font-size:13px; margin-bottom:6px;'}
+                        }) }}
+                        {{ form_widget(form.username, {
+                            'attr': {
+                                'style': 'width:100%; padding:11px 14px; border-radius:10px; border:1.5px solid #dbeafe; background:#f8fafc; font-size:13px; box-sizing:border-box; outline:none;',
+                                'placeholder': 'Ex: jean.dupont',
+                                'onfocus': "this.style.borderColor='#0B63CE'",
+                                'onblur': "this.style.borderColor='#dbeafe'"
+                            }
+                        }) }}
+                        {% if form.username.vars.errors|length > 0 %}
+                            <div style="color:#dc2626; font-size:12px; margin-top:4px;">
+                                {{ form_errors(form.username) }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {# Email #}
+                    <div>
+                        {{ form_label(form.email, null, {
+                            'label_attr': {'style': 'display:block; font-weight:600; color:#374151; font-size:13px; margin-bottom:6px;'}
+                        }) }}
+                        {{ form_widget(form.email, {
+                            'attr': {
+                                'style': 'width:100%; padding:11px 14px; border-radius:10px; border:1.5px solid #dbeafe; background:#f8fafc; font-size:13px; box-sizing:border-box; outline:none;',
+                                'placeholder': 'exemple@email.com',
+                                'onfocus': "this.style.borderColor='#0B63CE'",
+                                'onblur': "this.style.borderColor='#dbeafe'"
+                            }
+                        }) }}
+                        {% if form.email.vars.errors|length > 0 %}
+                            <div style="color:#dc2626; font-size:12px; margin-top:4px;">
+                                {{ form_errors(form.email) }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {# Password #}
+                    <div>
+                        {{ form_label(form.plainPassword.first, null, {
+                            'label_attr': {'style': 'display:block; font-weight:600; color:#374151; font-size:13px; margin-bottom:6px;'}
+                        }) }}
+                        <div style="position:relative;">
+                            {{ form_widget(form.plainPassword.first, {
+                                'attr': {
+                                    'id': 'pw1',
+                                    'style': 'width:100%; padding:11px 44px 11px 14px; border-radius:10px; border:1.5px solid #dbeafe; background:#f8fafc; font-size:13px; box-sizing:border-box; outline:none;',
+                                    'placeholder': 'Au moins 8 caractères, 1 majuscule, 1 chiffre',
+                                    'onfocus': "this.style.borderColor='#0B63CE'",
+                                    'onblur': "this.style.borderColor='#dbeafe'"
+                                }
+                            }) }}
+                            <button type="button" onclick="togglePw('pw1','eye1')"
+                                    style="position:absolute; right:12px; top:50%; transform:translateY(-50%);
+                                           background:none; border:none; cursor:pointer; color:#94a3b8; font-size:15px;"
+                                    id="eye1">👁</button>
+                        </div>
+                        {% if form.plainPassword.first.vars.errors|length > 0 %}
+                            <div style="color:#dc2626; font-size:12px; margin-top:4px;">
+                                {{ form_errors(form.plainPassword.first) }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {# Confirm password #}
+                    <div>
+                        {{ form_label(form.plainPassword.second, null, {
+                            'label_attr': {'style': 'display:block; font-weight:600; color:#374151; font-size:13px; margin-bottom:6px;'}
+                        }) }}
+                        <div style="position:relative;">
+                            {{ form_widget(form.plainPassword.second, {
+                                'attr': {
+                                    'id': 'pw2',
+                                    'style': 'width:100%; padding:11px 44px 11px 14px; border-radius:10px; border:1.5px solid #dbeafe; background:#f8fafc; font-size:13px; box-sizing:border-box; outline:none;',
+                                    'placeholder': 'Répéter le mot de passe',
+                                    'onfocus': "this.style.borderColor='#0B63CE'",
+                                    'onblur': "this.style.borderColor='#dbeafe'"
+                                }
+                            }) }}
+                            <button type="button" onclick="togglePw('pw2','eye2')"
+                                    style="position:absolute; right:12px; top:50%; transform:translateY(-50%);
+                                           background:none; border:none; cursor:pointer; color:#94a3b8; font-size:15px;"
+                                    id="eye2">👁</button>
+                        </div>
+                    </div>
+
+                    {# Password mismatch global error #}
+                    {% if form.plainPassword.vars.errors|length > 0 %}
+                        <div style="background:#fef2f2; color:#dc2626; border-radius:10px;
+                                    padding:10px 14px; font-size:12px; font-weight:600;">
+                            ❌ {{ form_errors(form.plainPassword) }}
+                        </div>
+                    {% endif %}
+
+                    {# Password strength indicator #}
+                    <div id="strengthWrap" style="display:none;">
+                        <div style="display:flex; gap:4px; margin-bottom:4px;">
+                            <div id="s1" style="flex:1; height:5px; border-radius:4px; background:#e2e8f0;"></div>
+                            <div id="s2" style="flex:1; height:5px; border-radius:4px; background:#e2e8f0;"></div>
+                            <div id="s3" style="flex:1; height:5px; border-radius:4px; background:#e2e8f0;"></div>
+                            <div id="s4" style="flex:1; height:5px; border-radius:4px; background:#e2e8f0;"></div>
+                        </div>
+                        <div id="strengthLabel" style="font-size:11px; color:#64748b;"></div>
+                    </div>
+
+                    <button type="submit"
+                            style="width:100%; padding:13px; border:none; border-radius:30px;
+                                   background:linear-gradient(to right,#0B63CE,#0FA36B);
+                                   color:white; font-weight:700; font-size:14px; cursor:pointer;
+                                   box-shadow:0 4px 15px rgba(11,99,206,0.3); margin-top:4px;">
+                        ✅ Créer mon compte
+                    </button>
+
+                    {{ form_end(form) }}
+
+                    <div style="text-align:center; margin-top:20px;">
+                        <a href="{{ path('app_login') }}"
+                           style="color:#0B63CE; font-size:13px; text-decoration:none; font-weight:500;">
+                            Déjà un compte ? Se connecter
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <p style="text-align:center; color:rgba(255,255,255,0.5); font-size:11px; margin-top:16px;">
+                INTEGRA RH v1.0
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function togglePw(inputId, btnId) {
+            const input = document.getElementById(inputId);
+            const btn   = document.getElementById(btnId);
+            input.type  = input.type === 'password' ? 'text' : 'password';
+            btn.textContent = input.type === 'password' ? '👁' : '🙈';
+        }
+
+        // Password strength meter
+        document.addEventListener('DOMContentLoaded', function () {
+            const pw = document.getElementById('pw1');
+            if (!pw) return;
+            pw.addEventListener('input', function () {
+                const val = pw.value;
+                const wrap = document.getElementById('strengthWrap');
+                wrap.style.display = val.length ? 'block' : 'none';
+
+                let score = 0;
+                if (val.length >= 8)          score++;
+                if (/[A-Z]/.test(val))        score++;
+                if (/[0-9]/.test(val))        score++;
+                if (/[^A-Za-z0-9]/.test(val)) score++;
+
+                const colors = ['#ef4444','#f59e0b','#3b82f6','#0FA36B'];
+                const labels = ['Très faible','Moyen','Fort','Très fort'];
+                for (let i = 1; i <= 4; i++) {
+                    document.getElementById('s' + i).style.background =
+                        i <= score ? colors[score - 1] : '#e2e8f0';
+                }
+                document.getElementById('strengthLabel').textContent = labels[score - 1] ?? '';
+                document.getElementById('strengthLabel').style.color = colors[score - 1] ?? '#64748b';
+            });
+        });
+    </script>
+{% endblock %}

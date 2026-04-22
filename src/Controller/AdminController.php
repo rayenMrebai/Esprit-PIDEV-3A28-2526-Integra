@@ -15,21 +15,72 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
+use App\Service\HuggingFaceService;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 #[Route('/admin')]
 class AdminController extends AbstractController
 {
+    #[Route('/user/{id}/ai-advice', name: 'admin_user_ai_advice')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function aiAdvice(UserAccount $user, HuggingFaceService $ai): JsonResponse
+    {
+        try {
+            $lastLogin = $user->getLastLogin();
+            $lastLoginStr = $lastLogin ? $lastLogin->format('d/m/Y') : 'never';
+
+            $prompt = sprintf(
+                "As an HR assistant, give a short actionable recommendation (one sentence) for a user with role=%s, last login=%s, active=%s.",
+                $user->getRole(),
+                $lastLoginStr,
+                $user->getIsActive() ? 'yes' : 'no'
+            );
+
+            $advice = $ai->generateAdvice($prompt);
+            return $this->json(['advice' => $advice]);
+        } catch (\Exception $e) {
+            // Return the exact error message for debugging
+            return $this->json(['advice' => 'AI error: ' . $e->getMessage()], 500);
+        }
+    }
     #[Route('/dashboard', name: 'app_dashboard')]
     #[IsGranted('ROLE_MANAGER')]
-    public function dashboard(UserAccountRepository $repo): Response
+    public function dashboard(UserAccountRepository $repo, HttpClientInterface $httpClient): Response
     {
+        // Auto‑deactivate users inactive for >3 days
+        $deactivatedCount = $repo->deactivateInactiveUsers();
+        if ($deactivatedCount > 0) {
+            $this->addFlash('info', "$deactivatedCount user(s) were deactivated due to inactivity.");
+        }
+
         $totalUsers = $repo->count([]);
         $activeUsers = $repo->count(['isActive' => true]);
         $stats = $repo->countActiveVsInactive();
+        $riskUsers = $repo->findAllWithRisk();   // includes all users
+
+        // Weather data (OpenWeatherMap)
+        $weather = null;
+        try {
+            $apiKey = $_ENV['WEATHER_API_KEY'] ?? '';
+            if ($apiKey) {
+                $url = "https://api.openweathermap.org/data/2.5/weather?q=Tunis,tn&appid={$apiKey}&units=metric&lang=fr";
+                $response = $httpClient->request('GET', $url);
+                $data = $response->toArray();
+                if ($response->getStatusCode() === 200) {
+                    $weather = $data;
+                }
+            }
+        } catch (\Exception $e) {
+            $weather = null;
+        }
+
         return $this->render('admin/dashboard.html.twig', [
             'totalUsers' => $totalUsers,
             'activeUsers' => $activeUsers,
             'stats' => $stats,
+            'weather' => $weather,
+            'riskUsers' => $riskUsers,
         ]);
     }
 
