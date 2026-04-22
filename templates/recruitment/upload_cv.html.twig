@@ -1,8 +1,10 @@
-{% extends 'base.html.twig' %}
+{% extends 'admin/base_admin.html.twig' %}
 
 {% block title %}Analyse de CV par IA{% endblock %}
+{% block page_title %}Analyse de CV{% endblock %}
+{% block breadcrumb %}Recrutement / Analyse CV{% endblock %}
 
-{% block body %}
+{% block admin_content %}
     <style>
         :root {
             --bg: #f6f8fc;
@@ -572,7 +574,7 @@
                     <div>
                         <h1>Analyse de CV par IA</h1>
                         <p>
-                            Importez un CV PDF, extrayez son contenu, analysez le profil avec l’IA
+                            Importez un CV PDF, extrayez son contenu, analysez le profil avec l'IA
                             et prenez une décision dans une interface claire, moderne et professionnelle.
                         </p>
                         <div class="hero-tags">
@@ -612,7 +614,7 @@
                 <div class="form-group-ui">
                     <label class="label-ui">Texte extrait</label>
                     <textarea id="cvText" rows="9" class="textarea-ui" placeholder="Le texte extrait apparaîtra ici..."></textarea>
-                    <div class="helper">Le contenu extrait peut être relu avant l’analyse.</div>
+                    <div class="helper">Le contenu extrait peut être relu avant l'analyse.</div>
                 </div>
             </div>
 
@@ -635,7 +637,7 @@
                     <div class="info-icon">02</div>
                     <div>
                         <strong>Extraction automatique</strong>
-                        <span>Lecture du contenu du PDF pour préparer l’analyse du candidat.</span>
+                        <span>Lecture du contenu du PDF pour préparer l'analyse du candidat.</span>
                     </div>
                 </div>
 
@@ -654,8 +656,8 @@
                 <div class="step-left">
                     <div class="step-number s2">2</div>
                     <div>
-                        <h3 class="step-title">Analyser avec l’IA</h3>
-                        <p class="step-subtitle">Associez le CV à une offre puis lancez l’analyse.</p>
+                        <h3 class="step-title">Analyser avec l'IA</h3>
+                        <p class="step-subtitle">Associez le CV à une offre puis lancez l'analyse.</p>
                     </div>
                 </div>
                 <div class="mini-label">Étape 2</div>
@@ -679,7 +681,7 @@
                 <div class="step-left">
                     <div class="step-number s3">3</div>
                     <div>
-                        <h3 class="step-title">Résultat de l’analyse</h3>
+                        <h3 class="step-title">Résultat de l'analyse</h3>
                         <p class="step-subtitle">Vérifiez les données avant de confirmer votre décision.</p>
                     </div>
                 </div>
@@ -755,13 +757,13 @@
     <div id="rejectionModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Lettre de refus générée par l’IA</h3>
+                <h3>Lettre de refus générée par l'IA</h3>
                 <span class="close-btn" onclick="closeRejectionModal()">&times;</span>
             </div>
 
             <div class="modal-body">
                 <textarea id="rejectionLetterText" class="letter-box"></textarea>
-                <p class="note">Vous pouvez modifier librement cette lettre avant l’envoi.</p>
+                <p class="note">Vous pouvez modifier librement cette lettre avant l'envoi.</p>
             </div>
 
             <div class="modal-footer">
@@ -850,7 +852,7 @@
             }
 
             if (!currentCvText) {
-                alert('Extrayez d’abord le texte.');
+                alert('Extrayez d\'abord le texte.');
                 return;
             }
 
@@ -944,7 +946,7 @@
 
         $('#rejectBtn').on('click', function() {
             if (!currentAnalysis || !currentJobId) {
-                alert('Veuillez d’abord analyser un CV.');
+                alert('Veuillez d\'abord analyser un CV.');
                 return;
             }
 
@@ -1060,7 +1062,7 @@
 
             window.location.href = mailtoLink;
 
-            alert('Votre messagerie va s’ouvrir avec la lettre déjà préparée.');
+            alert('Votre messagerie va s\'ouvrir avec la lettre déjà préparée.');
             closeRejectionModal();
         });
     </script>

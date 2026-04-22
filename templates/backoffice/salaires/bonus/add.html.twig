@@ -1,0 +1,176 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Ajouter Bonus Rule{% endblock %}
+
+{% block admin_content %}
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+  .br-wrapper {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .br-card {
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 20px 60px -10px rgba(0,0,0,0.12);
+    width: 100%;
+    max-width: 520px;
+    overflow: hidden;
+  }
+
+  .br-card-header {
+    background: linear-gradient(135deg, #0f2027 0%, #0d3b4f 60%, #064e3b 100%);
+    padding: 2rem 2.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .br-card-title {
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+
+  .br-card-body {
+    padding: 2rem 2.5rem 2.5rem;
+  }
+
+  .br-field {
+    margin-bottom: 1.4rem;
+  }
+
+  .br-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 0.45rem;
+    display: block;
+  }
+
+  .br-input {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+  }
+
+  .br-input.is-invalid {
+    border-color: #ef4444;
+  }
+
+  .br-error {
+    color: #ef4444;
+    font-size: 0.75rem;
+    margin-top: 0.3rem;
+  }
+
+  .br-actions {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .br-btn-primary {
+    flex: 1;
+    padding: 0.75rem;
+    background: linear-gradient(135deg, #0f2027, #064e3b);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+  }
+
+  .br-btn-cancel {
+    padding: 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    text-decoration: none;
+    color: #6b7280;
+  }
+</style>
+
+<div class="br-wrapper">
+  <div class="br-card">
+
+    <div class="br-card-header">
+      <h2 class="br-card-title">Ajouter une règle de bonus</h2>
+    </div>
+
+    <div class="br-card-body">
+
+      {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+      {# 🔥 ERREURS GLOBALES #}
+      {{ form_errors(form) }}
+
+      {# NOM REGLE #}
+      <div class="br-field">
+        <label class="br-label">{{ form_label(form.nomRegle)|striptags }}</label>
+
+        {{ form_widget(form.nomRegle, {
+          'attr': {
+            'class': 'br-input ' ~ (form.nomRegle.vars.errors|length ? 'is-invalid' : ''),
+            'placeholder': 'Ex : Bonus ancienneté'
+          }
+        }) }}
+
+        {% if form.nomRegle.vars.errors|length %}
+          <div class="br-error">⚠ {{ form_errors(form.nomRegle)|striptags }}</div>
+        {% endif %}
+      </div>
+
+      {# PERCENTAGE #}
+      <div class="br-field">
+        <label class="br-label">{{ form_label(form.percentage)|striptags }}</label>
+
+        {{ form_widget(form.percentage, {
+          'attr': {
+            'class': 'br-input ' ~ (form.percentage.vars.errors|length ? 'is-invalid' : ''),
+            'placeholder': 'Ex : 10'
+          }
+        }) }}
+
+        {% if form.percentage.vars.errors|length %}
+          <div class="br-error">⚠ {{ form_errors(form.percentage)|striptags }}</div>
+        {% endif %}
+      </div>
+
+      {# CONDITION TEXT 🔥 FIX ICI #}
+      <div class="br-field">
+        <label class="br-label">{{ form_label(form.conditionText)|striptags }}</label>
+
+        {{ form_widget(form.conditionText, {
+          'attr': {
+            'class': 'br-input ' ~ (form.conditionText.vars.errors|length ? 'is-invalid' : ''),
+            'placeholder': 'Ex : Si ancienneté > 3 ans',
+            'rows': '3'
+          }
+        }) }}
+
+        {% if form.conditionText.vars.errors|length %}
+          <div class="br-error">⚠ {{ form_errors(form.conditionText)|striptags }}</div>
+        {% endif %}
+      </div>
+
+      <div class="br-actions">
+        <a href="{{ path('app_backoffice_salaires_index') }}" class="br-btn-cancel">
+          Annuler
+        </a>
+
+        <button type="submit" class="br-btn-primary">
+          Ajouter la règle
+        </button>
+      </div>
+
+      {{ form_end(form) }}
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}

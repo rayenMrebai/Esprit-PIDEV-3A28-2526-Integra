@@ -1,5 +1,4 @@
-# This file is the entry point to configure your own services.
-# Files in the packages/ subdirectory configure your dependencies.
+# config/services.yaml
 
 parameters:
 
@@ -15,23 +14,71 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
-    # Service de ton ami (UserChecker)
+    # ============================================
+    # SERVICES DE TON AMI
+    # ============================================
+    
     App\Security\UserChecker:
         tags: ['security.user_checker']
 
-    # Service de ton ami (HuggingFaceService)
     App\Service\HuggingFaceService:
         arguments:
             $apiToken: '%env(HUGGINGFACE_API_TOKEN)%'
 
-    # Ton service HuggingFaceAnalyzer
+    # ============================================
+    # TES SERVICES
+    # ============================================
+    
     App\Service\HuggingFaceAnalyzer:
         arguments:
             $token: '%env(HUGGINGFACE_TOKEN)%'
             $url: '%env(HUGGINGFACE_URL)%'
             $model: '%env(HUGGINGFACE_MODEL)%'
 
-    # Ton contrôleur CVAnalysisController
+    App\Service\PdfService:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+
+    # ============================================
+    # MAILER SALAIRE (Toi - Brevo)
+    # ============================================
+    
+    mailer.transport.salaire:
+        class: Symfony\Component\Mailer\Transport\TransportInterface
+        factory: ['Symfony\Component\Mailer\Transport', 'fromDsn']
+        arguments: ['%env(MAILER_DSN_SALAIRE)%']
+
+    mailer.salaire:
+        class: Symfony\Component\Mailer\Mailer
+        arguments:
+            - '@mailer.transport.salaire'
+
+    # ============================================
+    # MAILER RECRUTEMENT (Ami - Gmail)
+    # ============================================
+    
+    mailer.transport.recrutement:
+        class: Symfony\Component\Mailer\Transport\TransportInterface
+        factory: ['Symfony\Component\Mailer\Transport', 'fromDsn']
+        arguments: ['%env(MAILER_DSN_RECRUTEMENT)%']
+
+    mailer.recrutement:
+        class: Symfony\Component\Mailer\Mailer
+        arguments:
+            - '@mailer.transport.recrutement'
+
+    # ============================================
+    # INJECTION EXPLICITE DES MAILERS DANS LES SERVICES
+    # ============================================
+    
+    App\Service\EmailSalaireService:
+        arguments:
+            $mailer: '@mailer.salaire'
+
+    App\Service\EmailService:
+        arguments:
+            $mailer: '@mailer.recrutement'
+
     App\Controller\CVAnalysisController:
         arguments:
-            $mailerFromEmail: '%env(MAILER_FROM_EMAIL)%'
+            $mailer: '@mailer.recrutement'

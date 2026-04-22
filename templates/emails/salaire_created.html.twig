@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; background: #f4f7fb; }
+    .wrapper { background: white; margin: 20px auto; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 35px 30px; text-align: center; }
+    .header h1 { margin: 0; font-size: 24px; }
+    .header p  { margin: 8px 0 0; opacity: 0.9; font-size: 14px; }
+    .content   { padding: 30px; }
+    .detail-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; margin: 20px 0; }
+    .info-row   { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e9ecef; font-size: 14px; }
+    .info-row:last-child { border-bottom: none; }
+    .label { color: #666; }
+    .value { font-weight: bold; color: #333; }
+    .total-highlight { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px; border-radius: 10px; text-align: center; margin: 20px 0; }
+    .total-highlight .amount { font-size: 32px; font-weight: bold; margin: 8px 0; }
+    .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; background: rgba(255,193,7,0.15); color: #856404; }
+    .footer { background: #2d3748; color: #ccc; padding: 20px 30px; text-align: center; font-size: 12px; }
+    .footer strong { color: white; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+    <div class="header">
+        <h1>🎉 Votre salaire a été créé</h1>
+        <p>INTEGRA RH — Système de Gestion des Ressources Humaines</p>
+    </div>
+
+    <div class="content">
+        <p>Bonjour <strong>{{ salaire.user.username }}</strong>,</p>
+        <p>
+            Votre salaire pour le mois de
+            <strong>{{ salaire.datePaiement|date('F Y') }}</strong>
+            a été créé avec succès dans le système INTEGRA RH.
+        </p>
+
+        <div class="detail-box">
+            <div class="info-row">
+                <span class="label">Salaire de base: </span>
+                <span class="value"> {{ salaire.baseAmount|number_format(2, ',', ' ') }} DT</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Bonus: </span>
+                <span class="value"> {{ salaire.bonusAmount|number_format(2, ',', ' ') }} DT</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Date de paiement prévue: </span>
+                <span class="value"> {{ salaire.datePaiement|date('d/m/Y') }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Statut actuel: </span>
+                <span class="value"><span class="status-badge"> {{ salaire.status }}</span></span>
+            </div>
+        </div>
+
+        <div class="total-highlight">
+            <div style="font-size:13px; opacity:0.9;">💰 Total Net</div>
+            <div class="amount">{{ salaire.totalAmount|number_format(2, ',', ' ') }} DT</div>
+        </div>
+
+        <p style="color:#666; font-size:13px;">
+            Vous recevrez une notification par email lorsque votre paiement sera effectué,
+            accompagnée de votre fiche de paie en PDF.
+        </p>
+    </div>
+
+    <div class="footer">
+        <strong>INTEGRA RH</strong><br>
+        Cet email a été envoyé automatiquement, merci de ne pas y répondre.
+    </div>
+</div>
+</body>
+</html>

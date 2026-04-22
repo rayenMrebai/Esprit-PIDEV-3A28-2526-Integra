@@ -20,7 +20,7 @@ security:
             entry_point: App\Security\LoginFormAuthenticator
             logout:
                 path: app_logout
-                target: front_home              # ← redirection vers l'accueil front (Wala)
+                target: front_acceuil             # ← redirection vers l'accueil front (Wala)
             # remember_me removed as requested
 
     role_hierarchy:
@@ -28,6 +28,7 @@ security:
         ROLE_MANAGER: [ROLE_USER]
 
     access_control:
+        - { path: ^/$, roles: PUBLIC_ACCESS } 
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/register, roles: PUBLIC_ACCESS }
         - { path: ^/recruitment, roles: ROLE_MANAGER }   # Dashboard recrutement (Wala)

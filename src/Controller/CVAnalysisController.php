@@ -8,7 +8,6 @@ use App\Service\HuggingFaceAnalyzer;
 use App\Service\PdfTextExtractor;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,12 +18,9 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class CVAnalysisController extends AbstractController
 {
-    private string $fromEmail;
-
-    public function __construct(string $mailerFromEmail)
-    {
-        $this->fromEmail = $mailerFromEmail;
-    }
+    public function __construct(
+        private MailerInterface $mailer,  // = mailer.recrutement (Gmail)
+    ) {}
 
     #[Route('/recruitment/cv-analyze', name: 'app_cv_analyze')]
     public function index(JobpositionRepository $jobRepo): Response
@@ -83,7 +79,6 @@ class CVAnalysisController extends AbstractController
 
         $result = $analyzer->analyzeCV($cvText, $job->getTitle() . ' - ' . $job->getDescription());
 
-        // fallback extraction email depuis le CV
         if (empty($result['email'])) {
             preg_match('/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/', $cvText, $matches);
             $result['email'] = $matches[0] ?? '';
@@ -132,7 +127,7 @@ class CVAnalysisController extends AbstractController
     }
 
     #[Route('/recruitment/send-rejection-email', name: 'app_send_rejection_email', methods: ['POST'])]
-    public function sendRejectionEmail(Request $request, MailerInterface $mailer, JobpositionRepository $jobRepo): JsonResponse
+    public function sendRejectionEmail(Request $request, JobpositionRepository $jobRepo): JsonResponse
     {
         $job = $jobRepo->find(json_decode($request->getContent(), true)['jobId'] ?? null);
 
@@ -140,36 +135,23 @@ class CVAnalysisController extends AbstractController
             return $this->json(['error' => 'Offre introuvable'], 404);
         }
 
-        $fromEmail = $this->fromEmail;
-
         try {
-            // 🔥 EMAIL FIXE POUR TEST
-            $toEmail = 'walabentahar0@gmail.com';
-
-            file_put_contents(
-                $this->getParameter('kernel.project_dir') . '/var/log/mail_debug.log',
-                "ENVOI TEST VERS: $toEmail" . PHP_EOL,
-                FILE_APPEND
-            );
-
             $email = (new Email())
-                ->from(new Address($fromEmail, 'INTEGRA Recruitment'))
-                ->to($toEmail)
+                ->from(new Address('walabentahar0@gmail.com', 'INTEGRA Recruitment'))
+                ->to('walabentahar0@gmail.com')
                 ->subject('TEST INTEGRA FINAL')
                 ->html('<p>Test final Symfony OK</p>')
                 ->text('Test final Symfony OK');
 
-            $mailer->send($email);
+            $this->mailer->send($email);
 
             return $this->json([
                 'success' => true,
-                'sent_to' => $toEmail
+                'sent_to' => 'walabentahar0@gmail.com'
             ]);
 
         } catch (\Exception $e) {
-            return $this->json([
-                'error' => $e->getMessage()
-            ], 500);
+            return $this->json(['error' => $e->getMessage()], 500);
         }
     }
 }

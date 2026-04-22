@@ -1,18 +1,22 @@
-{% extends 'base.html.twig' %}
+{% extends 'admin/base_admin.html.twig' %}
 
 {% block title %}Dashboard Recrutement{% endblock %}
+{% block page_title %}Recrutement{% endblock %}
+{% block breadcrumb %}Recrutement{% endblock %}
 
-{% block body %}
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/integra.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block admin_content %}
     {# Flashes #}
     {% for message in app.flashes('success') %}
-        <div class="alert-success" style="background: #d1fae5; color: #065f46; padding: 12px; border-radius: 12px; margin-bottom: 20px;">
-            {{ message }}
-        </div>
+        <div class="alert alert-success">{{ message }}</div>
     {% endfor %}
     {% for message in app.flashes('error') %}
-        <div class="alert-danger" style="background: #fee2e2; color: #b91c1c; padding: 12px; border-radius: 12px; margin-bottom: 20px;">
-            {{ message }}
-        </div>
+        <div class="alert alert-danger">{{ message }}</div>
     {% endfor %}
 
     {# SECTION OFFRES #}
@@ -147,7 +151,7 @@
         </div>
     </div>
 
-    {# MODALE AJOUT OFFRE (toujours présente, cachée par défaut) #}
+    {# MODALES #}
     <div id="jobModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
@@ -171,7 +175,6 @@
         </div>
     </div>
 
-    {# MODALE AJOUT CANDIDAT (toujours présente, cachée par défaut) #}
     <div id="candidatModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
@@ -197,7 +200,6 @@
         </div>
     </div>
 
-    {# MODALE DÉTAILS CANDIDAT #}
     <div id="candidatDetailModal" class="modal" style="display: none;">
         <div class="modal-content" style="max-width: 600px;">
             <div class="modal-header">
@@ -218,9 +220,11 @@
             </div>
         </div>
     </div>
+{% endblock %}
 
+{% block javascripts %}
+    {{ parent() }}
     <script>
-        // Rendre les cartes d'offres cliquables (filtre candidats)
         document.querySelectorAll('.job-card').forEach(card => {
             card.addEventListener('click', (e) => {
                 if (e.target.closest('.btn-warning') || e.target.closest('.btn-danger')) return;
@@ -234,14 +238,12 @@
             });
         });
 
-        // Fermeture des modales en cliquant à l'extérieur
         window.onclick = function(event) {
             if (event.target.classList.contains('modal')) {
                 event.target.style.display = 'none';
             }
         };
 
-        // Gestionnaire pour le bouton "Voir" (détails candidat)
         document.querySelectorAll('.view-candidat').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 e.preventDefault();
@@ -258,33 +260,20 @@
                     document.getElementById('detailJob').innerText = data.jobTitle;
                     document.getElementById('candidatDetailModal').style.display = 'flex';
                 } catch (error) {
-                    console.error('Erreur lors du chargement des détails:', error);
+                    console.error('Erreur:', error);
                 }
             });
         });
 
-        // Ouvrir/fermer les modales d'ajout
-        function openModal(modalId) {
-            document.getElementById(modalId).style.display = 'flex';
-        }
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
+        function openModal(modalId) { document.getElementById(modalId).style.display = 'flex'; }
+        function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
 
-        // Boutons pour ouvrir la modale offre
         const openJobModalBtn = document.getElementById('openJobModalBtn');
-        if (openJobModalBtn) {
-            openJobModalBtn.addEventListener('click', () => openModal('jobModal'));
-        }
+        if (openJobModalBtn) openJobModalBtn.addEventListener('click', () => openModal('jobModal'));
 
-        // Boutons pour ouvrir la modale candidat
         const openCandidatModalBtn = document.getElementById('openCandidatModalBtn');
         const openCandidatModalBtn2 = document.getElementById('openCandidatModalBtn2');
-        if (openCandidatModalBtn) {
-            openCandidatModalBtn.addEventListener('click', () => openModal('candidatModal'));
-        }
-        if (openCandidatModalBtn2) {
-            openCandidatModalBtn2.addEventListener('click', () => openModal('candidatModal'));
-        }
+        if (openCandidatModalBtn) openCandidatModalBtn.addEventListener('click', () => openModal('candidatModal'));
+        if (openCandidatModalBtn2) openCandidatModalBtn2.addEventListener('click', () => openModal('candidatModal'));
     </script>
 {% endblock %}

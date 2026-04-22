@@ -1,45 +1,61 @@
-{% extends 'base.html.twig' %}
+{% extends 'admin/base_admin.html.twig' %}
 
-{% block title %}Jobposition index{% endblock %}
+{% block title %}Liste des offres{% endblock %}
+{% block page_title %}Offres d'emploi{% endblock %}
+{% block breadcrumb %}Offres{% endblock %}
 
-{% block body %}
-    <h1>Jobposition index</h1>
+{% block admin_content %}
+    <div class="card-modern">
+        <div class="section-header">
+            <div class="section-title"><i class="fas fa-briefcase"></i> LISTE DES OFFRES</div>
+            <a href="{{ path('app_jobposition_new') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Nouvelle offre</a>
+        </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>IdJob</th>
-                <th>Title</th>
-                <th>Departement</th>
-                <th>EmployeeType</th>
-                <th>Description</th>
-                <th>Status</th>
-                <th>PostedAt</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for jobposition in jobpositions %}
-            <tr>
-                <td>{{ jobposition.idJob }}</td>
-                <td>{{ jobposition.title }}</td>
-                <td>{{ jobposition.departement }}</td>
-                <td>{{ jobposition.employeeType }}</td>
-                <td>{{ jobposition.description }}</td>
-                <td>{{ jobposition.status }}</td>
-                <td>{{ jobposition.postedAt ? jobposition.postedAt|date('Y-m-d') : '' }}</td>
-                <td>
-                    <a href="{{ path('app_jobposition_show', {'idJob': jobposition.idJob}) }}">show</a>
-                    <a href="{{ path('app_jobposition_edit', {'idJob': jobposition.idJob}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="8">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-
-    <a href="{{ path('app_jobposition_new') }}">Create new</a>
+        <div style="overflow-x: auto;">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Titre</th>
+                        <th>Département</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Statut</th>
+                        <th>Publié le</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for jobposition in jobpositions %}
+                    <tr>
+                        <td>#{{ jobposition.idJob }}</td>
+                        <td><strong>{{ jobposition.title }}</strong></td>
+                        <td>{{ jobposition.departement }}</td>
+                        <td>{{ jobposition.employeeType }}</td>
+                        <td>{{ jobposition.description|slice(0, 50) }}...</td>
+                        <td>
+                            <span class="status-badge {{ jobposition.status|lower == 'open' ? 'open' : 'closed' }}">
+                                {{ jobposition.status }}
+                            </span>
+                        </td>
+                        <td>{{ jobposition.postedAt ? jobposition.postedAt|date('d/m/Y') : '' }}</td>
+                        <td>
+                            <div class="action-buttons" style="display: flex; gap: 6px;">
+                                <a href="{{ path('app_jobposition_show', {'idJob': jobposition.idJob}) }}" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>
+                                <a href="{{ path('app_jobposition_edit', {'idJob': jobposition.idJob}) }}" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 40px; color: var(--gray-500);">
+                            <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 16px; display: block;"></i>
+                            Aucune offre trouvée
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 {% endblock %}

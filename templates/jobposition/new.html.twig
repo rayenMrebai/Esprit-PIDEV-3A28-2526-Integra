@@ -1,11 +1,14 @@
-{% extends 'base.html.twig' %}
+{% extends 'admin/base_admin.html.twig' %}
 
-{% block title %}New Jobposition{% endblock %}
+{% block title %}Nouvelle offre{% endblock %}
+{% block page_title %}Nouvelle offre{% endblock %}
+{% block breadcrumb %}Offres / Nouveau{% endblock %}
 
-{% block body %}
-    <h1>Create new Jobposition</h1>
-
-    {{ include('jobposition/_form.html.twig') }}
-
-    <a href="{{ path('app_jobposition_index') }}">back to list</a>
+{% block admin_content %}
+    <div class="card-modern" style="max-width: 800px; margin: 0 auto;">
+        <div class="section-header">
+            <div class="section-title"><i class="fas fa-plus"></i> Créer une offre</div>
+        </div>
+        {{ include('jobposition/_form.html.twig') }}
+    </div>
 {% endblock %}

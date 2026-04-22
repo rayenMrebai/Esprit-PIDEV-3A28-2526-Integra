@@ -1,32 +1,132 @@
 {% extends 'base.html.twig' %}
 
+{% block title %}INTEGRA RH - Connexion{% endblock %}
+
 {% block body %}
-    <div class="row justify-content-center">
-        <div class="col-md-5">
-            <div class="card">
-                <div class="card-header bg-white text-center pt-4">
-                    <h4 class="mb-0">Sign in to your account</h4>
+    <div class="container">
+        <div class="row justify-content-center align-items-center" style="min-height: 100vh;">
+            <div class="col-md-5">
+                
+                <!-- Logo / Brand -->
+                <div class="text-center mb-4">
+                    <h2 style="color: white; font-weight: 800; text-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+                        <i class="fas fa-user-shield me-2"></i>INTEGRA RH
+                    </h2>
+                    <p style="color: rgba(255,255,255,0.8); font-size: 14px;">Espace sécurisé</p>
                 </div>
-                <div class="card-body p-4">
-                    {% if error %}
-                        <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-                    {% endif %}
-                    <form method="post">
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Username</label>
-                            <input type="text" name="username" id="username" class="form-control" value="{{ last_username }}" autofocus>
+
+                <div class="card border-0 shadow-lg" style="border-radius: 24px; overflow: hidden;">
+                    <!-- Header -->
+                    <div style="background: linear-gradient(to right, #0B63CE, #0FA36B); padding: 28px; text-align: center;">
+                        <h4 class="mb-0" style="color: white; font-weight: 700;">
+                            <i class="fas fa-sign-in-alt me-2"></i>Connexion
+                        </h4>
+                    </div>
+
+                    <div class="card-body p-4 p-md-5">
+                        {% if error %}
+                            <div class="alert alert-danger d-flex align-items-center" style="border-radius: 12px;">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                {{ error.messageKey|trans(error.messageData, 'security') }}
+                            </div>
+                        {% endif %}
+
+                        <form method="post">
+                            <!-- Username -->
+                            <div class="mb-4">
+                                <label for="username" class="form-label" style="font-weight: 600; color: #374151; font-size: 13px;">
+                                    <i class="fas fa-user me-1 text-primary"></i> Nom d'utilisateur
+                                </label>
+                                <input type="text" 
+                                       name="username" 
+                                       id="username" 
+                                       class="form-control" 
+                                       value="{{ last_username }}" 
+                                       placeholder="Entrez votre nom d'utilisateur"
+                                       style="padding: 12px 14px; border-radius: 12px; border: 2px solid #e2e8f0; font-size: 14px;"
+                                       onfocus="this.style.borderColor='#0B63CE'"
+                                       onblur="this.style.borderColor='#e2e8f0'"
+                                       autofocus
+                                       required>
+                            </div>
+
+                            <!-- Password -->
+                            <div class="mb-4">
+                                <label for="password" class="form-label" style="font-weight: 600; color: #374151; font-size: 13px;">
+                                    <i class="fas fa-lock me-1 text-primary"></i> Mot de passe
+                                </label>
+                                <div style="position: relative;">
+                                    <input type="password" 
+                                           name="password" 
+                                           id="password" 
+                                           class="form-control"
+                                           placeholder="Entrez votre mot de passe"
+                                           style="padding: 12px 44px 12px 14px; border-radius: 12px; border: 2px solid #e2e8f0; font-size: 14px;"
+                                           onfocus="this.style.borderColor='#0B63CE'"
+                                           onblur="this.style.borderColor='#e2e8f0'"
+                                           required>
+                                    <button type="button" 
+                                            onclick="togglePassword()"
+                                            style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #94a3b8;"
+                                            id="eyeBtn">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                            <!-- Submit -->
+                            <button type="submit" 
+                                    class="btn w-100" 
+                                    style="background: linear-gradient(to right, #0B63CE, #0FA36B); 
+                                           color: white; 
+                                           font-weight: 700; 
+                                           padding: 14px; 
+                                           border-radius: 30px;
+                                           border: none;
+                                           font-size: 15px;
+                                           box-shadow: 0 4px 15px rgba(11,99,206,0.3);
+                                           transition: all 0.3s ease;">
+                                <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+                            </button>
+                        </form>
+
+                        <!-- Lien inscription -->
+                        <div class="text-center mt-4">
+                            <p class="mb-0" style="color: #64748b; font-size: 13px;">
+                                Pas encore de compte ? 
+                                <a href="{{ path('app_register') }}" style="color: #0B63CE; font-weight: 600; text-decoration: none;">
+                                    S'inscrire
+                                </a>
+                            </p>
                         </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" name="password" id="password" class="form-control">
-                        </div>
-                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-                        <button type="submit" class="btn btn-primary w-100">Login</button>
-                    </form>
-                    {# Removed "Forgot password?" link because password recovery is not implemented #}
-                    {# Removed face login button because the route does not exist #}
+                    </div>
                 </div>
+
+                <!-- Footer version -->
+                <p class="text-center mt-4" style="color: rgba(255,255,255,0.5); font-size: 12px;">
+                    INTEGRA RH v1.0
+                </p>
             </div>
         </div>
     </div>
+
+    <script>
+        function togglePassword() {
+            const input = document.getElementById('password');
+            const btn = document.getElementById('eyeBtn');
+            const icon = btn.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
 {% endblock %}

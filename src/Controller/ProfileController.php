@@ -20,7 +20,13 @@ class ProfileController extends AbstractController
     {
         /** @var UserAccount $user */
         $user = $this->getUser();
-        return $this->render('profile/show.html.twig', ['user' => $user]);
+        $roles = $user->getRoles();
+
+        // Admin/Manager → template authenticated, Employé → template front
+        $isEmployee = !in_array('ROLE_ADMIN', $roles) && !in_array('ROLE_MANAGER', $roles);
+        $template = $isEmployee ? 'front/profile.html.twig' : 'profile/show.html.twig';
+
+        return $this->render($template, ['user' => $user]);
     }
 
     #[Route('/edit', name: 'app_profile_edit')]
@@ -28,15 +34,23 @@ class ProfileController extends AbstractController
     {
         /** @var UserAccount $user */
         $user = $this->getUser();
+        $roles = $user->getRoles();
+
         $form = $this->createForm(ProfileFormType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $em->flush();
-            $this->addFlash('success', 'Profile updated.');
+            $this->addFlash('success', 'Profil mis à jour.');
             return $this->redirectToRoute('app_profile');
         }
 
-        return $this->render('profile/edit.html.twig', ['form' => $form->createView()]);
+        $isEmployee = !in_array('ROLE_ADMIN', $roles) && !in_array('ROLE_MANAGER', $roles);
+        $template = $isEmployee ? 'front/edit.html.twig' : 'profile/edit.html.twig';
+
+        return $this->render($template, [
+            'form' => $form->createView(),
+            'user' => $user,
+        ]);
     }
 }

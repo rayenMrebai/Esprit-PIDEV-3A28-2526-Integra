@@ -15,10 +15,9 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-    <!-- Custom styles (Clean Blog) -->
+    <!-- Custom styles -->
     <link href="{{ asset('front/css/styles.css') }}" rel="stylesheet">
 
-    <!-- Style additionnel pour le bouton admin (peut aussi être mis dans styles.css) -->
     <style>
         .btn-admin {
             border-radius: 40px;
@@ -35,94 +34,119 @@
             border-color: white;
             color: white;
         }
-        .btn-admin i {
-            transition: transform 0.2s ease;
-        }
-        .btn-admin:hover i.fa-arrow-right {
-            transform: translateX(3px);
-        }
-        .btn-admin:hover i.fa-lock {
-            transform: scale(1.1);
-        }
     </style>
 
     {% block stylesheets %}{% endblock %}
 </head>
+
 <body>
 
-<!-- Navigation -->
+<!-- NAVBAR -->
 <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
     <div class="container">
-        <a class="navbar-brand" href="{{ path('front_home') }}">INTEGRA RH</a>
-        <button class="navbar-toggler navbar-toggler-right" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive">
-            Menu
-            <i class="fas fa-bars"></i>
+        {# LOGO : accueil public si non connecté, dashboard employé si connecté #}
+        {% if app.user %}
+            <a class="navbar-brand" href="{{ path('front_home') }}">INTEGRA RH</a>
+        {% else %}
+            <a class="navbar-brand" href="{{ path('front_acceuil') }}">INTEGRA RH</a>
+        {% endif %}
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive">
+            Menu <i class="fas fa-bars"></i>
         </button>
+
         <div class="collapse navbar-collapse" id="navbarResponsive">
             <ul class="navbar-nav ms-auto">
+
+                {# ACCUEIL : public si non connecté, dashboard si connecté #}
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ path('front_home') }}">Accueil</a>
+                    {% if app.user %}
+                        <a class="nav-link" href="{{ path('front_home') }}">Accueil</a>
+                    {% else %}
+                        <a class="nav-link" href="{{ path('front_acceuil') }}">Accueil</a>
+                    {% endif %}
                 </li>
+
                 <li class="nav-item">
                     <a class="nav-link" href="{{ path('front_home') }}#offres">Offres</a>
                 </li>
+
                 <li class="nav-item">
                     <a class="nav-link" href="#">Contact</a>
                 </li>
-                <!-- BOUTON ESPACE ADMIN → CONNEXION -->
-                <li class="nav-item ms-3 d-flex align-items-center">
-                    <a href="{{ path('app_login') }}" class="btn-admin d-flex align-items-center gap-2 text-decoration-none">
-                        <i class="fas fa-lock" style="font-size: 12px;"></i>
-                        <span>Espace Admin</span>
-                        <i class="fas fa-arrow-right" style="font-size: 12px;"></i>
-                    </a>
-                </li>
+
+                {# BOUTON LOGIN (visible si NON connecté) #}
+                {% if not app.user %}
+                    <li class="nav-item ms-2">
+                        <a href="{{ path('app_login') }}" class="btn btn-admin">
+                            <i class="fas fa-sign-in-alt me-1"></i> Login
+                        </a>
+                    </li>
+                {% endif %}
+
+                {# BOUTON LOGOUT (visible si CONNECTÉ) #}
+                {% if app.user %}
+                    <li class="nav-item ms-2">
+                        <a href="{{ path('app_logout') }}" class="btn btn-danger rounded-pill"
+                           onclick="return confirm('Voulez-vous vous déconnecter ?');">
+                            <i class="fas fa-sign-out-alt me-1"></i> Logout
+                        </a>
+                    </li>
+                {% endif %}
+
             </ul>
         </div>
     </div>
 </nav>
 
-<!-- Page Header (image de fond) -->
+<!-- HEADER -->
 <header class="masthead" style="background-image: url('{{ asset('front/img/integralogo.jpg') }}')">
     <div class="container position-relative px-4 px-lg-5">
-        <div class="row gx-4 gx-lg-5 justify-content-center">
+        <div class="row justify-content-center">
             <div class="col-md-10 col-lg-8 col-xl-7">
                 <div class="site-heading">
                     <h1>{% block header_title %}INTEGRA RH{% endblock %}</h1>
-                    <span class="subheading">{% block header_subtitle %}Gestion des ressources humaines{% endblock %}</span>
+                    <span class="subheading">
+                        {% block header_subtitle %}Gestion des ressources humaines{% endblock %}
+                    </span>
                 </div>
             </div>
         </div>
     </div>
 </header>
 
-<!-- Main Content -->
+<!-- CONTENT -->
 <main class="container px-4 px-lg-5">
-    <div class="row gx-4 gx-lg-5 justify-content-center">
+    <div class="row justify-content-center">
         <div class="col-md-10 col-lg-8 col-xl-7">
             {% block content %}{% endblock %}
         </div>
     </div>
 </main>
 
-<!-- Footer -->
+<!-- FOOTER -->
 <footer class="border-top">
-    <div class="container px-4 px-lg-5">
-        <div class="row gx-4 gx-lg-5 justify-content-center">
-            <div class="col-md-10 col-lg-8 col-xl-7">
-                <ul class="list-inline text-center">
-                    <li class="list-inline-item"><a href="#"><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i><i class="fab fa-twitter fa-stack-1x fa-inverse"></i></span></a></li>
-                    <li class="list-inline-item"><a href="#"><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i><i class="fab fa-facebook-f fa-stack-1x fa-inverse"></i></span></a></li>
-                    <li class="list-inline-item"><a href="#"><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i><i class="fab fa-github fa-stack-1x fa-inverse"></i></span></a></li>
-                </ul>
-                <div class="small text-center text-muted fst-italic">Copyright &copy; INTEGRA RH 2025</div>
-            </div>
-        </div>
+    <div class="container px-4 px-lg-5 text-center">
+        <ul class="list-inline">
+            <li class="list-inline-item">
+                <a href="#"><i class="fab fa-twitter fa-lg"></i></a>
+            </li>
+            <li class="list-inline-item">
+                <a href="#"><i class="fab fa-facebook fa-lg"></i></a>
+            </li>
+            <li class="list-inline-item">
+                <a href="#"><i class="fab fa-github fa-lg"></i></a>
+            </li>
+        </ul>
+        <p class="small text-muted">© INTEGRA RH 2025</p>
     </div>
 </footer>
 
+<!-- JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{{ asset('front/js/scripts.js') }}"></script>
+
 {% block javascripts %}{% endblock %}
+
 </body>
 </html>

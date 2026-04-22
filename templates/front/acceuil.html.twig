@@ -1,0 +1,110 @@
+{% extends 'base_front.html.twig' %}
+
+{% block title %}INTEGRA RH - Accueil{% endblock %}
+
+{% block header_title %}INTEGRA RH{% endblock %}
+{% block header_subtitle %}Bienvenue sur notre plateforme de gestion des ressources humaines{% endblock %}
+
+{% block content %}
+    <!-- Section Hero / Bienvenue -->
+    <div class="post-preview text-center mb-5">
+        <h2 class="post-title">Bienvenue sur INTEGRA RH</h2>
+        <p class="post-subtitle">Plateforme de gestion des ressources humaines et du recrutement.</p>
+    </div>
+    <hr class="my-4" />
+
+    <!-- Bouton Login (visible seulement si NON connecté) -->
+    {% if not app.user %}
+        <div class="text-center mb-5">
+            <div class="card border-0 shadow-sm mx-auto" style="max-width: 500px;">
+                <div class="card-body p-4">
+                    <i class="fas fa-user-lock fa-3x text-primary mb-3"></i>
+                    <h4 class="card-title">Espace Sécurisé</h4>
+                    <p class="card-text text-muted mb-4">
+                        Connectez-vous pour accéder à votre espace employé, consulter vos salaires et gérer votre profil.
+                    </p>
+                    <a href="{{ path('app_login') }}" class="btn btn-primary btn-lg rounded-pill px-5">
+                        <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+                    </a>
+                    <p class="mt-3 mb-0">
+                        <small class="text-muted">Pas encore de compte ? <a href="{{ path('app_register') }}">S'inscrire</a></small>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <hr class="my-4" />
+    {% endif %}
+
+    <!-- Section : Espace Employé (si connecté) -->
+    {% if app.user %}
+        <div class="post-preview mb-5 text-center">
+            <h2 class="post-title">Bienvenue dans votre espace employé</h2>
+            <p class="post-meta">
+                <i class="fas fa-user-circle fa-2x text-primary mb-3 d-block"></i>
+                Connecté en tant que <strong>{{ app.user.username }}</strong><br>
+                Email : {{ app.user.email }}
+            </p>
+        </div>
+
+        <!-- Les boutons d'action employé -->
+        <div class="row mb-5">
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 border-0 shadow-sm text-center p-4">
+                    <div class="card-body">
+                        <i class="fas fa-user-edit fa-3x text-primary mb-3"></i>
+                        <h4 class="card-title">Mon Profil</h4>
+                        <p class="card-text text-muted">Consulter mes informations personnelles</p>
+                        <a href="{{ path('app_profile') }}" class="btn btn-outline-primary rounded-pill">
+                            <i class="fas fa-arrow-right me-2"></i>Accéder
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 border-0 shadow-sm text-center p-4">
+                    <div class="card-body">
+                        <i class="fas fa-money-bill-wave fa-3x text-success mb-3"></i>
+                        <h4 class="card-title">Mes Salaires</h4>
+                        <p class="card-text text-muted">Consulter mes fiches de paie et historique</p>
+                        <a href="{{ path('app_employee_salaires') }}" class="btn btn-success rounded-pill">
+                            <i class="fas fa-eye me-2"></i>Voir mes salaires
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Informations rapides employé -->
+        <div class="alert alert-light border mb-5">
+            <h5><i class="fas fa-info-circle me-2"></i>Informations</h5>
+            <p class="mb-0">
+                Cet espace est réservé aux employés. Consultez vos salaires et gérez vos informations personnelles ici.
+            </p>
+        </div>
+
+        <hr class="my-4" />
+    {% endif %}
+
+    <!-- Section : Offres d'emploi (visible par tous) -->
+    <h3 class="mb-4" id="offres">📌 Offres d'emploi</h3>
+
+    {% for job in jobs %}
+        <div class="post-preview">
+            <a href="{{ path('front_job_show', {'id': job.idJob}) }}" style="text-decoration: none;">
+                <h3 class="post-title" style="color: #0B63CE;">{{ job.title }}</h3>
+                <p class="post-subtitle">{{ job.description|default('')|slice(0, 120) }}{% if job.description|length > 120 %}...{% endif %}</p>
+            </a>
+            <p class="post-meta">
+                <span class="badge bg-primary">{{ job.departement }}</span>
+                <span class="badge bg-secondary">{{ job.employeeType }}</span>
+                <span class="badge {{ job.status == 'Open' ? 'bg-success' : 'bg-secondary' }}">{{ job.status }}</span>
+                <span class="ms-3"><i class="far fa-calendar-alt"></i> Publiée le {{ job.postedAt|date('d/m/Y') }}</span>
+            </p>
+        </div>
+        {% if not loop.last %}<hr class="my-4" />{% endif %}
+    {% else %}
+        <p>Aucune offre d'emploi disponible pour le moment.</p>
+    {% endfor %}
+
+{% endblock %}

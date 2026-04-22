@@ -5,6 +5,8 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
@@ -13,7 +15,7 @@ class UserAccount implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: "integer", name: "userid")]
+    #[ORM\Column(name: 'userId', type: 'integer')]
     private ?int $userId = null;
 
     #[ORM\Column(type: "string", length: 255, name: "username")]
@@ -47,15 +49,29 @@ class UserAccount implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: "string", length: 255, nullable: true, name: "face_image_path")]
     private ?string $faceImagePath = null;
 
+    #[ORM\OneToMany(
+    mappedBy: 'user', 
+    targetEntity: Salaire::class, 
+    orphanRemoval: true, 
+    cascade: ['persist', 'remove']
+    )]
+    private Collection $salaires;
+
     // --- OneToOne relation with UserSetting (inverse side) ---
     #[ORM\OneToOne(mappedBy: "userAccount", cascade: ["persist", "remove"])]
     private ?UserSetting $userSetting = null;
 
+    #[ORM\OneToMany(mappedBy: 'userAccount', targetEntity: PasswordResetToken::class, cascade: ['persist', 'remove'])]
+    private Collection $passwordResetTokens;
+
     public function __construct()
     {
+        $this->salaires           = new ArrayCollection();
         $this->accountCreatedDate = new \DateTime();
         $this->role = 'EMPLOYE';
     }
+
+    
 
     // Getters and setters
     public function getUserId(): ?int { return $this->userId; }
@@ -94,4 +110,23 @@ class UserAccount implements UserInterface, PasswordAuthenticatedUserInterface
     public function getPassword(): ?string { return $this->passwordHash; }
     public function getSalt(): ?string { return null; }
     public function eraseCredentials(): void {}
+
+    public function getSalaires(): Collection { return $this->salaires; }
+    public function addSalaire(Salaire $salaire): static
+    {
+        if (!$this->salaires->contains($salaire)) {
+            $this->salaires->add($salaire);
+            $salaire->setUser($this);
+        }
+        return $this;
+    }
+    public function removeSalaire(Salaire $salaire): static
+    {
+        if ($this->salaires->removeElement($salaire)) {
+            if ($salaire->getUser() === $this) {
+                $salaire->setUser(null);
+            }
+        }
+        return $this;
+    }
 }

@@ -1,0 +1,302 @@
+{% extends 'base_front.html.twig' %}
+
+{% block title %}Mes Salaires{% endblock %}
+
+{% block header_title %}Mes Bulletins de Paie{% endblock %}
+{% block header_subtitle %}Consultez votre historique de rémunération{% endblock %}
+
+{% block content %}
+
+<style>
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #6c757d;
+        text-decoration: none;
+        margin-bottom: 2rem;
+        font-weight: 500;
+    }
+    
+    .btn-back:hover {
+        color: #667eea;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2.5rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        text-align: center;
+        border-top: 4px solid var(--accent-color, #667eea);
+    }
+    
+    .stat-card .stat-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #1e2533;
+        margin-bottom: 0.25rem;
+    }
+    
+    .stat-card .stat-label {
+        font-size: 0.85rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    .salary-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+        border-left: 4px solid #e9ecef;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .salary-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .salary-card.status-paye { border-left-color: #28a745; }
+    .salary-card.status-encours { border-left-color: #17a2b8; }
+    .salary-card.status-cree { border-left-color: #ffc107; }
+    
+    .salary-header {
+        padding: 1.25rem;
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .salary-date {
+        font-weight: 600;
+        color: #1e2533;
+        font-size: 1.1rem;
+    }
+    
+    .salary-status {
+        padding: 0.35rem 0.85rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .status-paye { background: rgba(40,167,69,0.1); color: #28a745; }
+    .status-encours { background: rgba(23,162,184,0.1); color: #17a2b8; }
+    .status-cree { background: rgba(255,193,7,0.1); color: #856404; }
+    
+    .salary-body {
+        padding: 1.5rem;
+    }
+    
+    .salary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .salary-row:last-child {
+        border-bottom: none;
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: #1e2533;
+        margin-top: 0.5rem;
+        padding-top: 1rem;
+        border-top: 2px solid #e9ecef;
+    }
+    
+    .salary-label {
+        color: #6c757d;
+        font-size: 0.95rem;
+    }
+    
+    .salary-value {
+        font-weight: 600;
+        color: #1e2533;
+    }
+    
+    .salary-value.bonus {
+        color: #28a745;
+    }
+    
+    .salary-value.total {
+        color: #667eea;
+        font-size: 1.2rem;
+    }
+    
+    .bonus-rules {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px dashed #dee2e6;
+    }
+    
+    .bonus-rules-title {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    .bonus-tag {
+        display: inline-block;
+        background: rgba(102,126,234,0.1);
+        color: #667eea;
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+        border: 1px solid rgba(102,126,234,0.2);
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #adb5bd;
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.5;
+    }
+</style>
+
+<!-- Message de bienvenue pour l'employé connecté -->
+{% if app.user %}
+<div class="post-preview mb-4 text-center">
+    <p class="post-meta">
+        <i class="fas fa-user-circle text-primary me-2"></i>
+        Connecté en tant que <strong>{{ app.user.username }}</strong> | 
+        Email : {{ app.user.email }}
+    </p>
+</div>
+{% endif %}
+
+<a href="{{ path('front_home') }}" class="btn-back">
+    <i class="fas fa-arrow-left"></i> Retour au Dashboard
+</a>
+
+<!-- Statistiques -->
+{% if salaires|length > 0 %}
+<div class="stats-grid">
+    <div class="stat-card" style="--accent-color: #667eea;">
+        <div class="stat-value">{{ totalPercu|number_format(0, ',', ' ') }} DT</div>
+        <div class="stat-label">Total perçu</div>
+    </div>
+    
+    <div class="stat-card" style="--accent-color: #28a745;">
+        <div class="stat-value">{{ totalBonus|number_format(0, ',', ' ') }} DT</div>
+        <div class="stat-label">Total bonus</div>
+    </div>
+    
+    <div class="stat-card" style="--accent-color: #17a2b8;">
+        <div class="stat-value">{{ moyenne|number_format(0, ',', ' ') }} DT</div>
+        <div class="stat-label">Salaire moyen</div>
+    </div>
+    
+    <div class="stat-card" style="--accent-color: #ffc107;">
+        <div class="stat-value">{{ nbPayes }}/{{ nbTotal }}</div>
+        <div class="stat-label">Bulletins payés</div>
+    </div>
+</div>
+
+<!-- Liste des salaires -->
+{% for salaire in salaires %}
+    {% set statusClass = salaire.status == 'PAYÉ' ? 'status-paye' : (salaire.status == 'EN_COURS' ? 'status-encours' : 'status-cree') %}
+    
+    <div class="salary-card {{ statusClass }}">
+        <div class="salary-header">
+            <div class="salary-date">
+                <i class="far fa-calendar-alt me-2"></i>
+                {% if salaire.datePaiement %}
+                    {{ salaire.datePaiement|date('F Y') }}
+                {% else %}
+                    Date non définie
+                {% endif %}
+            </div>
+            <span class="salary-status {{ statusClass }}">
+                {{ salaire.status }}
+            </span>
+        </div>
+        
+        <div class="salary-body">
+            <div class="salary-row">
+                <span class="salary-label">Salaire de base</span>
+                <span class="salary-value">{{ salaire.baseAmount|number_format(2, ',', ' ') }} DT</span>
+            </div>
+            
+            <div class="salary-row">
+                <span class="salary-label">Bonus</span>
+                <span class="salary-value bonus">
+                    {% if salaire.bonusAmount > 0 %}
+                        + {{ salaire.bonusAmount|number_format(2, ',', ' ') }} DT
+                    {% else %}
+                        0,00 DT
+                    {% endif %}
+                </span>
+            </div>
+            
+            <!-- Règles de bonus -->
+            {% if salaire.bonusRules is defined and salaire.bonusRules|length > 0 %}
+            <div class="bonus-rules">
+                <div class="bonus-rules-title">
+                    <i class="fas fa-star me-1"></i> Règles de bonus appliquées
+                </div>
+                {% for rule in salaire.bonusRules %}
+                    <span class="bonus-tag">
+                        {{ rule.nomRegle }} ({{ rule.percentage }}%)
+                    </span>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="salary-row">
+                <span class="salary-label">Total net</span>
+                <span class="salary-value total">
+                    {{ salaire.totalAmount|number_format(2, ',', ' ') }} DT
+                </span>
+            </div>
+
+            <!-- Bouton PDF -->
+            <div class="salary-row" style="border-top: 2px solid #e9ecef; margin-top: 10px; padding-top: 15px; border-bottom: none; justify-content: flex-end;">
+                <a href="{{ path('salaire_download_pdf', {'id': salaire.id}) }}" 
+                   class="btn btn-outline-primary btn-sm rounded-pill"
+                   style="font-size: 13px;">
+                    <i class="fas fa-file-pdf me-2"></i>Télécharger ma fiche de paie
+                </a>
+            </div>
+
+        </div>
+    </div>
+{% endfor %}
+
+{% else %}
+<!-- État vide -->
+<div class="empty-state">
+    <i class="fas fa-file-invoice-dollar"></i>
+    <h4>Aucun bulletin de salaire</h4>
+    <p>Vos fiches de paie apparaîtront ici dès qu'elles seront disponibles.</p>
+</div>
+{% endif %}
+
+{% endblock %}

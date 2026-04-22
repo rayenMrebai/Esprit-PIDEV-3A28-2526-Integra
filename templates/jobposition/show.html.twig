@@ -1,46 +1,46 @@
-{% extends 'base.html.twig' %}
+{% extends 'admin/base_admin.html.twig' %}
 
-{% block title %}Jobposition{% endblock %}
+{% block title %}Détails de l'offre{% endblock %}
+{% block page_title %}Détails de l'offre{% endblock %}
+{% block breadcrumb %}Offres / Détails{% endblock %}
 
-{% block body %}
-    <h1>Jobposition</h1>
+{% block admin_content %}
+    <div class="card-modern" style="max-width: 700px; margin: 0 auto;">
+        <div class="section-header">
+            <div class="section-title"><i class="fas fa-briefcase"></i> {{ jobposition.title }}</div>
+            <span class="status-badge {{ jobposition.status|lower == 'open' ? 'open' : 'closed' }}">{{ jobposition.status }}</span>
+        </div>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>IdJob</th>
-                <td>{{ jobposition.idJob }}</td>
-            </tr>
-            <tr>
-                <th>Title</th>
-                <td>{{ jobposition.title }}</td>
-            </tr>
-            <tr>
-                <th>Departement</th>
-                <td>{{ jobposition.departement }}</td>
-            </tr>
-            <tr>
-                <th>EmployeeType</th>
-                <td>{{ jobposition.employeeType }}</td>
-            </tr>
-            <tr>
-                <th>Description</th>
-                <td>{{ jobposition.description }}</td>
-            </tr>
-            <tr>
-                <th>Status</th>
-                <td>{{ jobposition.status }}</td>
-            </tr>
-            <tr>
-                <th>PostedAt</th>
-                <td>{{ jobposition.postedAt ? jobposition.postedAt|date('Y-m-d') : '' }}</td>
-            </tr>
-        </tbody>
-    </table>
+        <div style="padding: 20px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
+                <div>
+                    <label style="color: var(--gray-500); font-size: 12px; text-transform: uppercase; font-weight: 600;">Département</label>
+                    <p style="margin: 4px 0 0; font-size: 16px; font-weight: 600;">{{ jobposition.departement }}</p>
+                </div>
+                <div>
+                    <label style="color: var(--gray-500); font-size: 12px; text-transform: uppercase; font-weight: 600;">Type d'emploi</label>
+                    <p style="margin: 4px 0 0; font-size: 16px; font-weight: 600;">{{ jobposition.employeeType }}</p>
+                </div>
+                <div>
+                    <label style="color: var(--gray-500); font-size: 12px; text-transform: uppercase; font-weight: 600;">Publié le</label>
+                    <p style="margin: 4px 0 0; font-size: 16px; font-weight: 600;">{{ jobposition.postedAt ? jobposition.postedAt|date('d/m/Y') : 'Non défini' }}</p>
+                </div>
+                <div>
+                    <label style="color: var(--gray-500); font-size: 12px; text-transform: uppercase; font-weight: 600;">ID</label>
+                    <p style="margin: 4px 0 0; font-size: 16px; font-weight: 600;">#{{ jobposition.idJob }}</p>
+                </div>
+            </div>
 
-    <a href="{{ path('app_jobposition_index') }}">back to list</a>
+            <div style="margin-bottom: 24px;">
+                <label style="color: var(--gray-500); font-size: 12px; text-transform: uppercase; font-weight: 600;">Description</label>
+                <p style="margin: 8px 0 0; line-height: 1.6; background: #f8fafc; padding: 16px; border-radius: 12px;">{{ jobposition.description }}</p>
+            </div>
 
-    <a href="{{ path('app_jobposition_edit', {'idJob': jobposition.idJob}) }}">edit</a>
-
-    {{ include('jobposition/_delete_form.html.twig') }}
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <a href="{{ path('app_jobposition_index') }}" class="btn btn-outline">← Retour à la liste</a>
+                <a href="{{ path('app_jobposition_edit', {'idJob': jobposition.idJob}) }}" class="btn btn-warning"><i class="fas fa-edit"></i> Modifier</a>
+                {{ include('jobposition/_delete_form.html.twig') }}
+            </div>
+        </div>
+    </div>
 {% endblock %}

@@ -4,7 +4,7 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: App\Repository\UserSettingRepository::class)]
+#[ORM\Entity(repositoryClass: 'App\Repository\UserSettingRepository')]
 #[ORM\Table(name: 'user_settings')]
 class UserSetting
 {
@@ -14,7 +14,7 @@ class UserSetting
     private ?int $settingsId = null;
 
     #[ORM\OneToOne(targetEntity: UserAccount::class)]
-    #[ORM\JoinColumn(name: 'userId', referencedColumnName: 'userid', unique: true)]
+    #[ORM\JoinColumn(name: 'userId', referencedColumnName: 'userId', unique: true)]
     private ?UserAccount $userAccount = null;
 
     #[ORM\Column(type: 'string', nullable: true, name: 'theme')]

@@ -6,6 +6,7 @@ use App\Entity\UserAccount;
 use App\Form\UserEditFormType;
 use App\Form\RegistrationFormType;
 use App\Repository\UserAccountRepository;
+use App\Service\SalaireStatisticsService;
 use Doctrine\ORM\EntityManagerInterface;
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -22,7 +23,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 #[Route('/admin')]
 class AdminController extends AbstractController
 {
-    #[Route('/user/{id}/ai-advice', name: 'admin_user_ai_advice')]
+        #[Route('/user/{id}/ai-advice', name: 'admin_user_ai_advice')]
     #[IsGranted('ROLE_MANAGER')]   // Changed from ROLE_ADMIN to ROLE_MANAGER
     public function aiAdvice(UserAccount $user, HuggingFaceService $ai): JsonResponse
     {
@@ -47,8 +48,11 @@ class AdminController extends AbstractController
 
     #[Route('/dashboard', name: 'app_dashboard')]
     #[IsGranted('ROLE_MANAGER')]
-    public function dashboard(UserAccountRepository $repo, HttpClientInterface $httpClient): Response
-    {
+    public function dashboard(
+        UserAccountRepository    $repo,
+        HttpClientInterface      $httpClient,
+        SalaireStatisticsService $statsService
+    ): Response {
         // Auto‑deactivate users inactive for >3 days
         $deactivatedCount = $repo->deactivateInactiveUsers();
         if ($deactivatedCount > 0) {
@@ -76,12 +80,16 @@ class AdminController extends AbstractController
             $weather = null;
         }
 
+        // Salaire statistics from su branch
+        $salStats = $statsService->getStatistics();
+
         return $this->render('admin/dashboard.html.twig', [
             'totalUsers' => $totalUsers,
             'activeUsers' => $activeUsers,
             'stats' => $stats,
             'weather' => $weather,
             'riskUsers' => $riskUsers,
+            'salStats' => $salStats,
         ]);
     }
 
