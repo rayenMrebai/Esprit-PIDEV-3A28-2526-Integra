@@ -1,0 +1,143 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+
+{% block title %}Gestion des inscriptions{% endblock %}
+
+{% block page_title %}Gestion des demandes d'inscription{% endblock %}
+{% block breadcrumb %}Inscriptions / Liste{% endblock %}
+
+{% block admin_content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Demandes d'inscription</h3>
+        <div class="card-tools">
+            <div class="btn-group">
+                <a href="{{ path('app_backoffice_inscriptions', {status: 'EN_ATTENTE'}) }}" 
+                   class="btn btn-sm {{ currentStatus == 'EN_ATTENTE' ? 'btn-warning' : 'btn-outline-warning' }}">
+                    <i class="bi bi-hourglass-split"></i> En attente
+                </a>
+                <a href="{{ path('app_backoffice_inscriptions', {status: 'ACCEPTEE'}) }}" 
+                   class="btn btn-sm {{ currentStatus == 'ACCEPTEE' ? 'btn-success' : 'btn-outline-success' }}">
+                    <i class="bi bi-check-circle"></i> Acceptées
+                </a>
+                <a href="{{ path('app_backoffice_inscriptions', {status: 'REFUSEE'}) }}" 
+                   class="btn btn-sm {{ currentStatus == 'REFUSEE' ? 'btn-danger' : 'btn-outline-danger' }}">
+                    <i class="bi bi-x-circle"></i> Refusées
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        {% if inscriptions|length > 0 %}
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Utilisateur</th>
+                            <th>Formation</th>
+                            <th>Date demande</th>
+                            <th>Motivation</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for inscription in inscriptions %}
+                            <tr>
+                                <td>
+                                    <strong>{{ inscription.user.username }}</strong><br>
+                                    <small class="text-muted">{{ inscription.user.email }}</small>
+                                </td>
+                                <td>
+                                    <strong>{{ inscription.formation.title }}</strong><br>
+                                    <small>{{ inscription.formation.startDate|date('d/m/Y') }} - {{ inscription.formation.endDate|date('d/m/Y') }}</small>
+                                </td>
+                                <td>{{ inscription.dateDemande|date('d/m/Y H:i') }}</td>
+                                <td>
+                                    <span data-bs-toggle="tooltip" title="{{ inscription.motivation }}">
+                                        {{ inscription.motivation|slice(0, 60) }}...
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if inscription.status == 'EN_ATTENTE' %}
+                                        <span class="badge bg-warning">En attente</span>
+                                    {% elseif inscription.status == 'ACCEPTEE' %}
+                                        <span class="badge bg-success">Acceptée</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Refusée</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if inscription.status == 'EN_ATTENTE' %}
+                                        <form method="post" action="{{ path('app_backoffice_inscription_accepter', {id: inscription.id}) }}" 
+                                              style="display: inline-block;">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('accepter' ~ inscription.id) }}">
+                                            <button class="btn btn-success btn-sm" onclick="return confirm('Accepter cette inscription ?')">
+                                                <i class="bi bi-check"></i> Accepter
+                                            </button>
+                                        </form>
+                                        
+                                        <button class="btn btn-danger btn-sm" data-bs-toggle="modal" 
+                                                data-bs-target="#refuserModal{{ inscription.id }}">
+                                            <i class="bi bi-x"></i> Refuser
+                                        </button>
+                                        
+                                        <!-- Modal Refuser -->
+                                        <div class="modal fade" id="refuserModal{{ inscription.id }}" tabindex="-1">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <form method="post" action="{{ path('app_backoffice_inscription_refuser', {id: inscription.id}) }}">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title">Refuser l'inscription</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <div class="mb-3">
+                                                                <label class="form-label fw-bold">Motif du refus :</label>
+                                                                <textarea name="commentaire" class="form-control" rows="3" required 
+                                                                          placeholder="Expliquez la raison du refus..."></textarea>
+                                                            </div>
+                                                            <div class="alert alert-info small">
+                                                                <i class="bi bi-info-circle"></i> 
+                                                                L'utilisateur recevra ce motif avec sa notification.
+                                                            </div>
+                                                            <input type="hidden" name="_token" value="{{ csrf_token('refuser' ~ inscription.id) }}">
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                            <button type="submit" class="btn btn-danger">Confirmer le refus</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% elseif inscription.status == 'REFUSEE' and inscription.commentaireAdmin %}
+                                        <span class="text-muted" data-bs-toggle="tooltip" title="{{ inscription.commentaireAdmin }}">
+                                            <i class="bi bi-info-circle"></i> Motif
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info text-center">
+                <i class="bi bi-inbox"></i> Aucune demande d'inscription {{ currentStatus == 'EN_ATTENTE' ? 'en attente' : (currentStatus == 'ACCEPTEE' ? 'acceptée' : 'refusée') }}.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+    // Activer les tooltips Bootstrap
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+</script>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+
+{% block page_title %}Détails de la compétence{% endblock %}
+{% block breadcrumb %}Compétences / Détails{% endblock %}
+
+{% block admin_content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Compétence #{{ skill.id }}</h3>
+        <div class="card-tools">
+            <a href="{{ path('app_backoffice_competences') }}" class="btn btn-secondary btn-sm">Retour à la liste</a>
+            <a href="{{ path('app_backoffice_competences_edit', {id: skill.id}) }}" class="btn btn-warning btn-sm">Modifier</a>
+        </div>
+    </div>
+    <div class="card-body">
+        <table class="table table-bordered">
+            <tbody>
+                <tr>
+                    <th>ID</th>
+                    <td>{{ skill.id }}</td>
+                </tr>
+                <tr>
+                    <th>Nom</th>
+                    <td>{{ skill.nom }}</td>
+                </tr>
+                <tr>
+                    <th>Description</th>
+                    <td>{{ skill.description }}</td>
+                </tr>
+                <tr>
+                    <th>Niveau requis</th>
+                    <td>{{ skill.levelRequired }} / 5</td>
+                </tr>
+                <tr>
+                    <th>Catégorie</th>
+                    <td>{{ skill.categorie }}</td>
+                </tr>
+                <tr>
+                    <th>Formation liée</th>
+                    <td>
+                        {% if skill.trainingProgram %}
+                            <a href="{{ path('app_backoffice_formations_show', {id: skill.trainingProgram.id}) }}">
+                                {{ skill.trainingProgram.title }}
+                            </a>
+                        {% else %}
+                            <span class="text-muted">Non liée</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {# 👇 AJOUTEZ CETTE SECTION POUR LES UTILISATEURS #}
+                <tr>
+                    <th>Utilisateurs associés</th>
+                    <td>
+                        {% if skill.users is not empty %}
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for user in skill.users %}
+                                    <span class="badge bg-primary">
+                                        <i class="bi bi-person"></i>
+                                        {{ user.username }} ({{ user.email }})
+                                    </span>
+                                {% endfor %}
+                            </div>
+                            <div class="mt-2 small text-muted">
+                                Total: {{ skill.users|length }} utilisateur(s)
+                            </div>
+                        {% else %}
+                            <span class="text-muted">
+                                <i class="bi bi-exclamation-triangle"></i>
+                                Aucun utilisateur associé à cette compétence
+                            </span>
+                        {% endif %}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

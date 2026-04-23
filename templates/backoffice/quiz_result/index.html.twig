@@ -1,0 +1,56 @@
+{% extends 'backoffice/base_backoffice.html.twig' %}
+
+{% block page_title %}Gestion des Résultats de Quiz{% endblock %}
+{% block breadcrumb %}Quiz Results{% endblock %}
+
+{% block admin_content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Liste des résultats de quiz</h3>
+        <div class="card-tools">
+            <a href="{{ path('app_backoffice_quiz_new') }}" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus"></i> Ajouter un résultat
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Utilisateur</th>
+                        <th>Score</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for quiz in quiz_results %}
+                        <tr>
+                            <td>{{ quiz.id }}</td>
+                            <td>{{ quiz.user ? quiz.user.username : 'N/A' }}</td>
+                            <td>{{ quiz.score }}%</td>
+                            <td>{{ quiz.completedAt ? quiz.completedAt|date('d/m/Y H:i') : 'N/A' }}</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{{ path('app_backoffice_quiz_show', {id: quiz.id}) }}" class="btn btn-sm btn-info">Voir</a>
+                                    <a href="{{ path('app_backoffice_quiz_edit', {id: quiz.id}) }}" class="btn btn-sm btn-warning">Modifier</a>
+                                    <form method="post" action="{{ path('app_backoffice_quiz_delete', {id: quiz.id}) }}" style="display:inline-block" onsubmit="return confirm('Supprimer ce résultat ?')">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ quiz.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center">Aucun résultat de quiz trouvé.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

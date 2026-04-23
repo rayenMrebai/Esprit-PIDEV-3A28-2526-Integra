@@ -2,11 +2,11 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
@@ -15,10 +15,10 @@ class UserAccount implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(name: 'userId', type: 'integer')]
+    #[ORM\Column(type: "integer", name: "userid")]
     private ?int $userId = null;
 
-    #[ORM\Column(type: "string", length: 255, name: "username")]
+    #[ORM\Column(type: "string", length: 255, name: "username", unique: true)]
     #[Assert\NotBlank]
     #[Assert\Length(min: 3, max: 50)]
     private ?string $username = null;
@@ -49,69 +49,100 @@ class UserAccount implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: "string", length: 255, nullable: true, name: "face_image_path")]
     private ?string $faceImagePath = null;
 
-    #[ORM\OneToMany(
-    mappedBy: 'user', 
-    targetEntity: Salaire::class, 
-    orphanRemoval: true, 
+// UserAccount.php — doit être exactement :
+#[ORM\OneToMany(
+    mappedBy: 'user',        // ✅ doit correspondre à $user dans Salaire
+    targetEntity: Salaire::class,
+    orphanRemoval: true,
     cascade: ['persist', 'remove']
-    )]
-    private Collection $salaires;
-
-    // --- OneToOne relation with UserSetting (inverse side) ---
-    #[ORM\OneToOne(mappedBy: "userAccount", cascade: ["persist", "remove"])]
-    private ?UserSetting $userSetting = null;
+)]
+private Collection $salaires;
 
     #[ORM\OneToMany(mappedBy: 'userAccount', targetEntity: PasswordResetToken::class, cascade: ['persist', 'remove'])]
     private Collection $passwordResetTokens;
 
+    // ✅ Depuis HEAD — UserSetting
+    #[ORM\OneToOne(mappedBy: "userAccount", cascade: ["persist", "remove"])]
+    private ?UserSetting $userSetting = null;
+
+    // ✅ Depuis formation_version_clean — Skills
+    #[ORM\ManyToMany(targetEntity: Skill::class, inversedBy: "users")]
+    #[ORM\JoinTable(name: "user_skill")]
+    #[ORM\JoinColumn(name: "user_id", referencedColumnName: "userid")]
+    #[ORM\InverseJoinColumn(name: "skill_id", referencedColumnName: "id")]
+    private Collection $skills;
+
     public function __construct()
     {
-        $this->salaires           = new ArrayCollection();
-        $this->accountCreatedDate = new \DateTime();
-        $this->role = 'EMPLOYE';
+        $this->accountCreatedDate  = new \DateTime();
+        $this->role                = 'EMPLOYE';
+        $this->salaires            = new ArrayCollection();
+        $this->passwordResetTokens = new ArrayCollection();
+        $this->skills              = new ArrayCollection();
     }
 
-    
-
-    // Getters and setters
     public function getUserId(): ?int { return $this->userId; }
+
     public function getUsername(): ?string { return $this->username; }
     public function setUsername(string $username): self { $this->username = $username; return $this; }
+
     public function getEmail(): ?string { return $this->email; }
     public function setEmail(string $email): self { $this->email = $email; return $this; }
+
     public function getPasswordHash(): ?string { return $this->passwordHash; }
     public function setPasswordHash(string $passwordHash): self { $this->passwordHash = $passwordHash; return $this; }
+
     public function getRole(): string { return $this->role; }
     public function setRole(string $role): self { $this->role = $role; return $this; }
+
     public function getIsActive(): ?bool { return $this->isActive; }
     public function setIsActive(bool $isActive): self { $this->isActive = $isActive; return $this; }
+
     public function getLastLogin(): ?\DateTimeInterface { return $this->lastLogin; }
     public function setLastLogin(?\DateTimeInterface $lastLogin): self { $this->lastLogin = $lastLogin; return $this; }
+
     public function getAccountCreatedDate(): ?\DateTimeInterface { return $this->accountCreatedDate; }
+
     public function getAccountStatus(): ?string { return $this->accountStatus; }
     public function setAccountStatus(string $accountStatus): self { $this->accountStatus = $accountStatus; return $this; }
+
     public function getFaceImagePath(): ?string { return $this->faceImagePath; }
     public function setFaceImagePath(?string $faceImagePath): self { $this->faceImagePath = $faceImagePath; return $this; }
 
-    // UserSetting relation
     public function getUserSetting(): ?UserSetting { return $this->userSetting; }
     public function setUserSetting(?UserSetting $userSetting): self { $this->userSetting = $userSetting; return $this; }
 
-    // Required by UserInterface
-    public function getUserIdentifier(): string { return $this->username; }
-    public function getRoles(): array
-    {
-        return match ($this->role) {
-            'ADMINISTRATEUR' => ['ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_USER'],
-            'MANAGER'        => ['ROLE_MANAGER', 'ROLE_USER'],
-            default          => ['ROLE_USER'],
-        };
-    }
-    public function getPassword(): ?string { return $this->passwordHash; }
-    public function getSalt(): ?string { return null; }
-    public function eraseCredentials(): void {}
+    // ✅ Skills
+    public function getSkills(): Collection { return $this->skills; }
 
+    public function addSkill(Skill $skill): self
+    {
+        if (!$this->skills->contains($skill)) {
+            $this->skills->add($skill);
+            $skill->addUser($this);
+        }
+        return $this;
+    }
+
+    public function removeSkill(Skill $skill): self
+    {
+        if ($this->skills->removeElement($skill)) {
+            $skill->removeUser($this);
+        }
+        return $this;
+    }
+
+    public function hasSkill(string $skillName): bool
+    {
+        foreach ($this->skills as $skill) {
+            if ($skill->getNom() === $skillName) return true;
+        }
+        return false;
+    }
+
+    // ✅ Salaires
     public function getSalaires(): Collection { return $this->salaires; }
+
     public function addSalaire(Salaire $salaire): static
     {
         if (!$this->salaires->contains($salaire)) {
@@ -120,6 +151,7 @@ class UserAccount implements UserInterface, PasswordAuthenticatedUserInterface
         }
         return $this;
     }
+
     public function removeSalaire(Salaire $salaire): static
     {
         if ($this->salaires->removeElement($salaire)) {
@@ -129,4 +161,24 @@ class UserAccount implements UserInterface, PasswordAuthenticatedUserInterface
         }
         return $this;
     }
+
+    // ── UserInterface ──────────────────────────────────────────────
+
+    public function getUserIdentifier(): string
+    {
+        return $this->email; // ✅ login par email
+    }
+
+    public function getRoles(): array
+    {
+        return match ($this->role) {
+            'ADMINISTRATEUR' => ['ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_EMPLOYE', 'ROLE_USER'],
+            'MANAGER'        => ['ROLE_MANAGER', 'ROLE_EMPLOYE', 'ROLE_USER'],
+            default          => ['ROLE_EMPLOYE', 'ROLE_USER'],
+        };
+    }
+
+    public function getPassword(): string { return $this->passwordHash; }
+    public function getSalt(): ?string { return null; }
+    public function eraseCredentials(): void {}
 }

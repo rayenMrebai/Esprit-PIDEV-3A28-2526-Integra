@@ -1,0 +1,21 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+
+{% block page_title %}Modifier la formation{% endblock %}
+{% block breadcrumb %}Formations / Modifier{% endblock %}
+
+{% block admin_content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Modifier la formation #{{ training_program.id }}</h3>
+        <div class="card-tools">
+            <a href="{{ path('app_backoffice_formations') }}" class="btn btn-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Retour à la liste
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        {{ include('backoffice/training_program/_form.html.twig', {'form': form}) }}
+    </div>
+</div>
+{% endblock %}

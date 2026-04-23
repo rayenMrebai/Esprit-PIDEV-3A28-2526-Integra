@@ -1,0 +1,48 @@
+09:12:48 - quizExistant: NON
+09:12:48 - AVANT generateQuiz formation: ISTQB
+09:12:51 - APRES generateQuiz - nb questions: 10 - q1: Qu'est-ce que ISTQB ?
+09:21:53 - quizExistant: NON
+09:21:53 - AVANT generateQuiz formation: Intelligence artificielle
+09:21:53 - APRES generateQuiz - nb questions: 10 - q1: Qu'est-ce que Intelligence artificielle ?
+09:28:24 - quizExistant: NON
+09:28:24 - AVANT generateQuiz formation: IPV6
+09:28:24 - APRES generateQuiz - nb questions: 10 - q1: Qu'est-ce que IPV6 ?
+09:45:06 - quizExistant: NON
+09:45:06 - AVANT generateQuiz formation: Google Project Management
+09:45:06 - APRES generateQuiz - nb questions: 10 - q1: Qu'est-ce que Google Project Management ?
+09:47:23 - quizExistant: NON
+09:47:23 - AVANT generateQuiz formation: Full Stack Web Development1
+09:47:23 - APRES generateQuiz - nb questions: 10 - q1: Qu'est-ce que Full Stack Web Development1 ?
+09:49:02 - quizExistant: NON
+09:49:02 - AVANT generateQuiz formation: bootstrap
+09:49:02 - APRES generateQuiz - nb questions: 10 - q1: Qu'est-ce que bootstrap ?
+10:02:14 - quizExistant: NON
+10:02:14 - AVANT generateQuiz formation: Machine Learning Specialization
+10:02:14 - APRES generateQuiz - nb questions: 10 - q1: Qu'est-ce que Machine Learning Specialization ?
+10:39:05 - quizExistant: NON
+10:39:05 - AVANT generateQuiz formation: Google Project Management
+10:39:05 - APRES generateQuiz - nb questions: 10 - q1: Qu'est-ce que Google Project Management ?
+10:48:22 - quizExistant: NON
+10:48:22 - AVANT generateQuiz formation: PHP
+10:48:22 - APRES generateQuiz - nb questions: 10 - q1: Qu'est-ce que PHP ?
+10:52:05 - quizExistant: NON
+10:52:05 - AVANT generateQuiz formation: Agile Project Management
+10:52:05 - APRES generateQuiz - nb questions: 10 - q1: Qu'est-ce que Agile Project Management ?
+10:56:33 - quizExistant: NON
+10:56:33 - AVANT generateQuiz formation: Intelligence artificielle
+10:56:33 - APRES generateQuiz - nb questions: 10 - q1: Qu'est-ce que Intelligence artificielle ?
+11:27:42 - quizExistant: NON
+11:27:42 - AVANT generateQuiz formation: Machine Learning Specialization
+11:27:45 - APRES generateQuiz - nb questions: 10 - q1: Qu'est-ce que le machine learning et comment se différencie-t-il de l'intelligence artificielle ?
+11:40:08 - quizExistant: NON
+11:40:08 - AVANT generateQuiz formation: IPV6
+11:40:11 - APRES generateQuiz - nb questions: 10 - q1: Quel est le principal avantage de l'adressage IPv6 par rapport à IPv4 ?
+12:11:43 - quizExistant: NON
+12:11:43 - AVANT generateQuiz formation: Full Stack Web Development1
+12:11:46 - APRES generateQuiz - nb questions: 10 - q1: Quel est le rôle principal de HTML dans le développement web ?
+14:19:20 - quizExistant: NON
+14:19:20 - AVANT generateQuiz formation: Google Project Management
+14:19:23 - APRES generateQuiz - nb questions: 10 - q1: Quel est l'outil de gestion de projet utilisé par Google pour suivre les progrès et les tâches ?
+15:07:26 - quizExistant: NON
+15:07:26 - AVANT generateQuiz formation: linux
+15:07:28 - APRES generateQuiz - nb questions: 10 - q1: Quel est le nom du noyau du système d'exploitation Linux ?

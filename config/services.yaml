@@ -6,6 +6,11 @@ services:
     _defaults:
         autowire: true
         autoconfigure: true
+        # Binding global pour que chaque mailer ait son propre service
+        bind:
+            $salaireMailer: '@mailer.salaire'
+            $recrutementMailer: '@mailer.recrutement'
+            $certificatMailer: '@mailer.certificat'
 
     App\:
         resource: '../src/'
@@ -39,6 +44,12 @@ services:
         arguments:
             $projectDir: '%kernel.project_dir%'
 
+    App\Service\AIQuizGenerator:
+        arguments:
+            $apiKey: '%env(GROQ_API_KEY)%'
+            $apiUrl: '%env(GROQ_API_URL)%'
+            $model: '%env(GROQ_MODEL)%'
+
     # ============================================
     # MAILER SALAIRE (Toi - Brevo)
     # ============================================
@@ -68,17 +79,35 @@ services:
             - '@mailer.transport.recrutement'
 
     # ============================================
+    # MAILER CERTIFICAT (Sarabeji - Gmail)
+    # ============================================
+    
+    mailer.transport.certificat:
+        class: Symfony\Component\Mailer\Transport\TransportInterface
+        factory: ['Symfony\Component\Mailer\Transport', 'fromDsn']
+        arguments: ['%env(MAILER_DSN_CERTIFICAT)%']
+
+    mailer.certificat:
+        class: Symfony\Component\Mailer\Mailer
+        arguments:
+            - '@mailer.transport.certificat'
+
+    # ============================================
     # INJECTION EXPLICITE DES MAILERS DANS LES SERVICES
     # ============================================
     
     App\Service\EmailSalaireService:
         arguments:
-            $mailer: '@mailer.salaire'
+            $salaireMailer: '@mailer.salaire'
 
     App\Service\EmailService:
         arguments:
-            $mailer: '@mailer.recrutement'
+            $recrutementMailer: '@mailer.recrutement'
 
     App\Controller\CVAnalysisController:
         arguments:
             $mailer: '@mailer.recrutement'
+
+    App\Service\CertificatMailer:
+        arguments:
+            $certificatMailer: '@mailer.certificat'

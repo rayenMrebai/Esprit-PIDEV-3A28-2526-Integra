@@ -25,4 +25,31 @@ return [
     '@hotwired/turbo' => [
         'version' => '7.3.0',
     ],
+    'admin-lte' => [
+        'version' => '4.0.0-rc7',
+    ],
+    'admin-lte/dist/css/adminlte.min.css' => [
+        'version' => '4.0.0-rc7',
+        'type' => 'css',
+    ],
+    'bootstrap' => [
+        'version' => '5.3.8',
+    ],
+    '@popperjs/core' => [
+        'version' => '2.11.8',
+    ],
+    'bootstrap/dist/css/bootstrap.min.css' => [
+        'version' => '5.3.8',
+        'type' => 'css',
+    ],
+    '@fortawesome/fontawesome-free' => [
+        'version' => '7.2.0',
+    ],
+    '@fortawesome/fontawesome-free/css/fontawesome.min.css' => [
+        'version' => '7.2.0',
+        'type' => 'css',
+    ],
+    'jquery' => [
+        'version' => '4.0.0',
+    ],
 ];

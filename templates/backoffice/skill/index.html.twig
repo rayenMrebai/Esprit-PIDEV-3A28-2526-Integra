@@ -1,0 +1,142 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+
+{% block page_title %}Gestion des compétences{% endblock %}
+{% block breadcrumb %}Compétences{% endblock %}
+
+{% block admin_content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Liste des compétences</h3>
+        <div class="card-tools">
+            <a href="{{ path('app_backoffice_competences_new') }}" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus"></i> Ajouter une compétence
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <!-- Formulaire de recherche -->
+        <form method="get" class="mb-4">
+            <div class="row">
+                <div class="col-md-4">
+                    <input type="text" name="search" class="form-control" placeholder="🔍 Rechercher par nom..." value="{{ search }}">
+                </div>
+                <div class="col-md-3">
+                    <select name="categorie" class="form-select">
+                        <option value="">Toutes les catégories</option>
+                        <option value="technique" {{ selectedCategorie == 'technique' ? 'selected' : '' }}>Technique</option>
+                        <option value="soft" {{ selectedCategorie == 'soft' ? 'selected' : '' }}>Soft skills</option>
+                        <option value="management" {{ selectedCategorie == 'management' ? 'selected' : '' }}>Management</option>
+                        <option value="autre" {{ selectedCategorie == 'autre' ? 'selected' : '' }}>Autre</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="level" class="form-select">
+                        <option value="">Niveau requis</option>
+                        {% for i in 1..5 %}
+                            <option value="{{ i }}" {{ selectedLevel == i ? 'selected' : '' }}>Niveau {{ i }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <div class="btn-group w-100">
+                        <button type="submit" class="btn btn-primary">Filtrer</button>
+                        <a href="{{ path('app_backoffice_competences') }}" class="btn btn-secondary">Réinitialiser</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nom</th>
+                        <th>Catégorie</th>
+                        <th>Niveau</th>
+                        <th>Utilisateurs</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for skill in skills %}
+                    <tr>
+                        <td>{{ skill.id }}</td>
+                        <td>{{ skill.nom }}</td>
+                        <td>
+                            <span class="badge 
+                                {% if skill.categorie == 'technique' %}bg-primary
+                                {% elseif skill.categorie == 'soft' %}bg-success
+                                {% elseif skill.categorie == 'management' %}bg-warning
+                                {% else %}bg-secondary{% endif %}">
+                                {{ skill.categorie }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar bg-info" style="width: {{ skill.levelRequired * 20 }}%;">
+                                    {{ skill.levelRequired }}/5
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            {% if skill.users|length > 0 %}
+                                <span class="badge bg-primary">{{ skill.users|length }} utilisateur(s)</span>
+                                <button type="button" class="btn btn-sm btn-link" data-bs-toggle="modal" data-bs-target="#usersModal{{ skill.id }}">
+                                    Voir la liste
+                                </button>
+                                
+                                <!-- Modal pour afficher les utilisateurs -->
+                                <div class="modal fade" id="usersModal{{ skill.id }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Utilisateurs avec la compétence "{{ skill.nom }}"</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <ul class="list-group">
+                                                    {% for user in skill.users %}
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                            <div>
+                                                                <strong>{{ user.username }}</strong><br>
+                                                                <small class="text-muted">{{ user.email }}</small>
+                                                            </div>
+                                                            <span class="badge bg-info">{{ user.role }}</span>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <span class="text-muted">Aucun utilisateur</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{{ path('app_backoffice_competences_show', {id: skill.id}) }}" class="btn btn-sm btn-info">Voir</a>
+                                <a href="{{ path('app_backoffice_competences_edit', {id: skill.id}) }}" class="btn btn-sm btn-warning">Modifier</a>
+                                <form method="post" action="{{ path('app_backoffice_competences_delete', {id: skill.id}) }}" style="display:inline-block" onsubmit="return confirm('Supprimer cette compétence ?')">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ skill.id) }}">
+                                    <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center">Aucune compétence trouvée.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

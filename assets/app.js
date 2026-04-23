@@ -6,3 +6,4 @@ import './styles/app.scss';
 // On évite l'import direct ici pour éviter l'erreur de résolution.
 
 console.log('This log comes from assets/app.js - welcome to AssetMapper! 🎉');
+

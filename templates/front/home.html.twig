@@ -47,6 +47,70 @@
             </div>
         </div>
 
+        <!-- ✅ Section Formations, Compétences et Quiz -->
+        <hr class="my-4" />
+        <h3 class="mb-4">
+            <i class="fas fa-graduation-cap me-2 text-primary"></i>Formations & Développement
+        </h3>
+
+        <div class="row mb-5">
+            <!-- Formations -->
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm text-center p-4"
+                     style="border-top: 4px solid #0B63CE !important;">
+                    <div class="card-body">
+                        <i class="fas fa-book-open fa-3x mb-3" style="color: #0B63CE;"></i>
+                        <h4 class="card-title">Mes Formations</h4>
+                        <p class="card-text text-muted">
+                            Inscrivez-vous aux formations disponibles et suivez votre progression
+                        </p>
+                        <a href="{{ path('app_frontoffice_inscription_formations') }}" 
+   class="btn btn-outline-primary rounded-pill">
+    <i class="fas fa-arrow-right me-2"></i>Voir les formations
+</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Compétences -->
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm text-center p-4"
+                     style="border-top: 4px solid #0FA36B !important;">
+                    <div class="card-body">
+                        <i class="fas fa-star fa-3x mb-3" style="color: #0FA36B;"></i>
+                        <h4 class="card-title">Mes Compétences</h4>
+                        <p class="card-text text-muted">
+                            Consultez et gérez vos compétences professionnelles acquises
+                        </p>
+                        <a href="{{ path('app_frontoffice_skills') }}" 
+                           class="btn rounded-pill"
+                           style="background: #0FA36B; color: white;">
+                            <i class="fas fa-arrow-right me-2"></i>Voir mes compétences
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz -->
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm text-center p-4"
+                     style="border-top: 4px solid #c9a84c !important;">
+                    <div class="card-body">
+                        <i class="fas fa-question-circle fa-3x mb-3" style="color: #c9a84c;"></i>
+                        <h4 class="card-title">Mes Quiz</h4>
+                        <p class="card-text text-muted">
+                            Passez vos quiz de certification et téléchargez vos certificats
+                        </p>
+                        <a href="{{ path('app_frontoffice_quiz') }}" 
+                           class="btn rounded-pill"
+                           style="background: #c9a84c; color: white;">
+                            <i class="fas fa-arrow-right me-2"></i>Voir mes quiz
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Informations rapides employé -->
         <div class="alert alert-light border mb-5">
             <h5><i class="fas fa-info-circle me-2"></i>Informations</h5>

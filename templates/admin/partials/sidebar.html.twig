@@ -4,53 +4,84 @@
     </a>
     <div class="sidebar">
         <nav class="mt-2">
-            <ul class="nav nav-pills nav-sidebar flex-column">
+            <ul class="nav nav-pills nav-sidebar flex-column"
+                data-widget="treeview"
+                role="menu"
+                data-accordion="false">
+
                 <li class="nav-item">
                     <a href="{{ path('app_dashboard') }}" class="nav-link">
                         <i class="nav-icon fas fa-tachometer-alt"></i>
                         <p>Dashboard</p>
                     </a>
                 </li>
-                <!-- NOUVEAU LIEN RECRUTEMENT -->
+
                 <li class="nav-item">
                     <a href="{{ path('app_recruitment_dashboard') }}" class="nav-link">
                         <i class="nav-icon fas fa-briefcase"></i>
                         <p>Recrutement</p>
                     </a>
                 </li>
+
                 <li class="nav-item">
                     <a href="{{ path('admin_user_list') }}" class="nav-link">
                         <i class="nav-icon fas fa-users"></i>
                         <p>Users</p>
                     </a>
                 </li>
+
                 <li class="nav-item">
                     {% if is_granted('ROLE_ADMIN') %}
-                        {# Admin voit tous les salaires #}
                         <a href="{{ path('app_backoffice_salaires_index') }}" class="nav-link">
                             <i class="nav-icon fas fa-money-bill-wave"></i>
                             <p>Salaires</p>
                         </a>
                     {% else %}
-                        {# Manager voit seulement ses salaires #}
                         <a href="{{ path('app_backoffice_salaires_mes_salaires') }}" class="nav-link">
                             <i class="nav-icon fas fa-money-bill-wave"></i>
                             <p>Mes Salaires</p>
                         </a>
                     {% endif %}
                 </li>
+
+                <!-- ✅ Formations — lien direct -->
+                <li class="nav-item">
+                    <a href="{{ path('app_backoffice_formations') }}" class="nav-link">
+                        <i class="nav-icon fas fa-graduation-cap"></i>
+                        <p>Formations</p>
+                    </a>
+                </li>
+
+                <!-- ✅ Compétences — lien direct -->
+                <li class="nav-item">
+                    <a href="{{ path('app_backoffice_competences') }}" class="nav-link">
+                        <i class="nav-icon fas fa-star"></i>
+                        <p>Compétences</p>
+                    </a>
+                </li>
+
+                <!-- ✅ Inscriptions — lien direct vers EN_ATTENTE -->
+                <li class="nav-item">
+                    <a href="{{ path('app_backoffice_inscriptions', {status: 'EN_ATTENTE'}) }}" class="nav-link">
+                        <i class="nav-icon fas fa-clipboard-list"></i>
+                        <p>Inscriptions</p>
+                    </a>
+                </li>
+
                 <li class="nav-item">
                     <a href="{{ path('app_profile') }}" class="nav-link">
                         <i class="nav-icon fas fa-user"></i>
                         <p>My Profile</p>
                     </a>
                 </li>
+
                 <li class="nav-item">
                     <a href="{{ path('app_logout') }}" class="nav-link">
                         <i class="nav-icon fas fa-sign-out-alt"></i>
                         <p>Logout</p>
                     </a>
                 </li>
+
             </ul>
         </nav>
     </div>

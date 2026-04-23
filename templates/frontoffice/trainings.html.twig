@@ -1,0 +1,48 @@
+{% extends 'base_front.html.twig' %}
+
+
+{% block title %}Toutes les formations – INTEGRA{% endblock %}
+
+{% block page_heading %}Formations{% endblock %}
+{% block page_subheading %}Consultez l'ensemble des programmes de formation disponibles{% endblock %}
+
+{% block content %}
+
+    <div class="post-preview">
+        <h2 class="post-title" style="color: #0B63CE;">
+            <i class="fas fa-graduation-cap me-2"></i>Tous les programmes
+        </h2>
+        <p class="post-subtitle">Retrouvez ici l'ensemble de nos formations RH et techniques.</p>
+    </div>
+    <hr class="my-4" />
+
+    {% for training in trainings %}
+        <div class="post-preview">
+            <a href="{{ path('app_frontoffice_training_show', {id: training.id}) }}" style="text-decoration: none;">
+                <h3 class="post-title" style="color: #0B63CE;">{{ training.title }}</h3>
+                <p class="post-subtitle">
+                    {{ training.description|length > 120 ? training.description|slice(0, 120) ~ '...' : training.description }}
+                </p>
+            </a>
+            <p class="post-meta">
+                <!-- Statut -->
+                <span class="badge-status"
+                    style="background: {% if training.status == 'EN COURS' %}#0B63CE{% elseif training.status == 'PROGRAMMÉ' %}#0FA36B{% else %}#6c757d{% endif %}; color: white;">
+                    {{ training.status }}
+                </span>
+                <!-- Type -->
+                <span class="badge-status ms-2"
+                    style="background: {% if training.type == 'présentiel' %}#e67e22{% elseif training.type == 'en ligne' %}#8e44ad{% else %}#17a2b8{% endif %}; color: white;">
+                    {{ training.type }}
+                </span>
+                <span class="ms-3"><i class="far fa-clock"></i> {{ training.duration }} h</span>
+                <span class="ms-3"><i class="far fa-calendar-alt"></i> {{ training.startDate ? training.startDate|date('d/m/Y') : '—' }}</span>
+                <span class="ms-3"><i class="far fa-calendar-check"></i> {{ training.endDate ? training.endDate|date('d/m/Y') : '—' }}</span>
+            </p>
+        </div>
+        {% if not loop.last %}<hr class="my-4" />{% endif %}
+    {% else %}
+        <p class="text-muted fst-italic">Aucune formation disponible pour le moment.</p>
+    {% endfor %}
+
+{% endblock %}

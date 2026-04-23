@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Controller;
-
+use App\Entity\Inscription;
+use App\Entity\Quiz_result;
 use App\Entity\UserAccount;
 use App\Form\UserEditFormType;
 use App\Form\RegistrationFormType;
@@ -165,17 +166,25 @@ class AdminController extends AbstractController
     #[Route('/user/{id}/delete', name: 'admin_user_delete')]
     #[IsGranted('ROLE_ADMIN')]
     public function delete(UserAccount $user, EntityManagerInterface $em, Request $request): Response
-    {
-        if ($this->isCsrfTokenValid('delete'.$user->getUserId(), $request->request->get('_token'))) {
-            $em->remove($user);
-            $em->flush();
-            $this->addFlash('success', 'User deleted.');
-        } else {
-            $this->addFlash('error', 'Invalid CSRF token.');
-        }
-        return $this->redirectToRoute('admin_user_list');
+{
+    // ✅ Supprimer les inscriptions liées
+    $inscriptions = $em->getRepository(Inscription::class)->findBy(['user' => $user]);
+    foreach ($inscriptions as $inscription) {
+        $em->remove($inscription);
     }
 
+    // ✅ Supprimer les quiz liés
+    $quizResults = $em->getRepository(Quiz_result::class)->findBy(['user' => $user]);
+    foreach ($quizResults as $quiz) {
+        $em->remove($quiz);
+    }
+
+    $em->remove($user);
+    $em->flush();
+
+    $this->addFlash('success', 'Utilisateur supprimé avec succès.');
+    return $this->redirectToRoute('admin_user_list');
+}
     #[Route('/users/export-pdf', name: 'admin_export_pdf')]
     #[IsGranted('ROLE_ADMIN')]
     public function exportPdf(UserAccountRepository $repo, Request $request): Response

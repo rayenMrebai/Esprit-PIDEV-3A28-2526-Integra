@@ -1,0 +1,56 @@
+{{ form_start(form, {'attr': {'id': 'quiz-form', 'class': 'ajax-form'}})}}
+
+    {{ form_errors(form) }}
+
+    <div class="mb-3">
+        {{ form_label(form.userId, 'ID Utilisateur', {'label_attr': {'class': 'form-label'}})}}
+        {{ form_widget(form.userId, {'attr': {'class': 'form-control'}})}}
+        {{ form_errors(form.userId) }}
+        <small class="text-muted">Doit être un nombre positif.</small>
+    </div>
+
+    <div class="mb-3">
+        {{ form_label(form.training, 'Formation', {'label_attr': {'class': 'form-label'}})}}
+        {{ form_widget(form.training, {'attr': {'class': 'form-select'}})}}
+        {{ form_errors(form.training) }}
+        <small class="text-muted">Champ obligatoire.</small>
+    </div>
+
+    <div class="mb-3">
+        {{ form_label(form.score, 'Score', {'label_attr': {'class': 'form-label'}})}}
+        {{ form_widget(form.score, {'attr': {'class': 'form-control'}})}}
+        {{ form_errors(form.score) }}
+        <small class="text-muted">Doit être compris entre 0 et 100.</small>
+    </div>
+
+    <div class="mb-3">
+        {{ form_label(form.totalQuestions, 'Total questions', {'label_attr': {'class': 'form-label'}})}}
+        {{ form_widget(form.totalQuestions, {'attr': {'class': 'form-control'}})}}
+        {{ form_errors(form.totalQuestions) }}
+        <small class="text-muted">Doit être un nombre positif.</small>
+    </div>
+
+    <div class="mb-3">
+        {{ form_label(form.percentage, 'Pourcentage', {'label_attr': {'class': 'form-label'}})}}
+        {{ form_widget(form.percentage, {'attr': {'class': 'form-control'}})}}
+        {{ form_errors(form.percentage) }}
+        <small class="text-muted">Doit être compris entre 0 et 100.</small>
+    </div>
+
+    <div class="mb-3">
+        <div class="form-check">
+            {{ form_widget(form.passed, {'attr': {'class': 'form-check-input'}})}}
+            {{ form_label(form.passed, 'Réussi', {'label_attr': {'class': 'form-check-label'}})}}
+        </div>
+        {{ form_errors(form.passed) }}
+    </div>
+
+    <div class="mb-3">
+        {{ form_label(form.completedAt, 'Date de complétion', {'label_attr': {'class': 'form-label'}})}}
+        {{ form_widget(form.completedAt, {'attr': {'class': 'form-control'}})}}
+        {{ form_errors(form.completedAt) }}
+        <small class="text-muted">Ne peut pas être dans le futur.</small>
+    </div>
+
+    {{ form_rest(form) }}
+{{ form_end(form) }}

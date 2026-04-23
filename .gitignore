@@ -1,6 +1,9 @@
 
 ###> symfony/framework-bundle ###
+<<<<<<< HEAD
 /.env
+=======
+>>>>>>> formation_version_clean
 /.env.local
 /.env.local.php
 /.env.*.local
@@ -8,7 +11,10 @@
 /public/bundles/
 /var/
 /vendor/
+<<<<<<< HEAD
 .idea/
+=======
+>>>>>>> formation_version_clean
 ###< symfony/framework-bundle ###
 
 ###> phpunit/phpunit ###

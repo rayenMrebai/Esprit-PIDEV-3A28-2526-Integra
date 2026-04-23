@@ -20,7 +20,6 @@
             background-color: #f8fafc;
         }
         
-        /* Bouton retour accueil flottant */
         .back-to-home {
             position: fixed;
             top: 20px;
@@ -49,7 +48,6 @@
             box-shadow: 0 6px 20px rgba(11,99,206,0.3);
         }
         
-        /* Navbar améliorée */
         .navbar-dark.bg-dark {
             background: linear-gradient(to right, #1e293b, #0f172a) !important;
         }
@@ -63,7 +61,6 @@
 </head>
 <body>
 
-    {# BOUTON RETOUR À L'ACCUEIL (visible sur toutes les pages) #}
     <div class="back-to-home">
         <a href="{{ path('front_acceuil') }}">
             <i class="fas fa-arrow-left"></i> Retour à l'accueil
@@ -72,7 +69,6 @@
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            {# Logo redirige vers accueil si non connecté, profile si connecté #}
             {% if app.user %}
                 <a class="navbar-brand" href="{{ path('app_profile') }}">
                     <i class="fas fa-shield-alt me-2"></i>INTEGRA RH
@@ -101,6 +97,25 @@
                                 <a class="nav-link" href="{{ path('app_dashboard') }}">
                                     <i class="fas fa-chart-line me-1"></i>Dashboard
                                 </a>
+                            </li>
+                        {% endif %}
+
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ path('app_backoffice_dashboard') }}">Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ path('app_backoffice_users') }}">Utilisateurs</a>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ path('front_home') }}">Accueil</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ path('app_frontoffice_trainings') }}">Formations</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ path('app_frontoffice_skills') }}">Compétences</a>
                             </li>
                         {% endif %}
                         

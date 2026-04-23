@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Quiz result{% endblock %}
+
+{% block body %}
+    <h1>Create new Quiz result</h1>
+
+    {{ include('quiz_result/_form.html.twig') }}
+
+    <a href="{{ path('app_quiz_result_index') }}">back to list</a>
+{% endblock %}

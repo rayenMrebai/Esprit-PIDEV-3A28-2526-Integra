@@ -1,0 +1,153 @@
+<?php
+
+namespace App\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use App\Repository\SkillRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Validator\Constraints as Assert;
+
+#[ORM\Entity(repositoryClass: SkillRepository::class)]
+#[ORM\Table(name: "skill")]
+class Skill
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: "integer")]
+    private ?int $id = null;
+
+    #[ORM\Column(type: "string", length: 100, nullable: true)]
+    #[Assert\NotBlank(message: "Le nom de la compétence est obligatoire.")]
+    #[Assert\Length(
+        min: 2,
+        max: 100,
+        minMessage: "Le nom doit contenir au moins {{ limit }} caractères.",
+        maxMessage: "Le nom ne peut pas dépasser {{ limit }} caractères."
+    )]
+    private ?string $nom = null;
+
+    #[ORM\Column(type: "text", nullable: true)]
+    #[Assert\NotBlank(message: "La description est obligatoire.")]
+    #[Assert\Length(
+        max: 500,
+        maxMessage: "La description ne peut pas dépasser {{ limit }} caractères."
+    )]
+    private ?string $description = null;
+
+    #[ORM\Column(type: "integer", nullable: true)]
+    #[Assert\NotBlank(message: "Le niveau requis est obligatoire.")]
+    #[Assert\Range(
+        min: 1,
+        max: 5,
+        notInRangeMessage: "Le niveau requis doit être compris entre {{ min }} et {{ max }}."
+    )]
+    private ?int $level_required = null;
+
+    #[ORM\Column(type: "string", length: 50, nullable: true)]
+    #[Assert\NotBlank(message: "La catégorie est obligatoire.")]
+    #[Assert\Choice(
+        choices: ["technique", "soft", "management", "autre"],
+        message: "La catégorie doit être: technique, soft, management ou autre."
+    )]
+    private ?string $categorie = null;
+
+    #[ORM\ManyToOne(targetEntity: Training_program::class, inversedBy: "skills")]
+    #[ORM\JoinColumn(name: "trainingprogram_id", referencedColumnName: "id", nullable: true)]
+    #[Assert\NotBlank(message: "Le programme de formation est obligatoire.")]
+    private ?Training_program $trainingProgram = null;
+
+    // Relation ManyToMany avec UserAccount (côté propriétaire ou inverse)
+    // Puisque UserAccount a déjà inversedBy="skills", ici c'est mappedBy
+    #[ORM\ManyToMany(targetEntity: UserAccount::class, mappedBy: "skills")]
+    private Collection $users;
+
+    public function __construct()
+    {
+        $this->users = new ArrayCollection();
+    }
+
+    // Getters et Setters
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getNom(): ?string
+    {
+        return $this->nom;
+    }
+
+    public function setNom(?string $nom): self
+    {
+        $this->nom = $nom;
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): self
+    {
+        $this->description = $description;
+        return $this;
+    }
+
+    public function getLevelRequired(): ?int
+    {
+        return $this->level_required;
+    }
+
+    public function setLevelRequired(?int $level_required): self
+    {
+        $this->level_required = $level_required;
+        return $this;
+    }
+
+    public function getCategorie(): ?string
+    {
+        return $this->categorie;
+    }
+
+    public function setCategorie(?string $categorie): self
+    {
+        $this->categorie = $categorie;
+        return $this;
+    }
+
+    public function getTrainingProgram(): ?Training_program
+    {
+        return $this->trainingProgram;
+    }
+
+    public function setTrainingProgram(?Training_program $trainingProgram): self
+    {
+        $this->trainingProgram = $trainingProgram;
+        return $this;
+    }
+
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
+
+   // Skill.php
+public function addUser(UserAccount $user): self
+{
+    if (!$this->users->contains($user)) {
+        $this->users->add($user);
+        $user->addSkill($this);  // Synchronisation
+    }
+    return $this;
+}
+
+public function removeUser(UserAccount $user): self
+{
+    if ($this->users->removeElement($user)) {
+        $user->removeSkill($this);  // Synchronisation
+    }
+    return $this;
+}
+}

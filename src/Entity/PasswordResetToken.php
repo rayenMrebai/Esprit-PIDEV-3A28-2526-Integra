@@ -29,7 +29,7 @@ class PasswordResetToken
     }
 
     #[ORM\ManyToOne(targetEntity: UserAccount::class, inversedBy: 'passwordResetTokens')]
-    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'userId')]
+#[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'userid')]
     private ?UserAccount $userAccount = null;
 
     public function getUserAccount(): ?UserAccount

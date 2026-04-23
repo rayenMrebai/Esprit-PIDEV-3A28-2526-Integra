@@ -1,0 +1,83 @@
+{% extends 'base_front.html.twig' %}
+
+
+{% block title %}{{ training.title }} – INTEGRA{% endblock %}
+
+{% block page_heading %}{{ training.title }}{% endblock %}
+{% block page_subheading %}Détail de la formation{% endblock %}
+
+{% block content %}
+
+    <div class="post-preview">
+        <h1 class="post-title" style="color: #0B63CE;">{{ training.title }}</h1>
+        <p class="post-subtitle">{{ training.description|default('Pas de description disponible.') }}</p>
+        <p class="post-meta">
+            <span class="badge-status"
+                style="background: {% if training.status == 'EN COURS' %}#0B63CE{% elseif training.status == 'PROGRAMMÉ' %}#0FA36B{% else %}#6c757d{% endif %}; color: white; font-size: 1rem;">
+                {{ training.status }}
+            </span>
+            <span class="badge-status ms-2"
+                style="background: {% if training.type == 'présentiel' %}#e67e22{% elseif training.type == 'en ligne' %}#8e44ad{% else %}#17a2b8{% endif %}; color: white; font-size: 1rem;">
+                {{ training.type }}
+            </span>
+        </p>
+    </div>
+
+    <hr class="my-4" />
+
+    <!-- Infos générales -->
+    <div class="row mb-4">
+        <div class="col-6">
+            <p><i class="far fa-calendar-alt text-primary"></i> <strong>Début :</strong>
+                {{ training.startDate ? training.startDate|date('d/m/Y') : '—' }}
+            </p>
+        </div>
+        <div class="col-6">
+            <p><i class="far fa-calendar-check text-primary"></i> <strong>Fin :</strong>
+                {{ training.endDate ? training.endDate|date('d/m/Y') : '—' }}
+            </p>
+        </div>
+        <div class="col-6">
+            <p><i class="far fa-clock text-primary"></i> <strong>Durée :</strong>
+                {{ training.duration }} heure(s)
+            </p>
+        </div>
+    </div>
+
+    <hr class="my-4" />
+
+    <!-- Compétences liées -->
+    <h3 class="mb-4" style="color: #0B63CE; font-weight: 300;">
+        <i class="fas fa-code me-2"></i>Compétences associées
+    </h3>
+
+    {% if training.skills is defined and training.skills|length > 0 %}
+        {% for skill in training.skills %}
+            <div class="post-preview">
+                <h5 class="post-title" style="color: #0B63CE; font-size: 1.1rem;">{{ skill.nom }}</h5>
+                <p class="post-subtitle">{{ skill.description|default('Aucune description')|slice(0, 100) }}...</p>
+                <p class="post-meta">
+                    <span class="badge-status"
+                        style="background: {% if skill.categorie == 'technique' %}#0B63CE{% elseif skill.categorie == 'soft' %}#0FA36B{% else %}#e67e22{% endif %}; color: white;">
+                        {{ skill.categorie }}
+                    </span>
+                    <span class="ms-3">
+                        <i class="fas fa-chart-bar"></i> Niveau {{ skill.levelRequired }}/5
+                    </span>
+                </p>
+            </div>
+            {% if not loop.last %}<hr class="my-3" />{% endif %}
+        {% endfor %}
+    {% else %}
+        <p class="text-muted fst-italic">Aucune compétence associée à cette formation.</p>
+    {% endif %}
+
+    <hr class="my-4" />
+
+    <div class="d-flex justify-content-start">
+        <a href="{{ path('app_frontoffice_trainings') }}" class="btn btn-outline-secondary" style="border-radius: 30px;">
+            ← Retour aux formations
+        </a>
+    </div>
+
+{% endblock %}

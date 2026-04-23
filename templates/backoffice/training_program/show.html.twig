@@ -1,0 +1,83 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+
+{% block page_title %}Détails de la formation{% endblock %}
+{% block breadcrumb %}Formations / Détails{% endblock %}
+
+{% block admin_content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Formation #{{ training_program.id }}</h3>
+        <div class="card-tools">
+            <a href="{{ path('app_backoffice_formations') }}" class="btn btn-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Retour à la liste
+            </a>
+            <a href="{{ path('app_backoffice_formations_edit', {id: training_program.id}) }}" class="btn btn-warning btn-sm">
+                <i class="bi bi-pencil"></i> Modifier
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <table class="table table-bordered">
+            <tbody>
+                <tr>
+                    <th style="width: 30%">ID</th>
+                    <td>{{ training_program.id }}</td>
+                </tr>
+                <tr>
+                    <th>Titre</th>
+                    <td>{{ training_program.title }}</td>
+                </tr>
+                <tr>
+                    <th>Description</th>
+                    <td>{{ training_program.description ?: 'Non renseignée' }}</td>
+                </tr>
+                <tr>
+                    <th>Durée</th>
+                    <td>{{ training_program.duration ? training_program.duration ~ ' heures' : 'Non renseignée' }}</td>
+                </tr>
+                <tr>
+                    <th>Type</th>
+                    <td>{{ training_program.type ?: 'Non renseigné' }}</td>
+                </tr>
+                <tr>
+                    <th>Statut</th>
+                    <td>
+                        {% if training_program.status == 'PROGRAMMÉ' %}
+                            <span class="badge bg-info">PROGRAMMÉ</span>
+                        {% elseif training_program.status == 'EN COURS' %}
+                            <span class="badge bg-warning">EN COURS</span>
+                        {% elseif training_program.status == 'TERMINÉ' %}
+                            <span class="badge bg-success">TERMINÉ</span>
+                        {% elseif training_program.status == 'ANNULÉ' %}
+                            <span class="badge bg-danger">ANNULÉ</span>
+                        {% else %}
+                            {{ training_program.status }}
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Date de début</th>
+                    <td>{{ training_program.startDate ? training_program.startDate|date('d/m/Y') : 'Non définie' }}</td>
+                </tr>
+                <tr>
+                    <th>Date de fin</th>
+                    <td>{{ training_program.endDate ? training_program.endDate|date('d/m/Y') : 'Non définie' }}</td>
+                </tr>
+                <tr>
+                    <th>Compétences associées</th>
+                    <td>
+                        {% if training_program.skills|length > 0 %}
+                            {% for skill in training_program.skills %}
+                                <span class="badge bg-primary">{{ skill.nom }}</span>
+                            {% endfor %}
+                        {% else %}
+                            <span class="text-muted">Aucune compétence associée</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

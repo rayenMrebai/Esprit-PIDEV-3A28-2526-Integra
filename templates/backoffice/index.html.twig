@@ -1,0 +1,104 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+
+{% block title %}Dashboard - Administration{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block breadcrumb %}Dashboard{% endblock %}
+
+{% block admin_content %}
+<div class="row">
+    <div class="col-md-3 col-sm-6 col-12">
+        <div class="info-box shadow-sm">
+            <span class="info-box-icon bg-primary"><i class="bi bi-people"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Utilisateurs</span>
+                <span class="info-box-number">{{ total_users|default(0) }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6 col-12">
+        <div class="info-box shadow-sm">
+            <span class="info-box-icon bg-success"><i class="bi bi-mortarboard"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Formations</span>
+                <span class="info-box-number">{{ total_formations|default(0) }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6 col-12">
+        <div class="info-box shadow-sm">
+            <span class="info-box-icon bg-info"><i class="bi bi-code-slash"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Compétences</span>
+                <span class="info-box-number">{{ total_competences|default(0) }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6 col-12">
+        <div class="info-box shadow-sm">
+            <span class="info-box-icon bg-warning"><i class="bi bi-question-circle"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Quiz</span>
+                <span class="info-box-number">{{ total_quiz|default(0) }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Derniers utilisateurs</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Email</th>
+                            <th>Rôle</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in recent_users|default([]) %}
+                            <tr>
+                                <td>{{ user.username }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>{{ user.role }}</td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center">Aucun utilisateur</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Actions rapides</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ path('app_backoffice_users') }}" class="btn btn-primary">
+                        <i class="bi bi-people"></i> Gérer les utilisateurs
+                    </a>
+                    <a href="{{ path('app_backoffice_formations') }}" class="btn btn-success">
+                        <i class="bi bi-mortarboard"></i> Gérer les formations
+                    </a>
+                    <a href="{{ path('app_backoffice_competences') }}" class="btn btn-info">
+                        <i class="bi bi-code-slash"></i> Gérer les compétences
+                    </a>
+                    <a href="{{ path('app_backoffice_quiz') }}" class="btn btn-warning">
+                        <i class="bi bi-question-circle"></i> Gérer les quiz
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

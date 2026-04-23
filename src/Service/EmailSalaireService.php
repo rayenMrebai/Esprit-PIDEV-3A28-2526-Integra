@@ -11,7 +11,7 @@ use Twig\Environment;
 class EmailSalaireService
 {
     public function __construct(
-        private MailerInterface $mailer,   // = mailer.salaire (Brevo)
+        private MailerInterface $salaireMailer,   // Changé : nom spécifique
         private Environment $twig,
         private PdfService $pdfService,
     ) {}
@@ -28,7 +28,7 @@ class EmailSalaireService
             ->subject('🎉 Votre salaire a été créé - INTEGRA RH')
             ->html($html);
 
-        $this->mailer->send($email);
+        $this->salaireMailer->send($email);
     }
 
     public function sendSalairePaid(Salaire $salaire): void
@@ -47,6 +47,6 @@ class EmailSalaireService
             ->html($html)
             ->attach($pdfContent, $fileName, 'application/pdf');
 
-        $this->mailer->send($email);
+        $this->salaireMailer->send($email);
     }
 }

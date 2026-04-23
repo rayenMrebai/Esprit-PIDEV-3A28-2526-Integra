@@ -1,0 +1,102 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+
+{% block page_title %}Gestion des formations{% endblock %}
+{% block breadcrumb %}Formations{% endblock %}
+
+{% block admin_content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Liste des programmes de formation</h3>
+        <div class="card-tools">
+            <a href="{{ path('app_backoffice_formations_new') }}" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus"></i> Ajouter une formation
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <!-- Formulaire de recherche -->
+        <form method="get" class="mb-4">
+            <div class="row">
+                <div class="col-md-4">
+                    <input type="text" name="search" class="form-control" placeholder="🔍 Rechercher par titre..." value="{{ search }}">
+                </div>
+                <div class="col-md-3">
+                    <select name="type" class="form-select">
+                        <option value="">Tous les types</option>
+                        <option value="présentiel" {{ selectedType == 'présentiel' ? 'selected' : '' }}>Présentiel</option>
+                        <option value="en ligne" {{ selectedType == 'en ligne' ? 'selected' : '' }}>En ligne</option>
+                        <option value="hybride" {{ selectedType == 'hybride' ? 'selected' : '' }}>Hybride</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="status" class="form-select">
+                        <option value="">Tous statuts</option>
+                        <option value="PROGRAMMÉ" {{ selectedStatus == 'PROGRAMMÉ' ? 'selected' : '' }}>PROGRAMMÉ</option>
+                        <option value="EN COURS" {{ selectedStatus == 'EN COURS' ? 'selected' : '' }}>EN COURS</option>
+                        <option value="TERMINÉ" {{ selectedStatus == 'TERMINÉ' ? 'selected' : '' }}>TERMINÉ</option>
+                        <option value="ANNULÉ" {{ selectedStatus == 'ANNULÉ' ? 'selected' : '' }}>ANNULÉ</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <div class="btn-group w-100">
+                        <button type="submit" class="btn btn-primary">Filtrer</button>
+                        <a href="{{ path('app_backoffice_formations') }}" class="btn btn-secondary">Réinitialiser</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Titre</th>
+                        <th>Description</th>
+                        <th>Durée</th>
+                        <th>Type</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for formation in training_programs %}  {# ← CHANGÉ : training_programs #}
+                        <tr>
+                            <td>{{ formation.id }}</td>
+                            <td>{{ formation.title }}</td>
+                            <td>{{ formation.description|slice(0, 100) }}...</td>
+                            <td><span class="badge bg-info">{{ formation.duration }} h</span></td>
+                            <td>{{ formation.type }}</td>
+                            <td>
+                                <span class="badge 
+                                    {% if formation.status == 'PROGRAMMÉ' %}bg-info
+                                    {% elseif formation.status == 'EN COURS' %}bg-warning
+                                    {% elseif formation.status == 'TERMINÉ' %}bg-success
+                                    {% elseif formation.status == 'ANNULÉ' %}bg-danger
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ formation.status }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{{ path('app_backoffice_formations_show', {id: formation.id}) }}" class="btn btn-sm btn-info">Voir</a>
+                                    <a href="{{ path('app_backoffice_formations_edit', {id: formation.id}) }}" class="btn btn-sm btn-warning">Modifier</a>
+                                    <form method="post" action="{{ path('app_backoffice_formations_delete', {id: formation.id}) }}" style="display:inline-block" onsubmit="return confirm('Supprimer cette formation ?')">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ formation.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center">Aucune formation trouvée.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

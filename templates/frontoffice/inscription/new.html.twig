@@ -1,0 +1,55 @@
+{% extends 'base_front.html.twig' %}
+
+
+{% block title %}Inscription à la formation{% endblock %}
+{% block page_heading %}{{ formation.title }}{% endblock %}
+{% block page_subheading %}Formulaire d'inscription{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="post-preview">
+
+            <div class="alert alert-info mb-4">
+                <h5><i class="fas fa-info-circle me-2"></i>Informations sur la formation</h5>
+                <ul class="mb-0">
+                    <li><strong>Dates :</strong> {{ formation.startDate|date('d/m/Y') }} – {{ formation.endDate|date('d/m/Y') }}</li>
+                    <li><strong>Durée :</strong> {{ formation.duration }} heures</li>
+                    <li><strong>Type :</strong> {{ formation.type }}</li>
+                </ul>
+            </div>
+
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+                <div class="mb-3">
+                    {{ form_label(form.motivation, 'Votre motivation *', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    {{ form_widget(form.motivation, {'attr': {
+                        'class': form.motivation.vars.errors|length > 0 ? 'form-control is-invalid' : 'form-control',
+                        'rows': 5,
+                        'placeholder': 'Expliquez pourquoi vous souhaitez suivre cette formation...'
+                    }}) }}
+                    {% if form.motivation.vars.errors|length > 0 %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.motivation.vars.errors %}
+                                <span>{{ error.message }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <small class="text-muted">Minimum 20 caractères, maximum 1000 caractères.</small>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{{ path('app_frontoffice_inscription_formations') }}" class="btn btn-secondary"
+                       style="border-radius: 30px;">
+                        <i class="fas fa-arrow-left me-1"></i> Retour
+                    </a>
+                    <button type="submit" class="btn btn-success" style="border-radius: 30px;">
+                        <i class="fas fa-paper-plane me-1"></i> Envoyer ma demande
+                    </button>
+                </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

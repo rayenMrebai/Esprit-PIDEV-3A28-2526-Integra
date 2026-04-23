@@ -1,12 +1,13 @@
 security:
     password_hashers:
-        App\Entity\UserAccount: 'auto'
+        App\Entity\UserAccount:
+            algorithm: auto
 
     providers:
         app_user_provider:
             entity:
                 class: App\Entity\UserAccount
-                property: username
+                property: username  # ✅ login par username (HEAD)
 
     firewalls:
         dev:
@@ -20,19 +21,20 @@ security:
             entry_point: App\Security\LoginFormAuthenticator
             logout:
                 path: app_logout
-                target: front_acceuil             # ← redirection vers l'accueil front (Wala)
-            # remember_me removed as requested
+                target: front_acceuil
 
     role_hierarchy:
         ROLE_ADMIN: [ROLE_MANAGER]
         ROLE_MANAGER: [ROLE_USER]
 
     access_control:
-        - { path: ^/$, roles: PUBLIC_ACCESS } 
+        - { path: ^/$, roles: PUBLIC_ACCESS }
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/register, roles: PUBLIC_ACCESS }
-        - { path: ^/recruitment, roles: ROLE_MANAGER }   # Dashboard recrutement (Wala)
-        - { path: ^/admin, roles: ROLE_MANAGER }        # Interface admin (ami)
+        - { path: ^/backoffice, roles: ROLE_ADMIN }
+        - { path: ^/frontoffice, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/recruitment, roles: ROLE_MANAGER }
+        - { path: ^/admin, roles: ROLE_MANAGER }
         - { path: ^/profile, roles: ROLE_USER }
 
 when@test:

@@ -1,0 +1,92 @@
+{% extends 'backoffice/base_backoffice.html.twig' %}
+
+{% block title %}Détails du quiz{% endblock %}
+{% block page_title %}Détails du quiz #{{ quiz_result.id }}{% endblock %}
+{% block breadcrumb %}Dashboard / Quiz / Détails{% endblock %}
+
+{% block admin_content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-question-circle me-2"></i>
+                    Résultat du quiz
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4 fw-bold">ID :</div>
+                    <div class="col-md-8">{{ quiz_result.id }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4 fw-bold">Utilisateur ID :</div>
+                    <div class="col-md-8">{{ quiz_result.userId }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4 fw-bold">Formation :</div>
+                    <div class="col-md-8">
+                        <span class="badge bg-primary">{{ quiz_result.training ? quiz_result.training.title : 'N/A' }}</span>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4 fw-bold">Score :</div>
+                    <div class="col-md-8">
+                        <div class="progress" style="height: 25px;">
+                            <div class="progress-bar {% if quiz_result.percentage >= 60 %}bg-success{% elseif quiz_result.percentage >= 40 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                 style="width: {{ quiz_result.percentage }}%;">
+                                {{ quiz_result.score }} / {{ quiz_result.totalQuestions }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4 fw-bold">Pourcentage :</div>
+                    <div class="col-md-8">
+                        <span class="badge {% if quiz_result.percentage >= 60 %}bg-success{% elseif quiz_result.percentage >= 40 %}bg-warning{% else %}bg-danger{% endif %} fs-6">
+                            {{ quiz_result.percentage }}%
+                        </span>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4 fw-bold">Résultat :</div>
+                    <div class="col-md-8">
+                        {% if quiz_result.passed %}
+                            <span class="badge bg-success fs-6">
+                                <i class="fas fa-check-circle me-1"></i> Réussi
+                            </span>
+                        {% else %}
+                            <span class="badge bg-danger fs-6">
+                                <i class="fas fa-times-circle me-1"></i> Échoué
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4 fw-bold">Date de complétion :</div>
+                    <div class="col-md-8">
+                        <i class="far fa-calendar-alt me-1"></i>
+                        {{ quiz_result.completedAt ? quiz_result.completedAt|date('d/m/Y H:i:s') : 'Non défini' }}
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer d-flex justify-content-between">
+                <a href="{{ path('app_backoffice_formations') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Retour aux formations
+                </a>
+                <div>
+                    <a href="{{ path('app_quiz_result_edit', {'id': quiz_result.id}) }}" class="btn btn-warning">
+                        <i class="fas fa-edit me-1"></i> Modifier
+                    </a>
+                    <form method="post" action="{{ path('app_quiz_result_delete', {'id': quiz_result.id}) }}" style="display:inline-block;" onsubmit="return confirm('Confirmer la suppression ?');">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ quiz_result.id) }}">
+                        <button class="btn btn-danger">
+                            <i class="fas fa-trash me-1"></i> Supprimer
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

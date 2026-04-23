@@ -48,10 +48,9 @@ class Salaire
     #[ORM\Column(name: 'updatedAt', type: 'datetime', options: ['default' => 'CURRENT_TIMESTAMP'])]
     private ?\DateTime $updatedAt = null;
 
-    #[ORM\ManyToOne(inversedBy: 'salaires')]
-    #[ORM\JoinColumn(name: 'userId', referencedColumnName: 'userId', nullable: false)]
-    #[Assert\NotBlank(message: "L'employé est obligatoire.")]
-    private ?UserAccount $user = null;
+  #[ORM\ManyToOne(inversedBy: 'salaires')]
+#[ORM\JoinColumn(name: "userId", referencedColumnName: "userid", nullable: false)]  // ✅ userid en minuscules
+private ?UserAccount $user = null;
 
     #[ORM\OneToMany(mappedBy: 'salaire', targetEntity: BonusRule::class, cascade: ['persist', 'remove'])]
     private Collection $bonusRules;

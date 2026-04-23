@@ -10795,4 +10795,17 @@ header.masthead .post-heading .meta a {
   .post-preview > a > .post-title {
     font-size: 2.25rem;
   }
+<<<<<<< HEAD
+=======
+  /* Animation subtile au survol du bouton admin */
+  .btn-outline-light i {
+    transition: transform 0.2s ease;
+  }
+  .btn-outline-light:hover i.fa-arrow-right {
+    transform: translateX(3px);
+  }
+  .btn-outline-light:hover i.fa-lock {
+    transform: scale(1.1);
+  }
+>>>>>>> formation_version_clean
 }

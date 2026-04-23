@@ -1,0 +1,160 @@
+{{ form_start(form, {'attr': {'class': 'form', 'id': 'training-program-form', 'novalidate': 'novalidate'}})}}
+
+    {# Erreurs globales du formulaire #}
+    {% if form_errors(form) %}
+        <div class="alert alert-danger">
+            {{ form_errors(form) }}
+        </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="mb-3">
+                {{ form_label(form.title, 'Titre *', {'label_attr': {'class': 'form-label fw-bold'}})}}
+                {{ form_widget(form.title, {'attr': {
+                    'class': form.title.vars.errors|length > 0 ? 'form-control is-invalid' : 'form-control'
+                }})}}
+                {% if form.title.vars.errors|length > 0 %}
+                    <div class="invalid-feedback d-block">
+                        {% for error in form.title.vars.errors %}
+                            <span>{{ error.message }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="mb-3">
+                {{ form_label(form.description, 'Description *', {'label_attr': {'class': 'form-label fw-bold'}})}}
+                {{ form_widget(form.description, {'attr': {
+                    'class': form.description.vars.errors|length > 0 ? 'form-control is-invalid' : 'form-control',
+                    'rows': 5
+                }})}}
+                {% if form.description.vars.errors|length > 0 %}
+                    <div class="invalid-feedback d-block">
+                        {% for error in form.description.vars.errors %}
+                            <span>{{ error.message }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="mb-3">
+                {{ form_label(form.duration, 'Durée (heures) *', {'label_attr': {'class': 'form-label fw-bold'}})}}
+                {{ form_widget(form.duration, {'attr': {
+                    'class': form.duration.vars.errors|length > 0 ? 'form-control is-invalid' : 'form-control'
+                }})}}
+                {% if form.duration.vars.errors|length > 0 %}
+                    <div class="invalid-feedback d-block">
+                        {% for error in form.duration.vars.errors %}
+                            <span>{{ error.message }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="mb-3">
+                {{ form_label(form.type, 'Type *', {'label_attr': {'class': 'form-label fw-bold'}})}}
+                {{ form_widget(form.type, {'attr': {
+                    'class': form.type.vars.errors|length > 0 ? 'form-select is-invalid' : 'form-select'
+                }})}}
+                {% if form.type.vars.errors|length > 0 %}
+                    <div class="invalid-feedback d-block">
+                        {% for error in form.type.vars.errors %}
+                            <span>{{ error.message }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="mb-3">
+                {{ form_label(form.status, 'Statut *', {'label_attr': {'class': 'form-label fw-bold'}})}}
+                {{ form_widget(form.status, {'attr': {
+                    'class': form.status.vars.errors|length > 0 ? 'form-select is-invalid' : 'form-select'
+                }})}}
+                {% if form.status.vars.errors|length > 0 %}
+                    <div class="invalid-feedback d-block">
+                        {% for error in form.status.vars.errors %}
+                            <span>{{ error.message }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="mb-3">
+                {{ form_label(form.startDate, 'Date de début *', {'label_attr': {'class': 'form-label fw-bold'}})}}
+                {{ form_widget(form.startDate, {'attr': {
+                    'class': form.startDate.vars.errors|length > 0 ? 'form-control is-invalid' : 'form-control'
+                }})}}
+                {% if form.startDate.vars.errors|length > 0 %}
+                    <div class="invalid-feedback d-block">
+                        {% for error in form.startDate.vars.errors %}
+                            <span>{{ error.message }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="mb-3">
+                {{ form_label(form.endDate, 'Date de fin *', {'label_attr': {'class': 'form-label fw-bold'}})}}
+                {{ form_widget(form.endDate, {'attr': {
+                    'class': form.endDate.vars.errors|length > 0 ? 'form-control is-invalid' : 'form-control'
+                }})}}
+                {% if form.endDate.vars.errors|length > 0 %}
+                    <div class="invalid-feedback d-block">
+                        {% for error in form.endDate.vars.errors %}
+                            <span>{{ error.message }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="mb-3">
+                {{ form_label(form.skills, 'Compétences associées *', {'label_attr': {'class': 'form-label fw-bold'}})}}
+                {{ form_widget(form.skills, {'attr': {
+                    'class': form.skills.vars.errors|length > 0 ? 'form-select is-invalid select2-multi' : 'form-select select2-multi'
+                }})}}
+                {% if form.skills.vars.errors|length > 0 %}
+                    <div class="invalid-feedback d-block">
+                        {% for error in form.skills.vars.errors %}
+                            <span>{{ error.message }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info mt-2 small">
+                        <i class="bi bi-info-circle"></i> 
+                        <strong>Note :</strong> Le programme doit avoir au moins une compétence associée.
+                        {% if form.skills.vars.value is not empty %}
+                            <span class="badge bg-success ms-2">{{ form.skills.vars.value|length }} compétence(s) sélectionnée(s)</span>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {{ form_rest(form) }}
+    
+    <div class="mt-4 d-flex justify-content-between">
+        <button type="submit" class="btn btn-success">
+            <i class="bi bi-check-lg"></i> Enregistrer
+        </button>
+        <a href="{{ path('app_backoffice_formations') }}" class="btn btn-secondary">
+            <i class="bi bi-x-lg"></i> Annuler
+        </a>
+    </div>
+
+{{ form_end(form) }}
