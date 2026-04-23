@@ -1,0 +1,89 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle affectation{% endblock %}
+
+{% block content %}
+
+    <div class="integra-header">
+        <div>
+            <h1>📋 Nouvelle affectation</h1>
+            <p>Assigner un employé à un projet</p>
+        </div>
+        <a href="{{ path('app_projectassignment_index') }}" style="background:rgba(255,255,255,0.25); color:white; border-radius:30px; padding:10px 20px; text-decoration:none; font-weight:bold; border:1px solid rgba(255,255,255,0.4);">
+            ← Retour
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="integra-card">
+                <h3 style="color:#1e3a5f; font-weight:700; border-bottom:2px solid #b0c4de; padding-bottom:12px; margin-bottom:25px; font-size:18px;">
+                    📝 Détails de l'affectation
+                </h3>
+
+                {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+                <div style="margin-bottom:18px;">
+                    <label class="integra-form-label">📌 Projet <span style="color:#ef4444;">*</span></label>
+                    {{ form_widget(form.project, {'attr': {'class': 'integra-form-control'}}) }}
+                    {% if form_errors(form.project) is not empty %}
+                        <div class="form-error">{{ form_errors(form.project) }}</div>
+                    {% endif %}
+                </div>
+
+                <div style="margin-bottom:18px;">
+                    <label class="integra-form-label">👤 Employé <span style="color:#ef4444;">*</span></label>
+                    {{ form_widget(form.userAccount, {'attr': {'class': 'integra-form-control'}}) }}
+                    {% if form_errors(form.userAccount) is not empty %}
+                        <div class="form-error">{{ form_errors(form.userAccount) }}</div>
+                    {% endif %}
+                </div>
+
+                <div style="margin-bottom:18px;">
+                    <label class="integra-form-label">🔧 Rôle <span style="color:#ef4444;">*</span></label>
+                    {{ form_widget(form.role, {'attr': {'class': 'integra-form-control', 'placeholder': 'Ex: Développeur'}}) }}
+                    {% if form_errors(form.role) is not empty %}
+                        <div class="form-error">{{ form_errors(form.role) }}</div>
+                    {% endif %}
+                </div>
+
+                <div style="margin-bottom:18px;">
+                    <label class="integra-form-label">⚖️ Allocation (%) <span style="color:#ef4444;">*</span></label>
+                    {{ form_widget(form.allocationRate, {'attr': {'class': 'integra-form-control', 'min': 0, 'max': 100}}) }}
+                    {% if form_errors(form.allocationRate) is not empty %}
+                        <div class="form-error">{{ form_errors(form.allocationRate) }}</div>
+                    {% endif %}
+                </div>
+
+                <div style="display:flex; gap:15px; margin-bottom:18px;">
+                    <div style="flex:1;">
+                        <label class="integra-form-label">📅 Début <span style="color:#ef4444;">*</span></label>
+                        {{ form_widget(form.assignedFrom, {'attr': {'class': 'integra-form-control'}}) }}
+                        {% if form_errors(form.assignedFrom) is not empty %}
+                            <div class="form-error">{{ form_errors(form.assignedFrom) }}</div>
+                        {% endif %}
+                    </div>
+                    <div style="flex:1;">
+                        <label class="integra-form-label">📆 Fin <span style="color:#ef4444;">*</span></label>
+                        {{ form_widget(form.assignedTo, {'attr': {'class': 'integra-form-control'}}) }}
+                        {% if form_errors(form.assignedTo) is not empty %}
+                            <div class="form-error">{{ form_errors(form.assignedTo) }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:25px; padding-top:15px; border-top:1px solid #f1f5f9;">
+                    <a href="{{ path('app_projectassignment_index') }}" style="background:#e2e8f0; color:#1e293b; border-radius:30px; padding:11px 25px; text-decoration:none; font-weight:bold; font-size:14px;">
+                        Annuler
+                    </a>
+                    <button type="submit" style="background:#10b981; color:white; border-radius:30px; padding:11px 30px; border:none; font-weight:bold; font-size:14px; cursor:pointer;">
+                        <i class="fas fa-save mr-1"></i> Enregistrer
+                    </button>
+                </div>
+
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

@@ -7,7 +7,7 @@ security:
         app_user_provider:
             entity:
                 class: App\Entity\UserAccount
-                property: username  # ✅ login par username (HEAD)
+                property: username  # connexion par username
 
     firewalls:
         dev:
@@ -21,21 +21,37 @@ security:
             entry_point: App\Security\LoginFormAuthenticator
             logout:
                 path: app_logout
-                target: front_acceuil
+                target: front_home   # ← redirection vers l'accueil du front (Aziz)
 
     role_hierarchy:
         ROLE_ADMIN: [ROLE_MANAGER]
         ROLE_MANAGER: [ROLE_USER]
 
     access_control:
+        # Pages publiques
         - { path: ^/$, roles: PUBLIC_ACCESS }
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/register, roles: PUBLIC_ACCESS }
+        - { path: ^/front, roles: PUBLIC_ACCESS }                     # front office projets
+        - { path: ^/api/currency-rates, roles: PUBLIC_ACCESS }        # taux de change
+
+        # Backoffice de l'équipe (admin / manager)
         - { path: ^/backoffice, roles: ROLE_ADMIN }
-        - { path: ^/frontoffice, roles: IS_AUTHENTICATED_FULLY }
-        - { path: ^/recruitment, roles: ROLE_MANAGER }
         - { path: ^/admin, roles: ROLE_MANAGER }
+
+        # Espaces utilisateurs connectés
+        - { path: ^/frontoffice, roles: ROLE_USER }
         - { path: ^/profile, roles: ROLE_USER }
+        - { path: ^/recruitment, roles: ROLE_MANAGER }
+
+        # Fonctionnalités d'Aziz (projets, affectations, IA, API)
+        - { path: ^/project, roles: ROLE_USER }
+        - { path: ^/projectassignment, roles: ROLE_USER }
+        - { path: ^/ai, roles: ROLE_USER }
+        - { path: ^/api, roles: ROLE_USER }
+        - { path: ^/salaire, roles: ROLE_USER }                       # si Aziz gère les salaires
+        - { path: ^/dashboard, roles: ROLE_USER }                     # dashboard INTEGRA
+        - { path: ^/user_account, roles: ROLE_ADMIN }                 # gestion utilisateurs
 
 when@test:
     security:

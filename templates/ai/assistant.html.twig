@@ -1,0 +1,422 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Assistant IA - {{ project.name }}{% endblock %}
+
+{% block content %}
+    <style>
+        .ai-card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 10px 25px rgba(0,50,100,0.08); margin-bottom: 25px; }
+        .ai-header { background: linear-gradient(135deg, #0B63CE, #0FA36B); border-radius: 20px; padding: 20px 25px; margin-bottom: 25px; color: white; }
+        .assistant-textarea { border-radius: 16px; border: 1px solid #dbeafe; padding: 15px; width: 100%; font-size: 14px; background: #fafcff; resize: vertical; min-height: 120px; }
+        .assistant-textarea:focus { outline: none; border-color: #0B63CE; box-shadow: 0 0 0 3px rgba(11,99,206,0.1); }
+        .assistant-tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; }
+        .assistant-tab { padding: 10px 20px; background: transparent; border: none; color: #64748b; font-weight: 600; cursor: pointer; border-radius: 30px 30px 0 0; transition: all 0.2s; }
+        .assistant-tab:hover { background: #f1f5f9; }
+        .assistant-tab.active { background: #0B63CE; color: white; }
+        .btn-primary-ai { background: linear-gradient(135deg, #0B63CE, #0FA36B); color: white; border: none; border-radius: 30px; padding: 8px 20px; font-weight: bold; font-size: 13px; cursor: pointer; white-space: nowrap; transition: opacity 0.2s; }
+        .btn-primary-ai:hover { opacity: 0.9; }
+        .btn-primary-ai:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-secondary-ai { background: #e2e8f0; color: #1e293b; border: none; border-radius: 30px; padding: 8px 18px; font-weight: bold; font-size: 12px; cursor: pointer; white-space: nowrap; transition: background 0.2s; }
+        .btn-secondary-ai:hover { background: #cbd5e1; }
+        .btn-success-ai { background: #10b981; color: white; border: none; border-radius: 30px; padding: 8px 18px; font-weight: bold; font-size: 12px; cursor: pointer; white-space: nowrap; transition: background 0.2s; }
+        .btn-success-ai:hover { background: #059669; }
+        .btn-success-ai:disabled { opacity: 0.6; cursor: not-allowed; }
+        .voice-btn { background: #0B63CE; color: white; border: none; border-radius: 40px; padding: 12px 28px; font-weight: bold; cursor: pointer; transition: all 0.2s; font-size: 14px; }
+        .voice-btn:hover { background: #0952b3; }
+        .voice-btn.recording { background: #ef4444; animation: pulse 1.5s infinite; }
+        .voice-btn.recording:hover { background: #dc2626; }
+        @keyframes pulse {
+            0%   { box-shadow: 0 0 0 0   rgba(239,68,68,0.5); }
+            70%  { box-shadow: 0 0 0 12px rgba(239,68,68,0);   }
+            100% { box-shadow: 0 0 0 0   rgba(239,68,68,0);   }
+        }
+        .status-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: #f0fdf4; color: #059669; border: 1px solid #bbf7d0;
+            border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 600;
+        }
+        .status-badge.recording { background: #fef2f2; color: #ef4444; border-color: #fecaca; }
+        .status-badge.processing { background: #eff6ff; color: #0B63CE; border-color: #bfdbfe; }
+        .interim-preview {
+            color: #94a3b8; font-style: italic; font-size: 13px;
+            min-height: 20px; margin-top: 8px; padding: 5px 10px;
+            background: #f8fafc; border-radius: 8px;
+        }
+        .char-counter { font-size: 11px; color: #94a3b8; text-align: right; margin-top: 4px; }
+    </style>
+
+    {# HEADER #}
+    <div class="ai-header">
+        <div class="d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-3">
+                <span style="font-size:32px;">🧠</span>
+                <div>
+                    <h1 style="margin:0; color:white; font-size:20px;">Assistant IA de Projet</h1>
+                    <p style="margin:0; opacity:0.85; font-size:13px;">{{ project.name }}</p>
+                </div>
+            </div>
+            <a href="{{ path('app_project_index') }}"
+               style="background:rgba(255,255,255,0.2); color:white; border-radius:30px; padding:8px 18px; text-decoration:none; font-size:13px; font-weight:bold;">
+                ← Retour
+            </a>
+        </div>
+    </div>
+
+    {# TABS #}
+    <div class="assistant-tabs">
+        <button class="assistant-tab active" onclick="showTab('summary',   this)">📄 Résumé</button>
+        <button class="assistant-tab"        onclick="showTab('improve',   this)">✨ Amélioration</button>
+        <button class="assistant-tab"        onclick="showTab('translate', this)">🌐 Traduction</button>
+        <button class="assistant-tab"        onclick="showTab('transcribe',this)">🎤 Dictée vocale</button>
+    </div>
+
+    {# ===== RÉSUMÉ ===== #}
+    <div id="tab-summary" class="ai-card">
+        <div class="d-flex align-items-center gap-3 mb-3">
+            <h3 style="color:#0B63CE; margin:0; font-size:16px;">📄 Résumé analytique intelligent</h3>
+            <button id="generateSummaryBtn" class="btn-primary-ai">
+                <i class="fas fa-magic mr-1"></i> Générer
+            </button>
+        </div>
+        <p style="color:#64748b; font-size:12px; margin-bottom:10px;">
+            Génère un paragraphe analytique complet basé sur tous les attributs du projet et ses affectations.
+        </p>
+        <textarea id="summaryArea" class="assistant-textarea" rows="6"
+                  placeholder="Le résumé analytique apparaîtra ici..."></textarea>
+        <div id="summaryCharCount" class="char-counter"></div>
+        <div class="d-flex justify-content-end gap-2 mt-3">
+            <button id="copySummaryBtn" class="btn-secondary-ai">
+                <i class="fas fa-copy mr-1"></i> Copier
+            </button>
+        </div>
+    </div>
+
+    {# ===== AMÉLIORATION ===== #}
+    <div id="tab-improve" class="ai-card" style="display:none;">
+        <div class="d-flex align-items-center gap-3 mb-3">
+            <h3 style="color:#0FA36B; margin:0; font-size:16px;">✨ Amélioration de la description</h3>
+            <button id="improveBtn" class="btn-primary-ai">
+                <i class="fas fa-magic mr-1"></i> Améliorer
+            </button>
+        </div>
+        <p style="color:#64748b; font-size:12px; margin-bottom:10px;">
+            Description actuelle améliorée — plus professionnelle et engageante.
+        </p>
+        <textarea id="improvedArea" class="assistant-textarea" rows="6"
+                  placeholder="La description améliorée apparaîtra ici...">{{ project.description }}</textarea>
+        <div id="improvedCharCount" class="char-counter"></div>
+        <div class="d-flex justify-content-end gap-2 mt-3">
+            <button id="copyImprovedBtn" class="btn-secondary-ai">
+                <i class="fas fa-copy mr-1"></i> Copier
+            </button>
+            <button id="replaceImprovedBtn" class="btn-success-ai">
+                <i class="fas fa-check mr-1"></i> Remplacer la description
+            </button>
+        </div>
+    </div>
+
+    {# ===== TRADUCTION ===== #}
+    <div id="tab-translate" class="ai-card" style="display:none;">
+        <h3 style="color:#0B63CE; margin-bottom:15px; font-size:16px;">🌐 Traduction FR ↔ EN</h3>
+        <div class="row">
+            <div class="col-md-6">
+                <label class="font-weight-bold mb-1" style="font-size:13px;">🇫🇷 Français</label>
+                <textarea id="frText" class="assistant-textarea" rows="6"
+                          placeholder="Texte en français...">{{ project.description }}</textarea>
+                <div class="mt-2 text-right">
+                    <button id="translateToEnBtn" class="btn-primary-ai">
+                        <i class="fas fa-arrow-right mr-1"></i> Traduire en Anglais
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <label class="font-weight-bold mb-1" style="font-size:13px;">🇬🇧 English</label>
+                <textarea id="enText" class="assistant-textarea" rows="6"
+                          placeholder="English text..."></textarea>
+                <div class="mt-2 text-right">
+                    <button id="translateToFrBtn" class="btn-primary-ai">
+                        <i class="fas fa-arrow-left mr-1"></i> Traduire en Français
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# ===== DICTÉE VOCALE ===== #}
+    <div id="tab-transcribe" class="ai-card" style="display:none;">
+        <h3 style="color:#0B63CE; margin-bottom:5px; font-size:16px;">🎤 Dictée vocale</h3>
+        <p style="color:#64748b; font-size:12px; margin-bottom:20px;">
+            Parlez clairement en français. Le texte transcrit est modifiable avant remplacement.
+        </p>
+
+        {# Bouton + statut #}
+        <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
+            <button id="recordBtn" class="voice-btn">
+                <i class="fas fa-microphone mr-2"></i> Démarrer l'enregistrement
+            </button>
+            <span id="recordingStatus"></span>
+        </div>
+
+        {# Aperçu en temps réel (texte intermédiaire) #}
+        <div id="interimPreview" class="interim-preview" style="display:none;"></div>
+
+        {# Zone de texte transcrit — ÉDITABLE #}
+        <div style="margin-top:15px;">
+            <label style="font-weight:bold; color:#1e3a5f; font-size:13px; margin-bottom:6px; display:block;">
+                ✏️ Texte transcrit (modifiable) :
+            </label>
+            <textarea id="transcribedText" class="assistant-textarea" rows="7"
+                      placeholder="Votre texte transcrit apparaîtra ici. Vous pouvez le modifier librement avant de l'utiliser."></textarea>
+            <div id="transcribeCharCount" class="char-counter"></div>
+        </div>
+
+        {# Actions #}
+        <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+            <div class="d-flex gap-2">
+                <button id="clearTranscriptionBtn" class="btn-secondary-ai">
+                    <i class="fas fa-eraser mr-1"></i> Effacer
+                </button>
+                <button id="copyTranscriptionBtn" class="btn-secondary-ai">
+                    <i class="fas fa-copy mr-1"></i> Copier
+                </button>
+            </div>
+            <button id="useTranscriptionBtn" class="btn-success-ai">
+                <i class="fas fa-check mr-1"></i> Remplacer la description du projet
+            </button>
+        </div>
+
+        {# Info navigateur #}
+        <div id="speechApiInfo" style="margin-top:15px; padding:10px 15px; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; font-size:12px; color:#92400e; display:none;">
+            ⚠️ Votre navigateur ne supporte pas la Web Speech API. Utilisez <strong>Google Chrome</strong> pour la dictée vocale.
+        </div>
+    </div>
+
+    <script>
+        const projectId = {{ project.projectId }};
+
+        // ===== NAVIGATION ONGLETS =====
+        function showTab(tabId, btn) {
+            document.querySelectorAll('[id^="tab-"]').forEach(el => el.style.display = 'none');
+            document.getElementById('tab-' + tabId).style.display = 'block';
+            document.querySelectorAll('.assistant-tab').forEach(t => t.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+        }
+
+        // ===== COMPTEUR DE CARACTÈRES =====
+        function updateCharCount(textareaId, counterId) {
+            const ta  = document.getElementById(textareaId);
+            const ctr = document.getElementById(counterId);
+            if (!ta || !ctr) return;
+            const update = () => ctr.textContent = ta.value.length + ' caractères';
+            ta.addEventListener('input', update);
+            update();
+        }
+        updateCharCount('summaryArea',     'summaryCharCount');
+        updateCharCount('improvedArea',    'improvedCharCount');
+        updateCharCount('transcribedText', 'transcribeCharCount');
+
+        // ===== HELPER FETCH AVEC SPINNER =====
+        async function fetchAI(btn, url, options, targetId, field) {
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Génération...';
+            btn.disabled = true;
+            try {
+                const resp = await fetch(url, options);
+                const data = await resp.json();
+                if (!resp.ok) throw new Error(data[field] || 'Erreur serveur ' + resp.status);
+                document.getElementById(targetId).value = data[field] || '';
+                document.getElementById(targetId).dispatchEvent(new Event('input'));
+            } catch (e) {
+                alert('❌ ' + e.message);
+            } finally {
+                btn.innerHTML = orig;
+                btn.disabled  = false;
+            }
+        }
+
+        // ===== RÉSUMÉ =====
+        document.getElementById('generateSummaryBtn').addEventListener('click', function () {
+            fetchAI(this, `/ai/generate-summary/${projectId}`, { method: 'POST' }, 'summaryArea', 'summary');
+        });
+
+        document.getElementById('copySummaryBtn').addEventListener('click', () => {
+            const v = document.getElementById('summaryArea').value;
+            if (!v.trim()) { alert('Rien à copier.'); return; }
+            navigator.clipboard.writeText(v).then(() => alert('✅ Copié !'));
+        });
+
+        // ===== AMÉLIORATION =====
+        document.getElementById('improveBtn').addEventListener('click', function () {
+            fetchAI(this, `/ai/improve-description/${projectId}`, { method: 'POST' }, 'improvedArea', 'improved');
+        });
+
+        document.getElementById('copyImprovedBtn').addEventListener('click', () => {
+            const v = document.getElementById('improvedArea').value;
+            if (!v.trim()) { alert('Rien à copier.'); return; }
+            navigator.clipboard.writeText(v).then(() => alert('✅ Copié !'));
+        });
+
+        document.getElementById('replaceImprovedBtn').addEventListener('click', async function () {
+            const desc = document.getElementById('improvedArea').value.trim();
+            if (!desc) { alert('La description est vide.'); return; }
+            if (!confirm('Remplacer la description du projet par ce texte ?')) return;
+            await replaceDescription(this, desc);
+        });
+
+        // ===== TRADUCTION =====
+        async function handleTranslate(btn, sourceId, targetId, lang) {
+            const text = document.getElementById(sourceId).value.trim();
+            if (!text) { alert('Le champ source est vide.'); return; }
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Traduction...';
+            btn.disabled = true;
+            try {
+                const resp = await fetch('/ai/translate-text', {
+                    method:  'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body:    JSON.stringify({ text, target: lang })
+                });
+                const data = await resp.json();
+                if (!resp.ok) throw new Error('Erreur serveur');
+                document.getElementById(targetId).value = data.translated || '';
+            } catch (e) {
+                alert('❌ Erreur : ' + e.message);
+            } finally {
+                btn.innerHTML = orig;
+                btn.disabled  = false;
+            }
+        }
+
+        document.getElementById('translateToEnBtn').addEventListener('click', function () {
+            handleTranslate(this, 'frText', 'enText', 'en');
+        });
+        document.getElementById('translateToFrBtn').addEventListener('click', function () {
+            handleTranslate(this, 'enText', 'frText', 'fr');
+        });
+
+        // ===== REMPLACEMENT DESCRIPTION (commun) =====
+        async function replaceDescription(btn, text) {
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Mise à jour...';
+            btn.disabled = true;
+            const fd = new FormData();
+            fd.append('description', text);
+            try {
+                const resp = await fetch(`/ai/replace-description/${projectId}`, { method: 'POST', body: fd });
+                if (resp.redirected || resp.ok) {
+                    window.location.href = resp.url || `{{ path('app_project_index') }}`;
+                } else {
+                    throw new Error('Erreur serveur');
+                }
+            } catch (e) {
+                alert('❌ Erreur : ' + e.message);
+                btn.innerHTML = orig;
+                btn.disabled  = false;
+            }
+        }
+
+        // ===== DICTÉE VOCALE (VOSK) =====
+        const recordBtn       = document.getElementById('recordBtn');
+        const statusSpan      = document.getElementById('recordingStatus');
+        const transcribedText = document.getElementById('transcribedText');
+        const interimPreview  = document.getElementById('interimPreview');
+
+        let mediaRecorder = null;
+        let audioChunks   = [];
+        let isRecording   = false;
+
+        function setStatus(type, text) {
+            statusSpan.className = 'status-badge ' + type;
+            statusSpan.innerHTML = text;
+            statusSpan.style.display = text ? '' : 'none';
+        }
+
+        function resetRecordBtn() {
+            isRecording = false;
+            recordBtn.innerHTML = '<i class="fas fa-microphone mr-2"></i> Démarrer l\'enregistrement';
+            recordBtn.classList.remove('recording');
+            interimPreview.style.display = 'none';
+            interimPreview.textContent = '';
+            setStatus('', '');
+        }
+
+        recordBtn.addEventListener('click', async () => {
+            if (!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+
+                    mediaRecorder.onstop = async () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        const formData = new FormData();
+                        formData.append('audio', audioBlob, 'recording.webm');
+
+                        setStatus('processing', '⏳ Transcription en cours...');
+                        try {
+                            const resp = await fetch('/ai/transcribe-audio', {
+                                method: 'POST',
+                                body: formData
+                            });
+                            const data = await resp.json();
+                            if (data.text) {
+                                // Formatage : majuscule début + point final
+                                let formatted = data.text.trim();
+                                if (formatted) {
+                                    formatted = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+                                    if (!/[.!?]$/.test(formatted)) {
+                                        formatted += '.';
+                                    }
+                                }
+                                transcribedText.value = formatted;
+                                transcribedText.dispatchEvent(new Event('input'));
+                                setStatus('processing', '✅ Transcription terminée');
+                            } else {
+                                setStatus('recording', '❌ Aucun texte reconnu');
+                            }
+                        } catch (e) {
+                            setStatus('recording', '❌ Erreur réseau');
+                        } finally {
+                            setTimeout(() => setStatus('', ''), 3000);
+                        }
+                        resetRecordBtn();
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    recordBtn.innerHTML = '<i class="fas fa-stop mr-2"></i> Arrêter l\'enregistrement';
+                    recordBtn.classList.add('recording');
+                    interimPreview.style.display = 'block';
+                    setStatus('recording', '🔴 Enregistrement en cours...');
+                } catch (err) {
+                    alert('Impossible d\'accéder au microphone.');
+                }
+            } else {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                // Le onstop s'occupera du reset
+            }
+        });
+
+        // Actions (Effacer, Copier, Utiliser) inchangées
+        document.getElementById('clearTranscriptionBtn').addEventListener('click', () => {
+            if (transcribedText.value && !confirm('Effacer le texte transcrit ?')) return;
+            transcribedText.value = '';
+            transcribedText.dispatchEvent(new Event('input'));
+        });
+
+        document.getElementById('copyTranscriptionBtn').addEventListener('click', () => {
+            const v = transcribedText.value;
+            if (!v.trim()) { alert('Rien à copier.'); return; }
+            navigator.clipboard.writeText(v).then(() => alert('✅ Copié !'));
+        });
+
+        document.getElementById('useTranscriptionBtn').addEventListener('click', async function () {
+            const text = transcribedText.value.trim();
+            if (!text) { alert('Le texte est vide.'); return; }
+            if (!confirm('Remplacer la description du projet par le texte transcrit ?')) return;
+            await replaceDescription(this, text);
+        });
+    </script>
+{% endblock %}

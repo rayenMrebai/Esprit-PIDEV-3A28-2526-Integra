@@ -1,0 +1,64 @@
+{% extends 'base_front.html.twig' %}
+
+{% block title %}{{ project.name }}{% endblock %}
+
+{% block content %}
+    <div class="post-preview">
+        <h1 class="post-title" style="color: #0B63CE;">{{ project.name }}</h1>
+        <p class="post-subtitle">{{ project.description|default('Pas de description') }}</p>
+        <p class="post-meta">
+            <span class="badge" style="background: #0FA36B; color: white; padding: 6px 16px; border-radius: 20px; font-size: 1rem;">
+                {{ project.status }}
+            </span>
+        </p>
+    </div>
+    <hr class="my-4" />
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <p><i class="far fa-calendar-alt text-primary"></i> <strong>Début :</strong> {{ project.startDate ? project.startDate|date('d/m/Y') : '—' }}</p>
+        </div>
+        <div class="col-md-6">
+            <p><i class="far fa-calendar-check text-primary"></i> <strong>Fin :</strong> {{ project.endDate ? project.endDate|date('d/m/Y') : '—' }}</p>
+        </div>
+        <div class="col-md-6">
+            <p><i class="fas fa-money-bill-wave text-primary"></i> <strong>Budget :</strong> {{ project.budget|number_format(0, ',', ' ') }} TND</p>
+        </div>
+    </div>
+    <hr class="my-4" />
+    <h3 class="mb-4" style="color: #0B63CE; font-weight: 300;">👥 Équipe affectée</h3>
+    {% if assignments is not empty %}
+        <div class="row">
+            {% for assignment in assignments %}
+                <div class="col-md-6 mb-4">
+                    <div class="card border-0 shadow-sm h-100" style="border-radius: 15px;">
+                        <div class="card-body">
+                            <h5 class="card-title" style="color: #0B63CE;">
+                                <i class="fas fa-user-circle me-2"></i>
+                                {{ assignment.userAccount ? assignment.userAccount.username : 'Employé inconnu' }}
+                            </h5>
+                            <h6 class="card-subtitle mb-2 text-muted">{{ assignment.role }}</h6>
+                            <p class="card-text">
+                                <span class="badge bg-light text-dark me-2">
+                                    <i class="fas fa-chart-pie"></i> Allocation : {{ assignment.allocationRate }}%
+                                </span>
+                                <br>
+                                <small class="text-muted">
+                                    <i class="far fa-calendar-alt"></i> {{ assignment.assignedFrom ? assignment.assignedFrom|date('d/m/Y') : '—' }}
+                                    <i class="far fa-calendar-check ms-2"></i> {{ assignment.assignedTo ? assignment.assignedTo|date('d/m/Y') : '—' }}
+                                </small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-muted fst-italic">Aucune affectation pour ce projet.</p>
+    {% endif %}
+    <hr class="my-4" />
+    <div class="d-flex justify-content-start">
+        <a href="{{ path('front_projects') }}" class="btn btn-outline-secondary" style="border-radius: 30px;">
+            ← Retour à la liste
+        </a>
+    </div>
+{% endblock %}

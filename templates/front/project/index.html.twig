@@ -1,0 +1,30 @@
+{% extends 'base_front.html.twig' %}
+
+{% block title %}Tous les projets{% endblock %}
+
+{% block content %}
+    <div class="post-preview">
+        <h2 class="post-title" style="color: #0B63CE;">📂 Tous les projets</h2>
+        <p class="post-subtitle">Consultez l'ensemble de nos initiatives RH.</p>
+    </div>
+    <hr class="my-4" />
+    {% for project in projects %}
+        <div class="post-preview">
+            <a href="{{ path('front_project_show', {projectId: project.projectId}) }}" style="text-decoration: none;">
+                <h3 class="post-title" style="color: #0B63CE;">{{ project.name }}</h3>
+                <p class="post-subtitle">{{ project.description|default('Aucune description')|u.truncate(120, '...') }}</p>
+            </a>
+            <p class="post-meta">
+                <span class="badge" style="background: #0FA36B; color: white; padding: 5px 14px; border-radius: 20px;">
+                    {{ project.status }}
+                </span>
+                <span class="ms-3"><i class="far fa-calendar-alt"></i> {{ project.startDate ? project.startDate|date('d/m/Y') : '—' }}</span>
+                <span class="ms-3"><i class="far fa-calendar-check"></i> {{ project.endDate ? project.endDate|date('d/m/Y') : '—' }}</span>
+                <span class="ms-3"><i class="fas fa-money-bill-wave"></i> {{ project.budget|number_format(0, ',', ' ') }} TND</span>
+            </p>
+        </div>
+        {% if not loop.last %}<hr class="my-4" />{% endif %}
+    {% else %}
+        <p class="text-muted">Aucun projet disponible.</p>
+    {% endfor %}
+{% endblock %}

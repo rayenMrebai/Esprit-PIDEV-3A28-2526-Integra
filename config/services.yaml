@@ -1,12 +1,10 @@
-# config/services.yaml
-
 parameters:
+    vosk_model_path: '%kernel.project_dir%/vosk-model-small-fr-0.22'
 
 services:
     _defaults:
         autowire: true
         autoconfigure: true
-        # Binding global pour que chaque mailer ait son propre service
         bind:
             $salaireMailer: '@mailer.salaire'
             $recrutementMailer: '@mailer.recrutement'
@@ -19,41 +17,59 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
-    # ============================================
-    # SERVICES DE TON AMI
-    # ============================================
-    
+    # HuggingFace (embedding + matching + conseils RH) – Token unique
+    App\Service\HuggingFaceService:
+        arguments:
+            $HF_TOKEN: '%env(HF_TOKEN)%'
+
+    # Vosk (dictée vocale)
+    App\Service\VoskService:
+        arguments:
+            $modelPath: '%vosk_model_path%'
+            $projectDir: '%kernel.project_dir%'
+            $logger: '@logger'
+
+    # Ollama (Assistant IA)
+    App\Service\OllamaService:
+        arguments:
+            $ollamaBaseUrl: '%env(OLLAMA_BASE_URL)%'
+
+    # Matching employé-projet
+    App\Service\EmployeeMatchingService: ~
+
+    # Taux de change live
+    App\Service\CurrencyService: ~
+
+    # Services d'export (Aziz)
+    App\Service\ProjectPdfExportService: ~
+    App\Service\ProjectExcelExportService: ~
+
+    # Security
     App\Security\UserChecker:
         tags: ['security.user_checker']
 
-    App\Service\HuggingFaceService:
-        arguments:
-            $apiToken: '%env(HUGGINGFACE_API_TOKEN)%'
-
-    # ============================================
-    # TES SERVICES
-    # ============================================
-    
+    # Analyseur HuggingFace de l'équipe (même token)
     App\Service\HuggingFaceAnalyzer:
         arguments:
-            $token: '%env(HUGGINGFACE_TOKEN)%'
-            $url: '%env(HUGGINGFACE_URL)%'
-            $model: '%env(HUGGINGFACE_MODEL)%'
+            $httpClient: '@http_client'
+            $logger: '@logger'
+            $token: '%env(HF_TOKEN)%'
+            $url: 'https://router.huggingface.co/v1/chat/completions'
+            $model: 'meta-llama/Llama-3.1-8B-Instruct:cerebras'
 
+    # Service PDF (bulletin de paie)
     App\Service\PdfService:
         arguments:
             $projectDir: '%kernel.project_dir%'
 
+    # AI Quiz Generator
     App\Service\AIQuizGenerator:
         arguments:
             $apiKey: '%env(GROQ_API_KEY)%'
             $apiUrl: '%env(GROQ_API_URL)%'
             $model: '%env(GROQ_MODEL)%'
 
-    # ============================================
-    # MAILER SALAIRE (Toi - Brevo)
-    # ============================================
-    
+    # Mailers
     mailer.transport.salaire:
         class: Symfony\Component\Mailer\Transport\TransportInterface
         factory: ['Symfony\Component\Mailer\Transport', 'fromDsn']
@@ -61,13 +77,8 @@ services:
 
     mailer.salaire:
         class: Symfony\Component\Mailer\Mailer
-        arguments:
-            - '@mailer.transport.salaire'
+        arguments: ['@mailer.transport.salaire']
 
-    # ============================================
-    # MAILER RECRUTEMENT (Ami - Gmail)
-    # ============================================
-    
     mailer.transport.recrutement:
         class: Symfony\Component\Mailer\Transport\TransportInterface
         factory: ['Symfony\Component\Mailer\Transport', 'fromDsn']
@@ -75,13 +86,8 @@ services:
 
     mailer.recrutement:
         class: Symfony\Component\Mailer\Mailer
-        arguments:
-            - '@mailer.transport.recrutement'
+        arguments: ['@mailer.transport.recrutement']
 
-    # ============================================
-    # MAILER CERTIFICAT (Sarabeji - Gmail)
-    # ============================================
-    
     mailer.transport.certificat:
         class: Symfony\Component\Mailer\Transport\TransportInterface
         factory: ['Symfony\Component\Mailer\Transport', 'fromDsn']
@@ -89,13 +95,8 @@ services:
 
     mailer.certificat:
         class: Symfony\Component\Mailer\Mailer
-        arguments:
-            - '@mailer.transport.certificat'
+        arguments: ['@mailer.transport.certificat']
 
-    # ============================================
-    # INJECTION EXPLICITE DES MAILERS DANS LES SERVICES
-    # ============================================
-    
     App\Service\EmailSalaireService:
         arguments:
             $salaireMailer: '@mailer.salaire'

@@ -8,6 +8,16 @@
     {{ parent() }}
     <link rel="stylesheet" href="{{ asset('css/integra.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <style>
+        /* Petit ajustement pour l'affichage du QR dans la modale */
+        #qrCodeImage {
+            max-width: 150px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 5px;
+            background: white;
+        }
+    </style>
 {% endblock %}
 
 {% block admin_content %}
@@ -140,18 +150,22 @@
                                     <input type="hidden" name="_token" value="{{ csrf_token('reject' ~ candidat.id) }}">
                                     <button class="btn btn-sm" style="background: #ef4444; color: white; border: none; border-radius: 8px; padding: 4px 10px;"><i class="fas fa-times-circle"></i> Rejeter</button>
                                 </form>
+                                {# Bouton QR code (ouvre directement l'image dans un nouvel onglet) #}
+                                <a href="{{ path('app_candidat_qrcode', {'id': candidat.id}) }}" class="btn btn-secondary btn-sm" target="_blank" title="QR Code">
+                                    <i class="fas fa-qrcode"></i>
+                                </a>
                             </div>
                         </td>
                     </tr>
                 {% else %}
-                    <tr><td colspan="6">Aucun candidat trouvé. <button class="btn btn-success btn-sm" id="openCandidatModalBtn2" style="margin-left: 10px;">+ Ajouter</button></td></tr>
+                    <td><td colspan="6">Aucun candidat trouvé. <button class="btn btn-success btn-sm" id="openCandidatModalBtn2" style="margin-left: 10px;">+ Ajouter</button></td></tr>
                 {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
 
-    {# MODALES #}
+    {# MODALE AJOUT OFFRE #}
     <div id="jobModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
@@ -175,6 +189,7 @@
         </div>
     </div>
 
+    {# MODALE AJOUT CANDIDAT #}
     <div id="candidatModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
@@ -200,20 +215,32 @@
         </div>
     </div>
 
+    {# MODALE DÉTAILS CANDIDAT (avec QR code) #}
     <div id="candidatDetailModal" class="modal" style="display: none;">
-        <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-content" style="max-width: 650px;">
             <div class="modal-header">
                 <h3><i class="fas fa-id-card"></i> Détails du candidat</h3>
                 <span class="close-btn" style="cursor: pointer; font-size: 28px;" onclick="document.getElementById('candidatDetailModal').style.display='none'">&times;</span>
             </div>
             <div class="modal-body">
-                <div class="detail-row"><strong>Nom complet :</strong> <span id="detailFullName"></span></div>
-                <div class="detail-row"><strong>Email :</strong> <span id="detailEmail"></span></div>
-                <div class="detail-row"><strong>Téléphone :</strong> <span id="detailPhone"></span></div>
-                <div class="detail-row"><strong>Niveau d'études :</strong> <span id="detailEducation"></span></div>
-                <div class="detail-row"><strong>Compétences :</strong> <span id="detailSkills"></span></div>
-                <div class="detail-row"><strong>Statut :</strong> <span id="detailStatus"></span></div>
-                <div class="detail-row"><strong>Offre associée :</strong> <span id="detailJob"></span></div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="detail-row"><strong>Nom complet :</strong> <span id="detailFullName"></span></div>
+                        <div class="detail-row"><strong>Email :</strong> <span id="detailEmail"></span></div>
+                        <div class="detail-row"><strong>Téléphone :</strong> <span id="detailPhone"></span></div>
+                        <div class="detail-row"><strong>Niveau d'études :</strong> <span id="detailEducation"></span></div>
+                        <div class="detail-row"><strong>Compétences :</strong> <span id="detailSkills"></span></div>
+                        <div class="detail-row"><strong>Statut :</strong> <span id="detailStatus"></span></div>
+                        <div class="detail-row"><strong>Offre associée :</strong> <span id="detailJob"></span></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-row"><strong>QR Code :</strong></div>
+                        <div id="qrCodeContainer" class="mt-2 text-center">
+                            <img id="qrCodeImage" src="" style="max-width: 150px; display: none; border:1px solid #ccc; border-radius:8px; padding:5px;">
+                        </div>
+                        <div class="detail-row mt-3 text-muted small">Scannez ce code avec votre téléphone pour identifier le candidat.</div>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="document.getElementById('candidatDetailModal').style.display='none'">Fermer</button>
@@ -225,6 +252,7 @@
 {% block javascripts %}
     {{ parent() }}
     <script>
+        // Clic sur les cartes offres => filtre candidats
         document.querySelectorAll('.job-card').forEach(card => {
             card.addEventListener('click', (e) => {
                 if (e.target.closest('.btn-warning') || e.target.closest('.btn-danger')) return;
@@ -238,17 +266,20 @@
             });
         });
 
+        // Fermeture des modales en cliquant à l'extérieur
         window.onclick = function(event) {
             if (event.target.classList.contains('modal')) {
                 event.target.style.display = 'none';
             }
         };
 
+        // Gestionnaire pour les boutons "Voir" (détails candidat + QR code)
         document.querySelectorAll('.view-candidat').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 e.preventDefault();
                 const candidatId = btn.dataset.id;
                 try {
+                    // Charger les détails du candidat (via route existante)
                     const response = await fetch(`/candidat/details/${candidatId}`);
                     const data = await response.json();
                     document.getElementById('detailFullName').innerText = `${data.firstName} ${data.lastName}`;
@@ -258,13 +289,25 @@
                     document.getElementById('detailSkills').innerText = data.skills;
                     document.getElementById('detailStatus').innerText = data.status;
                     document.getElementById('detailJob').innerText = data.jobTitle;
+
+                    // Charger le QR code (via route JSON)
+                    const qrResponse = await fetch(`/candidat/${candidatId}/qrcode-json`);
+                    const qrData = await qrResponse.json();
+                    const qrImg = document.getElementById('qrCodeImage');
+                    if (qrData.qr_base64) {
+                        qrImg.src = qrData.qr_base64;
+                        qrImg.style.display = 'block';
+                    } else {
+                        qrImg.style.display = 'none';
+                    }
                     document.getElementById('candidatDetailModal').style.display = 'flex';
                 } catch (error) {
-                    console.error('Erreur:', error);
+                    console.error('Erreur lors du chargement des détails:', error);
                 }
             });
         });
 
+        // Ouvrir/fermer les modales d'ajout
         function openModal(modalId) { document.getElementById(modalId).style.display = 'flex'; }
         function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
 
