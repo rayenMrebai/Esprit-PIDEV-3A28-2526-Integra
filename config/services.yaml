@@ -112,3 +112,4 @@ services:
     App\Service\CertificatMailer:
         arguments:
             $certificatMailer: '@mailer.certificat'
+

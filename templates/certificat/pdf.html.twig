@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Certificat</title>
+    <style>
+        @page {
+            size: landscape;
+            margin: 0;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #f0f4f8;
+        }
+        .certificate {
+            width: 95%;
+            height: 90%;
+            background: white;
+            border: 8px solid #0B63CE;
+            border-radius: 30px;
+            padding: 50px 60px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+        }
+        .logo {
+            position: absolute;
+            top: 30px;
+            left: 50px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #0B63CE;
+        }
+        .title {
+            font-size: 48px;
+            font-weight: bold;
+            color: #0B63CE;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+        .subtitle {
+            font-size: 22px;
+            color: #475569;
+            margin-bottom: 40px;
+        }
+        .recipient {
+            font-size: 36px;
+            font-weight: bold;
+            color: #1e3a5f;
+            margin-bottom: 20px;
+        }
+        .description {
+            font-size: 18px;
+            color: #334155;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .score {
+            font-size: 28px;
+            font-weight: bold;
+            color: #0FA36B;
+            margin-bottom: 30px;
+        }
+        .footer {
+            font-size: 14px;
+            color: #64748b;
+            margin-top: auto;
+        }
+        .signature {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 16px;
+        }
+        .signature .line {
+            width: 200px;
+            border-top: 1px solid #0B63CE;
+            margin-top: 5px;
+        }
+        .badge {
+            position: absolute;
+            top: 40px;
+            right: 50px;
+            background: #0B63CE;
+            color: white;
+            padding: 10px 25px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+<div class="certificate">
+    <div class="logo">🏢 INTEGRA RH</div>
+    <div class="badge">CERTIFICAT</div>
+
+    <div class="title">Certificat de réussite</div>
+    <div class="subtitle">Ce document atteste que</div>
+    <div class="recipient">{{ user.username }}</div>
+    <div class="description">
+        a complété avec succès la formation<br>
+        <strong>{{ formation.title }}</strong><br>
+        et a obtenu un score de <strong>{{ quiz.score }}/{{ quiz.totalQuestions }}</strong>
+        ({{ quiz.percentage|round }}%).
+    </div>
+    <div class="score">
+        {% if quiz.passed %}
+            ✅ Mention : Admis
+        {% else %}
+            ❌ Non admis
+        {% endif %}
+    </div>
+    <div class="signature">
+        <div>
+            <div class="line"></div>
+            <div>Le responsable RH</div>
+        </div>
+        <div>
+            <div class="line"></div>
+            <div>Le participant</div>
+        </div>
+    </div>
+    <div class="footer">
+        Délivré le {{ date|date('d/m/Y') }} — INTEGRA HR Management System
+    </div>
+</div>
+</body>
+</html>

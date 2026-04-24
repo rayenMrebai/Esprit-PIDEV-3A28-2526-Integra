@@ -177,7 +177,7 @@ class FrontController extends AbstractController
         Quiz_result $quiz,
         Request $request,
         EntityManagerInterface $em,
-        CertificatMailer $certificatMailer
+        CertificatMailer $certifMailer  // ← renommé
     ): Response {
         $user = $this->getUser();
 
@@ -210,36 +210,34 @@ class FrontController extends AbstractController
         $quiz->setCompletedAt(new \DateTime());
         $em->flush();
 
-if ($passed) {
-    // Log avant envoi
-    $this->addFlash('info', 'Tentative d\'envoi du certificat...');
-    
-    try {
-        // Log détaillé
-        error_log('=== TENTATIVE ENVOI CERTIFICAT ===');
-        error_log('Quiz ID: ' . $quiz->getId());
-        error_log('User email: ' . $user->getEmail());
-        error_log('Score: ' . $score . '/' . $totalQuestions);
-        error_log('Percentage: ' . $percentage);
-        
-        $certificatMailer->sendCertificat($quiz);
-        
-        error_log('✅ ENVOI RÉUSSI');
-        
-        $this->addFlash('success', sprintf(
-            'Quiz réussi ! Score : %d/%d (%.0f%%) ✅ — Certificat envoyé à %s',
-            $score, $totalQuestions, $percentage, $user->getEmail()
-        ));
-    } catch (\Exception $e) {
-        error_log('❌ ERREUR ENVOI: ' . $e->getMessage());
-        error_log('Trace: ' . $e->getTraceAsString());
-        
-        $this->addFlash('warning', sprintf(
-            'Quiz réussi ! Score : %d/%d (%.0f%%) ✅ — Erreur envoi email : %s',
-            $score, $totalQuestions, $percentage, $e->getMessage()
-        ));
-    }
-}
+        if ($passed) {
+            $this->addFlash('info', 'Tentative d\'envoi du certificat...');
+
+            try {
+                error_log('=== TENTATIVE ENVOI CERTIFICAT ===');
+                error_log('Quiz ID: ' . $quiz->getId());
+                error_log('User email: ' . $user->getEmail());
+                error_log('Score: ' . $score . '/' . $totalQuestions);
+                error_log('Percentage: ' . $percentage);
+
+                $certifMailer->sendCertificat($quiz);  // ← corrigé
+
+                error_log('✅ ENVOI RÉUSSI');
+
+                $this->addFlash('success', sprintf(
+                    'Quiz réussi ! Score : %d/%d (%.0f%%) ✅ — Certificat envoyé à %s',
+                    $score, $totalQuestions, $percentage, $user->getEmail()
+                ));
+            } catch (\Exception $e) {
+                error_log('❌ ERREUR ENVOI: ' . $e->getMessage());
+                error_log('Trace: ' . $e->getTraceAsString());
+
+                $this->addFlash('warning', sprintf(
+                    'Quiz réussi ! Score : %d/%d (%.0f%%) ✅ — Erreur envoi email : %s',
+                    $score, $totalQuestions, $percentage, $e->getMessage()
+                ));
+            }
+        }
 
         return $this->redirectToRoute('app_frontoffice_quiz');
     }
