@@ -10,6 +10,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use App\Service\TelegramService;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 #[Route('/candidat')]
 final class CandidatController extends AbstractController
@@ -76,9 +78,9 @@ final class CandidatController extends AbstractController
             $entityManager->flush();
             $this->addFlash('success', 'Candidat supprimé avec succès.');
         }
-        // Redirection vers le dashboard
         return $this->redirectToRoute('app_recruitment_dashboard', [], Response::HTTP_SEE_OTHER);
     }
+
     #[Route('/{id}/reject', name: 'app_candidat_reject', methods: ['POST'])]
     public function reject(Request $request, Candidat $candidat, EntityManagerInterface $entityManager): Response
     {
@@ -90,4 +92,33 @@ final class CandidatController extends AbstractController
         return $this->redirectToRoute('app_recruitment_dashboard');
     }
 
+    #[Route('/{id}/telegram', name: 'app_candidat_telegram', methods: ['POST'])]
+    public function sendTelegram(Candidat $candidat, TelegramService $telegram): JsonResponse
+    {
+        $chatId = $_ENV['TELEGRAM_CHAT_ID'] ?? null;
+        if (!$chatId) {
+            return $this->json(['error' => 'Chat ID non configuré'], 500);
+        }
+
+        $message = sprintf(
+            "📢 *Nouvelle notification recrutement*\n\n" .
+            "Candidat : %s %s\n" .
+            "Email : %s\n" .
+            "Téléphone : %s\n" .
+            "Poste : %s\n" .
+            "Statut : %s",
+            $candidat->getFirstName(),
+            $candidat->getLastName(),
+            $candidat->getEmail(),
+            $candidat->getPhone(),
+            $candidat->getJobposition() ? $candidat->getJobposition()->getTitle() : 'Non spécifié',
+            $candidat->getStatus()
+        );
+
+        $sent = $telegram->sendMessage($chatId, $message);
+        if ($sent) {
+            return $this->json(['success' => true]);
+        }
+        return $this->json(['error' => 'Échec de l\'envoi Telegram'], 500);
+    }
 }

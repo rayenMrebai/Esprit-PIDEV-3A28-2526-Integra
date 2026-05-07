@@ -9,13 +9,34 @@
     <link rel="stylesheet" href="{{ asset('css/integra.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <style>
-        /* Petit ajustement pour l'affichage du QR dans la modale */
         #qrCodeImage {
             max-width: 150px;
             border: 1px solid #ddd;
             border-radius: 8px;
             padding: 5px;
             background: white;
+        }
+        /* Style pour le toast de notification */
+        .notification-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            min-width: 250px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 12px 20px;
+            border-left: 5px solid;
+            animation: fadeInOut 3s ease forwards;
+        }
+        .notification-toast.success { border-left-color: #0FA36B; background: #f0fdf4; color: #065f46; }
+        .notification-toast.error { border-left-color: #ef4444; background: #fef2f2; color: #b91c1c; }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateX(100px); }
+            10% { opacity: 1; transform: translateX(0); }
+            90% { opacity: 1; transform: translateX(0); }
+            100% { opacity: 0; transform: translateX(100px); }
         }
     </style>
 {% endblock %}
@@ -29,7 +50,7 @@
         <div class="alert alert-danger">{{ message }}</div>
     {% endfor %}
 
-    {# SECTION OFFRES #}
+    {# SECTION OFFRES (inchangée) #}
     <div class="card-modern">
         <div class="section-header">
             <div class="section-title"><i class="fas fa-briefcase"></i> OFFRES D'EMPLOI</div>
@@ -150,22 +171,25 @@
                                     <input type="hidden" name="_token" value="{{ csrf_token('reject' ~ candidat.id) }}">
                                     <button class="btn btn-sm" style="background: #ef4444; color: white; border: none; border-radius: 8px; padding: 4px 10px;"><i class="fas fa-times-circle"></i> Rejeter</button>
                                 </form>
-                                {# Bouton QR code (ouvre directement l'image dans un nouvel onglet) #}
                                 <a href="{{ path('app_candidat_qrcode', {'id': candidat.id}) }}" class="btn btn-secondary btn-sm" target="_blank" title="QR Code">
                                     <i class="fas fa-qrcode"></i>
                                 </a>
+                                {# Bouton Telegram avec AJAX #}
+                                <button class="btn btn-info btn-sm telegram-btn" data-id="{{ candidat.id }}" title="Envoyer sur Telegram">
+                                    <i class="fab fa-telegram-plane"></i>
+                                </button>
                             </div>
                         </td>
                     </tr>
                 {% else %}
-                    <td><td colspan="6">Aucun candidat trouvé. <button class="btn btn-success btn-sm" id="openCandidatModalBtn2" style="margin-left: 10px;">+ Ajouter</button></td></tr>
+                    <tr><td colspan="6">Aucun candidat trouvé. <button class="btn btn-success btn-sm" id="openCandidatModalBtn2" style="margin-left: 10px;">+ Ajouter</button></td></tr>
                 {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
 
-    {# MODALE AJOUT OFFRE #}
+    {# MODALE AJOUT OFFRE (inchangée) #}
     <div id="jobModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
@@ -189,7 +213,7 @@
         </div>
     </div>
 
-    {# MODALE AJOUT CANDIDAT #}
+    {# MODALE AJOUT CANDIDAT (inchangée) #}
     <div id="candidatModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
@@ -279,7 +303,6 @@
                 e.preventDefault();
                 const candidatId = btn.dataset.id;
                 try {
-                    // Charger les détails du candidat (via route existante)
                     const response = await fetch(`/candidat/details/${candidatId}`);
                     const data = await response.json();
                     document.getElementById('detailFullName').innerText = `${data.firstName} ${data.lastName}`;
@@ -290,7 +313,6 @@
                     document.getElementById('detailStatus').innerText = data.status;
                     document.getElementById('detailJob').innerText = data.jobTitle;
 
-                    // Charger le QR code (via route JSON)
                     const qrResponse = await fetch(`/candidat/${candidatId}/qrcode-json`);
                     const qrData = await qrResponse.json();
                     const qrImg = document.getElementById('qrCodeImage');
@@ -302,7 +324,7 @@
                     }
                     document.getElementById('candidatDetailModal').style.display = 'flex';
                 } catch (error) {
-                    console.error('Erreur lors du chargement des détails:', error);
+                    console.error('Erreur:', error);
                 }
             });
         });
@@ -318,5 +340,41 @@
         const openCandidatModalBtn2 = document.getElementById('openCandidatModalBtn2');
         if (openCandidatModalBtn) openCandidatModalBtn.addEventListener('click', () => openModal('candidatModal'));
         if (openCandidatModalBtn2) openCandidatModalBtn2.addEventListener('click', () => openModal('candidatModal'));
+
+        // === TELEGRAM AJAX ===
+        function showNotification(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `notification-toast ${type}`;
+            toast.innerHTML = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        document.querySelectorAll('.telegram-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const candidatId = btn.dataset.id;
+                const originalHtml = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                try {
+                    const response = await fetch(`/candidat/${candidatId}/telegram`, {
+                        method: 'POST',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        showNotification('✅ Notification Telegram envoyée avec succès !', 'success');
+                    } else {
+                        showNotification('❌ Erreur : ' + (data.error || 'Échec de l\'envoi'), 'error');
+                    }
+                } catch (error) {
+                    showNotification('❌ Erreur réseau : ' + error.message, 'error');
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                }
+            });
+        });
     </script>
 {% endblock %}

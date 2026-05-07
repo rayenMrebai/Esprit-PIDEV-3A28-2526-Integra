@@ -21,15 +21,28 @@ class QrCodeController extends AbstractController
             throw $this->createNotFoundException('Candidat non trouvé');
         }
 
+        // Construction du contenu détaillé du QR code
         $qrContent = sprintf(
-            "Candidat ID: %d\nNom: %s %s\nEmail: %s",
+            "=== CANDIDAT ===\n".
+            "ID: %d\n".
+            "Nom complet: %s %s\n".
+            "Email: %s\n".
+            "Téléphone: %s\n".
+            "Niveau d'études: %s\n".
+            "Compétences: %s\n".
+            "Statut: %s\n".
+            "Offre associée: %s",
             $candidat->getId(),
             $candidat->getFirstName(),
             $candidat->getLastName(),
-            $candidat->getEmail()
+            $candidat->getEmail(),
+            $candidat->getPhone(),
+            $candidat->getEducationLevel(),
+            $candidat->getSkills(),
+            $candidat->getStatus(),
+            $candidat->getJobposition() ? $candidat->getJobposition()->getTitle() : 'Aucune'
         );
 
-        // ✅ Builder v6 (PAS de create())
         $result = (new Builder(
             writer: new PngWriter(),
             data: $qrContent,
@@ -53,11 +66,24 @@ class QrCodeController extends AbstractController
         }
 
         $qrContent = sprintf(
-            "Candidat ID: %d\nNom: %s %s\nEmail: %s",
+            "=== CANDIDAT ===\n".
+            "ID: %d\n".
+            "Nom complet: %s %s\n".
+            "Email: %s\n".
+            "Téléphone: %s\n".
+            "Niveau d'études: %s\n".
+            "Compétences: %s\n".
+            "Statut: %s\n".
+            "Offre associée: %s",
             $candidat->getId(),
             $candidat->getFirstName(),
             $candidat->getLastName(),
-            $candidat->getEmail()
+            $candidat->getEmail(),
+            $candidat->getPhone(),
+            $candidat->getEducationLevel(),
+            $candidat->getSkills(),
+            $candidat->getStatus(),
+            $candidat->getJobposition() ? $candidat->getJobposition()->getTitle() : 'Aucune'
         );
 
         $result = (new Builder(
