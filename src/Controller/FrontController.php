@@ -29,14 +29,25 @@ class FrontController extends AbstractController
     #[Route('/', name: 'front_acceuil')]
     public function acceuil(JobpositionRepository $jobpositionRepository): Response
     {
-        $jobs = $jobpositionRepository->findBy([], ['postedAt' => 'DESC']);
+        // Limiter à 50 offres pour éviter le Find All
+        $jobs = $jobpositionRepository->createQueryBuilder('j')
+            ->orderBy('j.postedAt', 'DESC')
+            ->setMaxResults(50)
+            ->getQuery()
+            ->getResult();
+
         return $this->render('front/acceuil.html.twig', ['jobs' => $jobs]);
     }
 
     #[Route('/home', name: 'front_home')]
     public function home(JobpositionRepository $jobpositionRepository): Response
     {
-        $jobs = $jobpositionRepository->findBy([], ['postedAt' => 'DESC']);
+        $jobs = $jobpositionRepository->createQueryBuilder('j')
+            ->orderBy('j.postedAt', 'DESC')
+            ->setMaxResults(50)
+            ->getQuery()
+            ->getResult();
+
         return $this->render('front/home.html.twig', ['jobs' => $jobs]);
     }
 

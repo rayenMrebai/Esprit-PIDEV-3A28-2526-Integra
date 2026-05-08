@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -13,17 +15,17 @@ class Projectassignment
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer', name: 'idAssignment')]
+    #[ORM\Column(type: 'integer', name: 'id_assignment')]
     private int $idAssignment = 0;
 
     #[Assert\NotNull(message: "Le projet est obligatoire")]
     #[ORM\ManyToOne(targetEntity: Project::class)]
-    #[ORM\JoinColumn(name: 'projectId', referencedColumnName: 'projectId', nullable: false)]
+    #[ORM\JoinColumn(name: 'project_id', referencedColumnName: 'projectId', nullable: false)]
     private ?Project $project = null;
 
     #[Assert\NotNull(message: "L'employé est obligatoire")]
     #[ORM\ManyToOne(targetEntity: UserAccount::class)]
-    #[ORM\JoinColumn(name: 'employeeId', referencedColumnName: 'userId', nullable: false)]
+    #[ORM\JoinColumn(name: 'user_account_id', referencedColumnName: 'userid', nullable: false)]
     private ?UserAccount $userAccount = null;
 
     #[Assert\NotBlank(message: "Le rôle est obligatoire")]
@@ -32,20 +34,16 @@ class Projectassignment
     private ?string $role = null;
 
     #[Assert\NotBlank(message: "Le taux d'allocation est obligatoire")]
-    #[Assert\Range(
-        min: 0,
-        max: 100,
-        notInRangeMessage: "Le taux d'allocation doit être compris entre 0 et 100"
-    )]
-    #[ORM\Column(type: 'integer', name: 'allocationRate', nullable: false)]
+    #[Assert\Range(min: 0, max: 100, notInRangeMessage: "Le taux d'allocation doit être compris entre 0 et 100")]
+    #[ORM\Column(type: 'integer', name: 'allocation_rate', nullable: false)]
     private ?int $allocationRate = null;
 
     #[Assert\NotBlank(message: "La date de début est obligatoire")]
-    #[ORM\Column(type: 'date', name: 'assignedFrom', nullable: true)]
+    #[ORM\Column(type: 'date', name: 'assigned_from', nullable: true)]
     private ?\DateTimeInterface $assignedFrom = null;
 
     #[Assert\NotBlank(message: "La date de fin est obligatoire")]
-    #[ORM\Column(type: 'date', name: 'assignedTo', nullable: true)]
+    #[ORM\Column(type: 'date', name: 'assigned_to', nullable: true)]
     private ?\DateTimeInterface $assignedTo = null;
 
     #[Assert\Callback]
@@ -77,24 +75,17 @@ class Projectassignment
         }
     }
 
-    // Getters et setters
     public function getIdAssignment(): int { return $this->idAssignment; }
-
     public function getProject(): ?Project { return $this->project; }
     public function setProject(?Project $project): self { $this->project = $project; return $this; }
-
     public function getUserAccount(): ?UserAccount { return $this->userAccount; }
     public function setUserAccount(?UserAccount $userAccount): self { $this->userAccount = $userAccount; return $this; }
-
     public function getRole(): ?string { return $this->role; }
     public function setRole(?string $role): self { $this->role = $role; return $this; }
-
     public function getAllocationRate(): ?int { return $this->allocationRate; }
     public function setAllocationRate(?int $allocationRate): self { $this->allocationRate = $allocationRate; return $this; }
-
     public function getAssignedFrom(): ?\DateTimeInterface { return $this->assignedFrom; }
     public function setAssignedFrom(?\DateTimeInterface $assignedFrom): self { $this->assignedFrom = $assignedFrom; return $this; }
-
     public function getAssignedTo(): ?\DateTimeInterface { return $this->assignedTo; }
     public function setAssignedTo(?\DateTimeInterface $assignedTo): self { $this->assignedTo = $assignedTo; return $this; }
 }

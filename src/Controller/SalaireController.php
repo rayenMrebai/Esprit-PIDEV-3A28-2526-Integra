@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Entity\Salaire;
@@ -39,22 +41,22 @@ class SalaireController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $salaire->setTotalAmount($salaire->getBaseAmount() + $salaire->getBonusAmount());
+            // Les montants sont en string, on les convertit
+            $base  = (float) $salaire->getBaseAmount();
+            $bonus = (float) $salaire->getBonusAmount();
+            $salaire->setTotalAmount(number_format($base + $bonus, 2, '.', ''));
             $salaire->setStatus('CREÉ');
 
             $em->persist($salaire);
             $em->flush();
 
-            // ✅ Envoi email création
             try {
                 $this->emailService->sendSalaireCreated($salaire);
                 $this->addFlash('success', 'Salaire créé et email envoyé avec succès');
             } catch (\Exception $e) {
-                // Ne pas bloquer si l'email échoue
                 $this->addFlash('warning', 'Salaire créé mais l\'email n\'a pas pu être envoyé.');
             }
 
-            $this->addFlash('success', 'Salaire créé avec succès');
             return $this->redirectToRoute('app_backoffice_salaires_index');
         }
 
@@ -98,7 +100,6 @@ class SalaireController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             if ($salaire->getStatus() === 'PAYÉ') {
                 $datePaiement = $salaire->getDatePaiement();
-                // ✅ Vérification null avant format()
                 if ($datePaiement === null) {
                     $this->addFlash('error', "La date de paiement est obligatoire pour le statut PAYÉ.");
                     return $this->render('backoffice/salaires/salaire/edit.html.twig', [
@@ -116,12 +117,17 @@ class SalaireController extends AbstractController
                 }
             }
 
-            $salaire->setTotalAmount($salaire->getBaseAmount() + $salaire->getBonusAmount());
-            $salaire->setUpdatedAt(new \DateTime());
+            // Recalcul du total (string -> float -> string)
+            $base  = (float) $salaire->getBaseAmount();
+            $bonus = (float) $salaire->getBonusAmount();
+            $salaire->setTotalAmount(number_format($base + $bonus, 2, '.', ''));
+
+            // Utiliser le setter de l'entité (le setter a été retiré pour DateTimeImmutable,
+            // mais on peut appeler la méthode onPreUpdate via le lifecycle. On ne touche pas ici.)
 
             $em->flush();
 
-            // ✅ Envoi email si passage à PAYÉ
+            // Envoi email si passage à PAYÉ
             if ($oldStatus !== 'PAYÉ' && $salaire->getStatus() === 'PAYÉ') {
                 try {
                     $this->emailService->sendSalairePaid($salaire);
@@ -148,7 +154,7 @@ class SalaireController extends AbstractController
             return $this->redirectToRoute('app_backoffice_salaires_index');
         }
 
-        $token = (string) $request->request->get('_token'); // ✅ cast string
+        $token = (string) $request->request->get('_token');
         if (!$this->isCsrfTokenValid('delete' . $salaire->getId(), $token)) {
             $this->addFlash('error', 'Token de sécurité invalide.');
             return $this->redirectToRoute('app_backoffice_salaires_index');

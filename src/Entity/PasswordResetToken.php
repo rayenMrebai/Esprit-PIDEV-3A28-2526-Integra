@@ -6,6 +6,7 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\PasswordResetTokenRepository;
+use Symfony\Component\Serializer\Annotation\Ignore;
 
 #[ORM\Entity(repositoryClass: PasswordResetTokenRepository::class)]
 #[ORM\Table(name: 'password_reset_token')]
@@ -22,6 +23,7 @@ class PasswordResetToken
     private ?UserAccount $userAccount = null;
 
     #[ORM\Column(type: 'string', nullable: false)]
+    #[Ignore]
     private string $token;
 
     #[ORM\Column(type: 'datetime', nullable: false)]
@@ -36,52 +38,13 @@ class PasswordResetToken
         $this->expiry_date = new \DateTime();
     }
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
-    public function getUserAccount(): ?UserAccount
-    {
-        return $this->userAccount;
-    }
-
-    public function setUserAccount(?UserAccount $userAccount): self
-    {
-        $this->userAccount = $userAccount;
-        return $this;
-    }
-
-    public function getToken(): string
-    {
-        return $this->token;
-    }
-
-    public function setToken(string $token): self
-    {
-        $this->token = $token;
-        return $this;
-    }
-
-    public function getExpiryDate(): \DateTimeInterface
-    {
-        return $this->expiry_date;
-    }
-
-    public function setExpiryDate(\DateTimeInterface $expiry_date): self
-    {
-        $this->expiry_date = $expiry_date;
-        return $this;
-    }
-
-    public function isUsed(): ?bool
-    {
-        return $this->used;
-    }
-
-    public function setUsed(?bool $used): self
-    {
-        $this->used = $used;
-        return $this;
-    }
+    public function getId(): ?int { return $this->id; }
+    public function getUserAccount(): ?UserAccount { return $this->userAccount; }
+    public function setUserAccount(?UserAccount $userAccount): self { $this->userAccount = $userAccount; return $this; }
+    public function getToken(): string { return $this->token; }
+    public function setToken(string $token): self { $this->token = $token; return $this; }
+    public function getExpiryDate(): \DateTimeInterface { return $this->expiry_date; }
+    public function setExpiryDate(\DateTimeInterface $expiry_date): self { $this->expiry_date = $expiry_date; return $this; }
+    public function isUsed(): ?bool { return $this->used; }
+    public function setUsed(?bool $used): self { $this->used = $used; return $this; }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use App\Repository\JobpositionRepository;
@@ -26,7 +28,7 @@ class Jobposition
     #[Assert\NotBlank(message: "Le département est obligatoire.")]
     private ?string $departement = null;
 
-    #[ORM\Column(name: 'employeeType', type: 'string', length: 255)]
+    #[ORM\Column(name: 'employee_type', type: 'string', length: 255)]
     #[Assert\NotBlank(message: "Le type d'emploi est obligatoire.")]
     private ?string $employeeType = null;
 
@@ -40,7 +42,7 @@ class Jobposition
     #[Assert\Choice(choices: ['Open', 'Closed'])]
     private ?string $status = null;
 
-    #[ORM\Column(name: 'postedAt', type: 'date')]
+    #[ORM\Column(name: 'posted_at', type: 'date')]
     #[Assert\NotNull(message: "La date de publication est obligatoire.")]
     private ?\DateTimeInterface $postedAt = null;
 
@@ -53,7 +55,6 @@ class Jobposition
         $this->candidats = new ArrayCollection();
     }
 
-    // Getters
     public function getIdJob(): int { return $this->idJob; }
     public function getTitle(): ?string { return $this->title; }
     public function getDepartement(): ?string { return $this->departement; }
@@ -64,7 +65,6 @@ class Jobposition
     /** @return Collection<int, Candidat> */
     public function getCandidats(): Collection { return $this->candidats; }
 
-    // Setters
     public function setTitle(?string $title): self { $this->title = $title; return $this; }
     public function setDepartement(?string $departement): self { $this->departement = $departement; return $this; }
     public function setEmployeeType(?string $employeeType): self { $this->employeeType = $employeeType; return $this; }

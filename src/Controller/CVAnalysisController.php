@@ -27,8 +27,11 @@ class CVAnalysisController extends AbstractController
     #[Route('/recruitment/cv-analyze', name: 'app_cv_analyze')]
     public function index(JobpositionRepository $jobRepo): Response
     {
+        // Utiliser findBy avec un tri et une limite pour éviter le Find All
+        $jobs = $jobRepo->findBy([], ['postedAt' => 'DESC'], 100);
+
         return $this->render('recruitment/upload_cv.html.twig', [
-            'jobs' => $jobRepo->findAll(),
+            'jobs' => $jobs,
         ]);
     }
 

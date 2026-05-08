@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Serializer\Annotation\Ignore;
 
 #[ORM\Entity]
 #[ORM\Table(name: "user_account")]
@@ -18,7 +19,7 @@ class UserAccount implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", name: "userid")]
-    /** @phpstan-ignore property.unusedType */  // Doctrine assigne automatiquement l'ID
+    /** @phpstan-ignore property.unusedType */
     private ?int $userId = null;
 
     #[ORM\Column(type: "string", length: 255, name: "username")]
@@ -32,6 +33,7 @@ class UserAccount implements UserInterface, PasswordAuthenticatedUserInterface
     private string $email = '';
 
     #[ORM\Column(type: "string", length: 255, name: "passwordHash")]
+    #[Ignore]
     private ?string $passwordHash = null;
 
     #[ORM\Column(type: "string", length: 50, name: "role")]
@@ -52,10 +54,8 @@ class UserAccount implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: "string", length: 255, nullable: true, name: "face_image_path")]
     private ?string $faceImagePath = null;
 
-    #[ORM\OneToOne(mappedBy: "userAccount", cascade: ["persist", "remove"])]
+    #[ORM\OneToOne(mappedBy: "userAccount", cascade: ["persist"])]
     private ?UserSetting $userSetting = null;
-
-    // ─── Relations ──────────────────────────────────────────────────
 
     /**
      * @var Collection<int, \App\Entity\Salaire>
@@ -66,17 +66,23 @@ class UserAccount implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var Collection<int, \App\Entity\PasswordResetToken>
      */
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: \App\Entity\PasswordResetToken::class)]
+    #[ORM\OneToMany(mappedBy: 'userAccount', targetEntity: \App\Entity\PasswordResetToken::class)]
     private Collection $passwordResetTokens;
 
     /**
      * @var Collection<int, \App\Entity\Skill>
      */
     #[ORM\ManyToMany(targetEntity: \App\Entity\Skill::class, inversedBy: 'users')]
-    #[ORM\JoinTable(name: 'user_skill')]
+    #[ORM\JoinTable(
+        name: 'user_skill',
+        joinColumns: [
+            new ORM\JoinColumn(name: 'user_id', referencedColumnName: 'userid')
+        ],
+        inverseJoinColumns: [
+            new ORM\JoinColumn(name: 'skill_id', referencedColumnName: 'id')
+        ]
+    )]
     private Collection $skills;
-
-    // ─── Constructor ────────────────────────────────────────────────
 
     public function __construct()
     {
@@ -87,127 +93,35 @@ class UserAccount implements UserInterface, PasswordAuthenticatedUserInterface
         $this->skills = new ArrayCollection();
     }
 
-    // ─── Getters / Setters ──────────────────────────────────────────
-
-    public function getUserId(): ?int
-    {
-        return $this->userId;
-    }
-
-    public function getUsername(): string
-    {
-        return $this->username;
-    }
-
-    public function setUsername(string $username): self
-    {
-        $this->username = $username;
-        return $this;
-    }
-
-    public function getEmail(): string
-    {
-        return $this->email;
-    }
-
-    public function setEmail(string $email): self
-    {
-        $this->email = $email;
-        return $this;
-    }
-
-    public function getPasswordHash(): ?string
-    {
-        return $this->passwordHash;
-    }
-
+    public function getUserId(): ?int { return $this->userId; }
+    public function getUsername(): string { return $this->username; }
+    public function setUsername(string $username): self { $this->username = $username; return $this; }
+    public function getEmail(): string { return $this->email; }
+    public function setEmail(string $email): self { $this->email = $email; return $this; }
+    public function getPasswordHash(): ?string { return $this->passwordHash; }
     public function setPasswordHash(string $passwordHash): self
     {
         $this->passwordHash = $passwordHash;
         return $this;
     }
-
-    public function getRole(): string
-    {
-        return $this->role;
-    }
-
-    public function setRole(string $role): self
-    {
-        $this->role = $role;
-        return $this;
-    }
-
-    public function getIsActive(): bool
-    {
-        return $this->isActive;
-    }
-
-    public function setIsActive(bool $isActive): self
-    {
-        $this->isActive = $isActive;
-        return $this;
-    }
-
-    public function getLastLogin(): ?\DateTimeInterface
-    {
-        return $this->lastLogin;
-    }
-
-    public function setLastLogin(?\DateTimeInterface $lastLogin): self
-    {
-        $this->lastLogin = $lastLogin;
-        return $this;
-    }
-
-    public function getAccountCreatedDate(): ?\DateTimeInterface
-    {
-        return $this->accountCreatedDate;
-    }
-
-    public function getAccountStatus(): string
-    {
-        return $this->accountStatus;
-    }
-
-    public function setAccountStatus(string $accountStatus): self
-    {
-        $this->accountStatus = $accountStatus;
-        return $this;
-    }
-
-    public function getFaceImagePath(): ?string
-    {
-        return $this->faceImagePath;
-    }
-
-    public function setFaceImagePath(?string $faceImagePath): self
-    {
-        $this->faceImagePath = $faceImagePath;
-        return $this;
-    }
-
-    public function getUserSetting(): ?UserSetting
-    {
-        return $this->userSetting;
-    }
-
-    public function setUserSetting(?UserSetting $userSetting): self
-    {
-        $this->userSetting = $userSetting;
-        return $this;
-    }
-
-    // ─── Skills ────────────────────────────────────────────────────
+    public function getRole(): string { return $this->role; }
+    public function setRole(string $role): self { $this->role = $role; return $this; }
+    public function getIsActive(): bool { return $this->isActive; }
+    public function setIsActive(bool $isActive): self { $this->isActive = $isActive; return $this; }
+    public function getLastLogin(): ?\DateTimeInterface { return $this->lastLogin; }
+    public function setLastLogin(?\DateTimeInterface $lastLogin): self { $this->lastLogin = $lastLogin; return $this; }
+    public function getAccountCreatedDate(): ?\DateTimeInterface { return $this->accountCreatedDate; }
+    public function getAccountStatus(): string { return $this->accountStatus; }
+    public function setAccountStatus(string $accountStatus): self { $this->accountStatus = $accountStatus; return $this; }
+    public function getFaceImagePath(): ?string { return $this->faceImagePath; }
+    public function setFaceImagePath(?string $faceImagePath): self { $this->faceImagePath = $faceImagePath; return $this; }
+    public function getUserSetting(): ?UserSetting { return $this->userSetting; }
+    public function setUserSetting(?UserSetting $userSetting): self { $this->userSetting = $userSetting; return $this; }
 
     /**
      * @return Collection<int, \App\Entity\Skill>
      */
-    public function getSkills(): Collection
-    {
-        return $this->skills;
-    }
-
+    public function getSkills(): Collection { return $this->skills; }
     public function addSkill(\App\Entity\Skill $skill): self
     {
         if (!$this->skills->contains($skill)) {
@@ -216,7 +130,6 @@ class UserAccount implements UserInterface, PasswordAuthenticatedUserInterface
         }
         return $this;
     }
-
     public function removeSkill(\App\Entity\Skill $skill): self
     {
         if ($this->skills->removeElement($skill)) {
@@ -225,16 +138,10 @@ class UserAccount implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    // ─── Salaires ──────────────────────────────────────────────────
-
     /**
      * @return Collection<int, \App\Entity\Salaire>
      */
-    public function getSalaires(): Collection
-    {
-        return $this->salaires;
-    }
-
+    public function getSalaires(): Collection { return $this->salaires; }
     public function addSalaire(\App\Entity\Salaire $salaire): self
     {
         if (!$this->salaires->contains($salaire)) {
@@ -243,11 +150,9 @@ class UserAccount implements UserInterface, PasswordAuthenticatedUserInterface
         }
         return $this;
     }
-
     public function removeSalaire(\App\Entity\Salaire $salaire): self
     {
         if ($this->salaires->removeElement($salaire)) {
-            // set the owning side to null (unless already changed)
             if ($salaire->getUser() === $this) {
                 $salaire->setUser(null);
             }
@@ -255,42 +160,29 @@ class UserAccount implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    // ─── PasswordResetTokens ───────────────────────────────────────
-
     /**
      * @return Collection<int, \App\Entity\PasswordResetToken>
      */
-    public function getPasswordResetTokens(): Collection
-    {
-        return $this->passwordResetTokens;
-    }
-
+    public function getPasswordResetTokens(): Collection { return $this->passwordResetTokens; }
     public function addPasswordResetToken(\App\Entity\PasswordResetToken $token): self
     {
         if (!$this->passwordResetTokens->contains($token)) {
             $this->passwordResetTokens->add($token);
-            $token->setUser($this);
+            $token->setUserAccount($this);
         }
         return $this;
     }
-
     public function removePasswordResetToken(\App\Entity\PasswordResetToken $token): self
     {
         if ($this->passwordResetTokens->removeElement($token)) {
-            if ($token->getUser() === $this) {
-                $token->setUser(null);
+            if ($token->getUserAccount() === $this) {
+                $token->setUserAccount(null);
             }
         }
         return $this;
     }
 
-    // ─── UserInterface ─────────────────────────────────────────────
-
-    public function getUserIdentifier(): string
-    {
-        return $this->username; // username est non-nullable désormais
-    }
-
+    public function getUserIdentifier(): string { return $this->username; }
     /**
      * @return list<string>
      */
@@ -302,19 +194,7 @@ class UserAccount implements UserInterface, PasswordAuthenticatedUserInterface
             default          => ['ROLE_USER'],
         };
     }
-
-    public function getPassword(): ?string
-    {
-        return $this->passwordHash;
-    }
-
-    public function getSalt(): ?string
-    {
-        return null;
-    }
-
-    public function eraseCredentials(): void
-    {
-        // Clear any sensitive data
-    }
+    public function getPassword(): ?string { return $this->passwordHash; }
+    public function getSalt(): ?string { return null; }
+    public function eraseCredentials(): void {}
 }

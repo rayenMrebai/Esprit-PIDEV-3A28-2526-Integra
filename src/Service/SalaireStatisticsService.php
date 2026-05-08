@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Service;
 
 use App\Repository\SalaireRepository;
@@ -20,7 +22,6 @@ class SalaireStatisticsService
 
         $totalCount = count($salaires);
 
-        // ── Tous statuts pour les compteurs ──
         $salairesPayes   = array_values(array_filter($salaires, fn($s) => $s->getStatus() === 'PAYÉ'));
         $salairesEnCours = array_values(array_filter($salaires, fn($s) => $s->getStatus() === 'EN_COURS'));
         $salairesCreed   = array_values(array_filter($salaires, fn($s) => $s->getStatus() === 'CREÉ'));
@@ -29,57 +30,40 @@ class SalaireStatisticsService
         $enCoursCount = count($salairesEnCours);
         $creeCount    = count($salairesCreed);
 
-        // ── Montants sur TOUS les salaires pour les KPI ──
-        $amounts = array_map(fn($s) => $s->getTotalAmount(), $salaires);
-        $bonuses = array_map(fn($s) => $s->getBonusAmount(), $salaires);
+        // Conversion des montants en float
+        $amounts = array_map(fn($s) => (float) $s->getTotalAmount(), $salaires);
+        $bonuses = array_map(fn($s) => (float) $s->getBonusAmount(), $salaires);
 
-        // ── Montants PAYÉS pour total versé réel ──
         $amountsPayes = count($salairesPayes) > 0
-            ? array_map(fn($s) => $s->getTotalAmount(), $salairesPayes)
+            ? array_map(fn($s) => (float) $s->getTotalAmount(), $salairesPayes)
             : [];
 
         return [
             'totalCount'     => $totalCount,
-
-            // Moyenne sur TOUS (sinon 0 si aucun payé)
             'averageSalary'  => array_sum($amounts) / $totalCount,
-
-            // Total versé = PAYÉS uniquement (0 si aucun payé)
             'totalAmount'    => array_sum($amountsPayes),
-
-            // Max/Min sur TOUS
             'maxSalary'      => max($amounts),
             'minSalary'      => min($amounts),
-
             'totalBonus'     => array_sum($bonuses),
             'averageBonus'   => array_sum($bonuses) / $totalCount,
-
             'paidCount'      => $paidCount,
             'enCoursCount'   => $enCoursCount,
             'creeCount'      => $creeCount,
             'paidPercentage' => ($paidCount / $totalCount) * 100,
-
-            // ✅ Graphique et prédiction sur TOUS les salaires
             'monthlyData'    => $this->getMonthlyData($salaires),
             'prediction'     => $this->getLinearPrediction($salaires),
-
-            // Top 5 sur TOUS
             'topEmployees'   => $this->getTopEmployees($salaires),
         ];
     }
 
-    // ─────────────────────────────────────────────
-    // Moyenne des salaires par mois — TOUS statuts
-    // ─────────────────────────────────────────────
     private function getMonthlyData(array $salaires): array
     {
         $grouped = [];
-
         foreach ($salaires as $s) {
             $date = $s->getDatePaiement();
             if (!$date) continue;
             $key = $date->format('Y-m');
-            $grouped[$key][] = $s->getTotalAmount();
+            $grouped[$key][] = (float) $s->getTotalAmount();
         }
 
         if (empty($grouped)) {
@@ -90,9 +74,12 @@ class SalaireStatisticsService
 
         $labels = [];
         $data   = [];
-
         foreach ($grouped as $yearMonth => $vals) {
-            $dt       = \DateTime::createFromFormat('Y-m', $yearMonth);
+            $dt = \DateTime::createFromFormat('Y-m', $yearMonth);
+            // Si la création échoue, on ignore
+            if (!$dt) {
+                continue;
+            }
             $labels[] = $dt->format('M Y');
             $data[]   = round(array_sum($vals) / count($vals), 2);
         }
@@ -100,9 +87,6 @@ class SalaireStatisticsService
         return ['labels' => $labels, 'data' => $data];
     }
 
-    // ─────────────────────────────────────────────
-    // Régression linéaire — prédiction 3 mois
-    // ─────────────────────────────────────────────
     private function getLinearPrediction(array $salaires): array
     {
         $monthly = $this->getMonthlyData($salaires);
@@ -122,15 +106,11 @@ class SalaireStatisticsService
         [$a, $b] = $this->linearRegression($xs, $ys);
         $r2      = $this->calculateR2($xs, $ys, $a, $b);
 
-        // Prédire les 3 prochains mois
         $predictions = [];
-
-        // Retrouver la dernière date à partir du dernier label
         $lastLabel = end($monthly['labels']);
-        $lastDate  = \DateTime::createFromFormat('M Y', $lastLabel);
-
+        // Récupérer la dernière date
+        $lastDate = \DateTime::createFromFormat('M Y', $lastLabel);
         if (!$lastDate) {
-            // Fallback si le format échoue
             $lastDate = new \DateTime();
         }
 
@@ -138,8 +118,6 @@ class SalaireStatisticsService
             $futureDate   = clone $lastDate;
             $futureDate->modify("+{$i} month");
             $predictedVal = $a * ($n - 1 + $i) + $b;
-
-            // ✅ Ne jamais retourner une valeur négative
             $predictedVal = max(0, round($predictedVal, 2));
 
             $predictions[] = [
@@ -156,9 +134,6 @@ class SalaireStatisticsService
         ];
     }
 
-    // ─────────────────────────────────────────────
-    // Calcul régression linéaire y = ax + b
-    // ─────────────────────────────────────────────
     private function linearRegression(array $xs, array $ys): array
     {
         $n     = count($xs);
@@ -173,7 +148,6 @@ class SalaireStatisticsService
         }
 
         $denom = ($n * $sumX2 - $sumX * $sumX);
-
         if ($denom == 0) {
             return [0, $n > 0 ? $sumY / $n : 0];
         }
@@ -184,9 +158,6 @@ class SalaireStatisticsService
         return [$a, $b];
     }
 
-    // ─────────────────────────────────────────────
-    // Coefficient de détermination R²
-    // ─────────────────────────────────────────────
     private function calculateR2(array $xs, array $ys, float $a, float $b): float
     {
         $n     = count($ys);
@@ -201,21 +172,18 @@ class SalaireStatisticsService
             $residualSS += pow($ys[$i] - $predicted, 2);
         }
 
-        if ($totalSS == 0) return 1; // Toutes les valeurs identiques = fit parfait
-
+        if ($totalSS == 0) return 1;
         return max(0, min(1, 1 - ($residualSS / $totalSS)));
     }
 
-    // ─────────────────────────────────────────────
-    // Top 5 employés par salaire moyen
-    // ─────────────────────────────────────────────
     private function getTopEmployees(array $salaires): array
     {
         $byEmployee = [];
-
         foreach ($salaires as $s) {
-            $name = $s->getUser()->getUsername();
-            $byEmployee[$name][] = $s->getTotalAmount();
+            $user = $s->getUser();
+            if (!$user) continue;
+            $name = $user->getUsername();
+            $byEmployee[$name][] = (float) $s->getTotalAmount();
         }
 
         $averages = [];
@@ -224,13 +192,9 @@ class SalaireStatisticsService
         }
 
         arsort($averages);
-
         return array_slice($averages, 0, 5, true);
     }
 
-    // ─────────────────────────────────────────────
-    // Stats vides si aucun salaire
-    // ─────────────────────────────────────────────
     private function emptyStats(): array
     {
         return [

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Entity\BonusRule;
@@ -45,7 +47,6 @@ class BonusRuleController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // ✅ getSalaire() peut être null → vérification explicite
             $linkedSalaire = $rule->getSalaire();
             if ($linkedSalaire instanceof Salaire && $linkedSalaire->getStatus() === 'PAYÉ') {
                 $this->addFlash('error', 'Impossible d\'ajouter une règle à un salaire payé.');
@@ -54,15 +55,17 @@ class BonusRuleController extends AbstractController
 
             $rule->recalculateBonus();
 
-            if ($rule->getBonus() < 0) {
+            // Le bonus est maintenant une string, on vérifie en float
+            if ((float) $rule->getBonus() < 0) {
                 $this->addFlash('error', 'Le bonus calculé ne peut pas être négatif.');
                 return $this->render('backoffice/salaires/bonus/add.html.twig', [
                     'form' => $form->createView(),
                 ]);
             }
 
-            $rule->setCreatedAt(new \DateTime());
-            $rule->setUpdatedAt(new \DateTime());
+            // Utilisation de DateTimeImmutable
+            $rule->setCreatedAt(new \DateTimeImmutable());
+            $rule->setUpdatedAt(new \DateTimeImmutable());
             $em->persist($rule);
             $em->flush();
 
@@ -86,7 +89,6 @@ class BonusRuleController extends AbstractController
             return $this->redirectToRoute('app_backoffice_salaires_index');
         }
 
-        // ✅ Vérification null avant appel méthode
         $salaire = $rule->getSalaire();
         if (!$salaire instanceof Salaire) {
             $this->addFlash('error', 'Salaire associé introuvable.');
@@ -104,26 +106,26 @@ class BonusRuleController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $rule->recalculateBonus();
 
-            if ($rule->getBonus() < 0) {
+            if ((float) $rule->getBonus() < 0) {
                 $this->addFlash('error', 'Le bonus calculé ne peut pas être négatif.');
                 return $this->render('backoffice/salaires/bonus/editRule.html.twig', [
                     'form' => $form->createView(),
                 ]);
             }
 
-            $rule->setUpdatedAt(new \DateTime());
+            $rule->setUpdatedAt(new \DateTimeImmutable());
 
             if ($rule->getStatus() === 'ACTIVE') {
                 $totalBonus = 0.0;
                 foreach ($salaire->getBonusRules() as $r) {
                     if ($r->getStatus() === 'ACTIVE') {
-                        $totalBonus += $r->getBonus();
+                        $totalBonus += (float) $r->getBonus();
                     }
                 }
-                $salaire->setBonusAmount($totalBonus);
-                $baseAmount = $salaire->getBaseAmount();
-                // ✅ baseAmount peut être null selon l'entité
-                $salaire->setTotalAmount(($baseAmount ?? 0.0) + $totalBonus);
+                // baseAmount est string, conversion
+                $baseAmount = (float) $salaire->getBaseAmount();
+                $salaire->setBonusAmount(number_format($totalBonus, 2, '.', ''));
+                $salaire->setTotalAmount(number_format($baseAmount + $totalBonus, 2, '.', ''));
             }
 
             $em->flush();
@@ -142,7 +144,6 @@ class BonusRuleController extends AbstractController
         BonusRule $rule,
         EntityManagerInterface $em
     ): Response {
-        // ✅ Cast string pour isCsrfTokenValid
         $token = (string) $request->request->get('_token');
         if (!$this->isCsrfTokenValid('delete' . $rule->getId(), $token)) {
             $this->addFlash('error', 'Token de sécurité invalide.');
@@ -154,7 +155,6 @@ class BonusRuleController extends AbstractController
             return $this->redirectToRoute('app_backoffice_salaires_index');
         }
 
-        // ✅ Vérification null
         $salaire = $rule->getSalaire();
         if ($salaire instanceof Salaire && $salaire->getStatus() === 'PAYÉ') {
             $this->addFlash('error', 'Impossible de supprimer une règle d\'un salaire payé.');

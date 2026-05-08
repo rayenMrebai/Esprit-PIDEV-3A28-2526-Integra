@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use App\Repository\CandidatRepository;
@@ -13,14 +15,14 @@ class Candidat
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(name: 'id', type: 'integer')]
-    private int $id = 0;                     // ← int au lieu de ?int
+    private int $id = 0;
 
-    #[ORM\Column(name: 'firstName', type: 'string', length: 255)]
+    #[ORM\Column(name: 'first_name', type: 'string', length: 255)]
     #[Assert\NotBlank(message: "Le prénom est obligatoire.")]
     #[Assert\Length(min: 2, max: 50)]
     private ?string $firstName = null;
 
-    #[ORM\Column(name: 'lastName', type: 'string', length: 255)]
+    #[ORM\Column(name: 'last_name', type: 'string', length: 255)]
     #[Assert\NotBlank(message: "Le nom est obligatoire.")]
     #[Assert\Length(min: 2, max: 50)]
     private ?string $lastName = null;
@@ -35,7 +37,7 @@ class Candidat
     #[Assert\Type(type: 'integer', message: "Le téléphone doit être un nombre.")]
     private ?int $phone = null;
 
-    #[ORM\Column(name: 'educationLevel', type: 'string', length: 255)]
+    #[ORM\Column(name: 'education_level', type: 'string', length: 255)]
     #[Assert\NotBlank(message: "Le niveau d'études est obligatoire.")]
     private ?string $educationLevel = null;
 
@@ -48,10 +50,10 @@ class Candidat
     private ?string $status = null;
 
     #[ORM\ManyToOne(targetEntity: Jobposition::class, inversedBy: 'candidats')]
-    #[ORM\JoinColumn(name: 'idJob', referencedColumnName: 'idJob', nullable: true)]
+    #[ORM\JoinColumn(name: 'jobposition_id', referencedColumnName: 'idJob', nullable: true)]
     private ?Jobposition $jobposition = null;
 
-    // Getters
+    // Getters & setters
     public function getId(): int { return $this->id; }
     public function getFirstName(): ?string { return $this->firstName; }
     public function getLastName(): ?string { return $this->lastName; }
@@ -62,7 +64,6 @@ class Candidat
     public function getStatus(): ?string { return $this->status; }
     public function getJobposition(): ?Jobposition { return $this->jobposition; }
 
-    // Setters
     public function setFirstName(?string $firstName): self { $this->firstName = $firstName; return $this; }
     public function setLastName(?string $lastName): self { $this->lastName = $lastName; return $this; }
     public function setEmail(?string $email): self { $this->email = $email; return $this; }

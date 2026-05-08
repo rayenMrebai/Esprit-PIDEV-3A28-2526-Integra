@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Service;
 
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -9,18 +11,15 @@ class HuggingFaceService
     private HttpClientInterface $httpClient;
     private string $apiToken;
 
-    public function __construct(HttpClientInterface $httpClient, string $apiToken)
+    public function __construct(HttpClientInterface $httpClient, string $HF_TOKEN)
     {
         $this->httpClient = $httpClient;
-        $this->apiToken = $apiToken;
+        $this->apiToken   = $HF_TOKEN;
     }
 
-    /**
-     * @throws \Exception
-     */
     public function generateAdvice(string $prompt): string
     {
-        $url = 'https://router.huggingface.co/v1/chat/completions';
+        $url   = 'https://router.huggingface.co/v1/chat/completions';
         $model = 'meta-llama/Llama-3.1-8B-Instruct:cerebras';
 
         $messages = [
@@ -32,27 +31,27 @@ class HuggingFaceService
             $response = $this->httpClient->request('POST', $url, [
                 'headers' => [
                     'Authorization' => 'Bearer ' . $this->apiToken,
-                    'Content-Type' => 'application/json',
+                    'Content-Type'  => 'application/json',
                 ],
                 'json' => [
-                    'model' => $model,
-                    'messages' => $messages,
-                    'max_tokens' => 150,
+                    'model'       => $model,
+                    'messages'    => $messages,
+                    'max_tokens'  => 150,
                     'temperature' => 0.7,
                 ],
                 'timeout' => 30,
             ]);
 
             $statusCode = $response->getStatusCode();
-            $data = $response->toArray(false);
+            $data       = $response->toArray(false);
 
             if ($statusCode !== 200) {
                 $errorMsg = $this->extractErrorMessage($data);
                 throw new \Exception("HTTP $statusCode – $errorMsg");
             }
 
-            if (is_array($data) && isset($data['choices'][0]['message']['content'])) {
-                return trim((string)$data['choices'][0]['message']['content']);
+            if (isset($data['choices'][0]['message']['content'])) {
+                return trim((string) $data['choices'][0]['message']['content']);
             }
 
             throw new \Exception("Unexpected response format: " . json_encode($data));
@@ -61,12 +60,10 @@ class HuggingFaceService
         }
     }
 
-    /**
-     * @param array<mixed>|string $data
-     */
-    private function extractErrorMessage($data): string
+    /** @param array<string, mixed> $data */
+    private function extractErrorMessage(array $data): string
     {
-        if (is_array($data) && isset($data['error']['message']) && is_string($data['error']['message'])) {
+        if (isset($data['error']['message']) && is_string($data['error']['message'])) {
             return $data['error']['message'];
         }
         return json_encode($data) ?: 'Unknown error';

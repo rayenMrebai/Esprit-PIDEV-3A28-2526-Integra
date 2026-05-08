@@ -51,9 +51,10 @@ class AIAssistantController extends AbstractController
         $uniqueRoles  = array_unique($roles);
         $avgAlloc     = $nbEmployees > 0 ? (int) round($totalAlloc / $nbEmployees) : 0;
 
-        $projectBudget = $project->getBudget() ?? 0.0;
-        $budgetPerEmp  = $nbEmployees > 0
-            ? number_format($projectBudget / $nbEmployees, 2)
+        // Le budget est une chaîne décimale, on le convertit en float pour les calculs
+        $budgetFloat  = (float) ($project->getBudget() ?: '0');
+        $budgetPerEmp = $nbEmployees > 0
+            ? number_format($budgetFloat / $nbEmployees, 2)
             : 'N/A';
 
         $duration = '';
@@ -68,7 +69,7 @@ class AIAssistantController extends AbstractController
         $context .= "Début : "     . ($project->getStartDate()?->format('d/m/Y') ?? 'N/A') . "\n";
         $context .= "Fin : "       . ($project->getEndDate()?->format('d/m/Y')   ?? 'N/A') . "\n";
         $context .= "Durée : "     . ($duration ?: 'N/A')  . "\n";
-        $context .= "Budget : "    . number_format($projectBudget, 2) . " TND\n";
+        $context .= "Budget : "    . number_format($budgetFloat, 2) . " TND\n";
         $context .= "Équipe : "    . $nbEmployees . " employé(s)\n";
 
         if ($nbEmployees > 0) {
@@ -110,7 +111,6 @@ PROMPT;
 
         try {
             $summary = $ollama->generate($prompt);
-            // Nettoyage : on utilise trim() sur la chaîne retournée (jamais null car on a une réponse)
             $clean = trim($summary);
             $clean = preg_replace('/^(Paragraphe analytique\s*:?\s*|Voici\s.*?:\s*)/i', '', $clean);
             return $this->json(['summary' => trim($clean)]);
@@ -118,6 +118,9 @@ PROMPT;
             return $this->json(['summary' => 'Erreur : ' . $e->getMessage()], 500);
         }
     }
+
+    // ... les autres méthodes improveDescription, translate, replaceDescription, transcribeAudio restent identiques
+    // Je te les donne pour être complet :
 
     #[Route('/improve-description/{projectId}', name: 'ai_improve_description', methods: ['POST'])]
     public function improveDescription(
@@ -173,7 +176,7 @@ PROMPT;
 
         try {
             $result = $ollama->generate($prompt);
-            $result = trim($result); // result est string
+            $result = trim($result);
 
             $lines = explode("\n", $result);
             $clean = '';
@@ -198,7 +201,6 @@ PROMPT;
         Request $request,
         EntityManagerInterface $em
     ): Response {
-        /** @var string|int|float|bool|null $newDescRaw */
         $newDescRaw = $request->request->get('description')
             ?? $request->getPayload()->get('description');
 
