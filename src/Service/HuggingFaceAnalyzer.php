@@ -7,11 +7,11 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class HuggingFaceAnalyzer
 {
-    private $httpClient;
-    private $token;
-    private $url;
-    private $model;
-    private $logger;
+    private HttpClientInterface $httpClient;
+    private string $token;
+    private string $url;
+    private string $model;
+    private LoggerInterface $logger;
 
     public function __construct(HttpClientInterface $httpClient, LoggerInterface $logger, string $token, string $url, string $model)
     {
@@ -24,6 +24,7 @@ class HuggingFaceAnalyzer
 
     /**
      * Appelle l'API Hugging Face (routeur OpenAI-compatible) pour analyser un CV.
+     * @return array<string, string>
      */
     public function analyzeCV(string $cvText, string $jobDescription): array
     {
@@ -145,6 +146,7 @@ class HuggingFaceAnalyzer
         return '';
     }
 
+    /** @return array<string, string> */
     private function fallbackResult(string $rawText): array
     {
         $rec = (stripos($rawText, 'garder') !== false) ? 'garder' : ((stripos($rawText, 'rejeter') !== false) ? 'rejeter' : 'indéterminé');
@@ -155,6 +157,7 @@ class HuggingFaceAnalyzer
         ];
     }
 
+    /** @return array<string, string> */
     private function errorResult(string $reason): array
     {
         return [

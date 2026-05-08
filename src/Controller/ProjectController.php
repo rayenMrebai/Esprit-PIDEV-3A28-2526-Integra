@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Entity\Project;
@@ -12,7 +14,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use App\Service\ProjectExcelExportService;       // ← Changement ici
+use App\Service\ProjectExcelExportService;
 use App\Repository\UserAccountRepository;
 
 #[Route('/project')]
@@ -42,11 +44,13 @@ final class ProjectController extends AbstractController
             $queryBuilder->andWhere('p.status = :status')
                 ->setParameter('status', $status);
         }
-        if ($startFrom) {
+        // On s'assure que $startFrom est une chaîne non vide avant de l'utiliser
+        if ($startFrom && is_string($startFrom)) {
             $queryBuilder->andWhere('p.startDate >= :startFrom')
                 ->setParameter('startFrom', new \DateTime($startFrom));
         }
-        if ($startTo) {
+        // Idem pour $startTo
+        if ($startTo && is_string($startTo)) {
             $queryBuilder->andWhere('p.startDate <= :startTo')
                 ->setParameter('startTo', new \DateTime($startTo));
         }
@@ -176,5 +180,4 @@ final class ProjectController extends AbstractController
 
         return $excelService->exportSingleProject($project, $assignments, $employees);
     }
-
 }

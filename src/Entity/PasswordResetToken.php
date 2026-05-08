@@ -1,11 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-
 use App\Repository\PasswordResetTokenRepository;
 
 #[ORM\Entity(repositoryClass: PasswordResetTokenRepository::class)]
@@ -15,22 +14,32 @@ class PasswordResetToken
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
+    /** @phpstan-ignore property.unusedType */
     private ?int $id = null;
+
+    #[ORM\ManyToOne(targetEntity: UserAccount::class, inversedBy: 'passwordResetTokens')]
+    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'userid')]
+    private ?UserAccount $userAccount = null;
+
+    #[ORM\Column(type: 'string', nullable: false)]
+    private string $token;
+
+    #[ORM\Column(type: 'datetime', nullable: false)]
+    private \DateTimeInterface $expiry_date;
+
+    #[ORM\Column(type: 'boolean', nullable: true)]
+    private ?bool $used = null;
+
+    public function __construct()
+    {
+        $this->token = '';
+        $this->expiry_date = new \DateTime();
+    }
 
     public function getId(): ?int
     {
         return $this->id;
     }
-
-    public function setId(int $id): self
-    {
-        $this->id = $id;
-        return $this;
-    }
-
-    #[ORM\ManyToOne(targetEntity: UserAccount::class, inversedBy: 'passwordResetTokens')]
-#[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'userid')]
-    private ?UserAccount $userAccount = null;
 
     public function getUserAccount(): ?UserAccount
     {
@@ -43,10 +52,7 @@ class PasswordResetToken
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: false)]
-    private ?string $token = null;
-
-    public function getToken(): ?string
+    public function getToken(): string
     {
         return $this->token;
     }
@@ -57,22 +63,16 @@ class PasswordResetToken
         return $this;
     }
 
-    #[ORM\Column(type: 'datetime', nullable: false)]
-    private ?\DateTimeInterface $expiry_date = null;
-
-    public function getExpiry_date(): ?\DateTimeInterface
+    public function getExpiryDate(): \DateTimeInterface
     {
         return $this->expiry_date;
     }
 
-    public function setExpiry_date(\DateTimeInterface $expiry_date): self
+    public function setExpiryDate(\DateTimeInterface $expiry_date): self
     {
         $this->expiry_date = $expiry_date;
         return $this;
     }
-
-    #[ORM\Column(type: 'boolean', nullable: true)]
-    private ?bool $used = null;
 
     public function isUsed(): ?bool
     {
@@ -84,17 +84,4 @@ class PasswordResetToken
         $this->used = $used;
         return $this;
     }
-
-    public function getExpiryDate(): ?\DateTime
-    {
-        return $this->expiry_date;
-    }
-
-    public function setExpiryDate(\DateTime $expiry_date): static
-    {
-        $this->expiry_date = $expiry_date;
-
-        return $this;
-    }
-
 }

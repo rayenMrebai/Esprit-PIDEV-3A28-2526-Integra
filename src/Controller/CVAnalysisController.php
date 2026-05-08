@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Entity\Candidat;
@@ -39,8 +41,12 @@ class CVAnalysisController extends AbstractController
             return $this->json(['error' => 'Fichier PDF requis'], 400);
         }
 
-        $dir = $this->getParameter('kernel.project_dir') . '/var/tmp/';
-        if (!is_dir($dir)) mkdir($dir, 0777, true);
+        /** @var string $projectDir */
+        $projectDir = $this->getParameter('kernel.project_dir');
+        $dir = $projectDir . '/var/tmp/';
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
 
         $filename = uniqid() . '.pdf';
         $file->move($dir, $filename);
@@ -51,7 +57,7 @@ class CVAnalysisController extends AbstractController
     #[Route('/recruitment/cv-extract', name: 'app_cv_extract', methods: ['POST'])]
     public function extract(Request $request, PdfTextExtractor $extractor): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
+        $data = json_decode((string) $request->getContent(), true) ?? [];
         $filePath = $data['filePath'] ?? null;
 
         if (!$filePath || !file_exists($filePath)) {
@@ -64,7 +70,7 @@ class CVAnalysisController extends AbstractController
     #[Route('/recruitment/cv-analyze-ai', name: 'app_cv_analyze_ai', methods: ['POST'])]
     public function analyze(Request $request, HuggingFaceAnalyzer $analyzer, JobpositionRepository $jobRepo): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
+        $data = json_decode((string) $request->getContent(), true) ?? [];
         $cvText = $data['text'] ?? '';
         $jobId = $data['jobId'] ?? null;
 
@@ -90,19 +96,23 @@ class CVAnalysisController extends AbstractController
     #[Route('/recruitment/cv-add-rejected-candidate', name: 'app_cv_add_rejected_candidate', methods: ['POST'])]
     public function addRejectedCandidate(Request $request, EntityManagerInterface $em, JobpositionRepository $jobRepo): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
+        $data = json_decode((string) $request->getContent(), true) ?? [];
 
         $candidat = new Candidat();
-        $candidat->setFirstName($data['firstName'] ?? '');
-        $candidat->setLastName($data['lastName'] ?? '');
-        $candidat->setEmail($data['email'] ?? '');
-        $candidat->setPhone((int) preg_replace('/\D/', '', $data['phone'] ?? ''));
-        $candidat->setEducationLevel($data['educationLevel'] ?? '');
-        $candidat->setSkills($data['skills'] ?? '');
+        $candidat->setFirstName((string) ($data['firstName'] ?? ''));
+        $candidat->setLastName((string) ($data['lastName'] ?? ''));
+        $candidat->setEmail((string) ($data['email'] ?? ''));
+        $candidat->setPhone((int) preg_replace('/\D/', '', (string) ($data['phone'] ?? '')));
+        $candidat->setEducationLevel((string) ($data['educationLevel'] ?? ''));
+        $candidat->setSkills((string) ($data['skills'] ?? ''));
         $candidat->setStatus('Rejeté');
 
-        if ($job = $jobRepo->find($data['jobId'] ?? null)) {
-            $candidat->setJobposition($job);
+        $jobId = $data['jobId'] ?? null;
+        if ($jobId) {
+            $job = $jobRepo->find($jobId);
+            if ($job) {
+                $candidat->setJobposition($job);
+            }
         }
 
         $em->persist($candidat);
@@ -114,13 +124,13 @@ class CVAnalysisController extends AbstractController
     #[Route('/recruitment/generate-rejection-letter', name: 'app_generate_rejection_letter', methods: ['POST'])]
     public function generateRejectionLetter(Request $request, HuggingFaceAnalyzer $analyzer): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
+        $data = json_decode((string) $request->getContent(), true) ?? [];
 
         $letter = $analyzer->generateRejectionLetter(
-            $data['firstName'] ?? '',
-            $data['lastName'] ?? '',
-            $data['jobTitle'] ?? '',
-            $data['reason'] ?? ''
+            (string) ($data['firstName'] ?? ''),
+            (string) ($data['lastName'] ?? ''),
+            (string) ($data['jobTitle'] ?? ''),
+            (string) ($data['reason'] ?? '')
         );
 
         return $this->json(['letter' => $letter]);
@@ -129,7 +139,8 @@ class CVAnalysisController extends AbstractController
     #[Route('/recruitment/send-rejection-email', name: 'app_send_rejection_email', methods: ['POST'])]
     public function sendRejectionEmail(Request $request, JobpositionRepository $jobRepo): JsonResponse
     {
-        $job = $jobRepo->find(json_decode($request->getContent(), true)['jobId'] ?? null);
+        $data = json_decode((string) $request->getContent(), true) ?? [];
+        $job = $jobRepo->find($data['jobId'] ?? null);
 
         if (!$job) {
             return $this->json(['error' => 'Offre introuvable'], 404);
@@ -149,7 +160,6 @@ class CVAnalysisController extends AbstractController
                 'success' => true,
                 'sent_to' => 'walabentahar0@gmail.com'
             ]);
-
         } catch (\Exception $e) {
             return $this->json(['error' => $e->getMessage()], 500);
         }

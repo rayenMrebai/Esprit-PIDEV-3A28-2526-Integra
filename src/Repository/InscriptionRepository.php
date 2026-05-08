@@ -6,6 +6,8 @@ namespace App\Repository;
 use App\Entity\Inscription;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use App\Entity\UserAccount;
+use App\Entity\Training_program;
 
 /**
  * @extends ServiceEntityRepository<Inscription>
@@ -20,6 +22,9 @@ class InscriptionRepository extends ServiceEntityRepository
     /**
      * Trouve les inscriptions d'un utilisateur
      */
+/**
+ * @return Inscription[]
+ */
     public function findByUser($user): array
     {
         return $this->createQueryBuilder('i')
@@ -33,6 +38,9 @@ class InscriptionRepository extends ServiceEntityRepository
     /**
      * Trouve les inscriptions par statut
      */
+    /**
+ * @return array<int, Inscription>
+ */
     public function findByStatus(string $status): array
     {
         return $this->createQueryBuilder('i')
@@ -46,7 +54,10 @@ class InscriptionRepository extends ServiceEntityRepository
     /**
      * Vérifie si un utilisateur est déjà inscrit à une formation
      */
-    public function findExistingInscription($user, $formation): ?Inscription
+    /**
+ * @return array<int, Inscription>
+ */
+public function findExistingInscription(Training_program $formation,UserAccount $user): ?Inscription
     {
         return $this->createQueryBuilder('i')
             ->andWhere('i.user = :user')

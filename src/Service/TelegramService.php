@@ -7,9 +7,9 @@ use Psr\Log\LoggerInterface;
 
 class TelegramService
 {
-    private $httpClient;
-    private $logger;
-    private $botToken;
+    private HttpClientInterface $httpClient;
+    private LoggerInterface $logger;
+    private string $botToken;
 
     public function __construct(HttpClientInterface $httpClient, LoggerInterface $logger, string $telegramBotToken)
     {

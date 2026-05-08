@@ -65,9 +65,12 @@ public function index(EntityManagerInterface $entityManager, Request $request): 
 
         if ($request->isXmlHttpRequest() && $form->isSubmitted()) {
             $errors = [];
-            foreach ($form->getErrors(true) as $error) {
-                $errors[] = $error->getMessage();
-            }
+foreach ($form->getErrors(true) as $formError) {
+    if ($formError instanceof \Symfony\Component\Form\FormError) {
+        $this->addFlash('error', $formError->getMessage());
+    }
+}
+            
             return $this->json([
                 'success' => false, 
                 'message' => 'Erreur de validation',
@@ -116,9 +119,12 @@ public function index(EntityManagerInterface $entityManager, Request $request): 
 
         if ($request->isXmlHttpRequest() && $form->isSubmitted()) {
             $errors = [];
-            foreach ($form->getErrors(true) as $error) {
-                $errors[] = $error->getMessage();
-            }
+foreach ($form->getErrors(true) as $formError) {
+    if ($formError instanceof \Symfony\Component\Form\FormError) {
+        $this->addFlash('error', $formError->getMessage());
+    }
+}
+        
             return $this->json([
                 'success' => false, 
                 'message' => 'Erreur de validation',

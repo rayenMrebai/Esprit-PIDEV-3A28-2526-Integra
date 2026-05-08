@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Service;
 
 use App\Entity\Project;
@@ -14,6 +16,10 @@ class EmployeeMatchingService
         private ProjectassignmentRepository $assignmentRepo
     ) {}
 
+    /**
+     * @param UserAccount[] $employees
+     * @return array<int, array<string, mixed>>
+     */
     public function rankEmployeesForProject(Project $project, array $employees): array
     {
         $projectProfile = $this->buildProjectProfile($project);
@@ -25,7 +31,6 @@ class EmployeeMatchingService
             $history = $this->assignmentRepo->findBy(['userAccount' => $employee]);
             $currentAllocation = $this->getCurrentAllocation($employee);
 
-            // Exclure les employés surchargés (> 90%)
             if ($currentAllocation > 90.0) {
                 continue;
             }
@@ -36,7 +41,7 @@ class EmployeeMatchingService
             $similarity = $this->hfService->cosineSimilarity($projectVector, $employeeVector);
             $dominantRole = $this->getDominantRole($history);
 
-            $finalScore = $similarity * (1 - $currentAllocation / 100);
+            $finalScore = $similarity * (1.0 - $currentAllocation / 100.0);
 
             $results[] = [
                 'userId'            => $employee->getUserId(),
@@ -72,6 +77,9 @@ class EmployeeMatchingService
         return implode('. ', array_filter($parts));
     }
 
+    /**
+     * @param Projectassignment[] $history
+     */
     private function buildEmployeeProfile(UserAccount $employee, array $history): string
     {
         $parts = ["Employee: " . $employee->getUsername()];
@@ -88,6 +96,9 @@ class EmployeeMatchingService
         return implode('. ', $parts);
     }
 
+    /**
+     * @param Projectassignment[] $history
+     */
     private function getDominantRole(array $history): string
     {
         if (empty($history)) {
@@ -97,10 +108,14 @@ class EmployeeMatchingService
         $roleCounts = [];
         foreach ($history as $assignment) {
             $role = $assignment->getRole();
-            $roleCounts[$role] = ($roleCounts[$role] ?? 0) + 1;
+            if (!isset($roleCounts[$role])) {
+                $roleCounts[$role] = 0;
+            }
+            $roleCounts[$role]++;
         }
 
         arsort($roleCounts);
-        return array_key_first($roleCounts) ?? 'Not assigned';
+        $key = array_key_first($roleCounts);
+        return $key ?? 'Not assigned';
     }
 }

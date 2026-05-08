@@ -19,9 +19,16 @@ class Quiz_result
     #[ORM\JoinColumn(name: "user_id", referencedColumnName: "userid", nullable: false)]
     private ?UserAccount $user = null;
 
-    #[ORM\ManyToOne(targetEntity: Training_program::class)]
-    #[ORM\JoinColumn(name: "training_id", referencedColumnName: "id", nullable: false)]
-    private ?Training_program $training = null;
+#[ORM\ManyToOne(
+    targetEntity: Training_program::class,
+    inversedBy: "quizResults"
+)]
+#[ORM\JoinColumn(
+    name: "training_id",
+    referencedColumnName: "id",
+    nullable: false
+)]
+private ?Training_program $training = null;
 
     #[ORM\Column(type: "integer", nullable: true)]
     private ?int $score = null;
@@ -37,7 +44,9 @@ class Quiz_result
 
     #[ORM\Column(name: "completed_at", type: "datetime", nullable: true)]
     private ?\DateTimeInterface $completedAt = null;
-
+/**
+ * @var array<int, string>
+ */
     #[ORM\Column(type: "json", nullable: true)]
     private ?array $questions = null;
 
@@ -66,7 +75,12 @@ class Quiz_result
 
     public function getCompletedAt(): ?\DateTimeInterface { return $this->completedAt; }
     public function setCompletedAt(?\DateTimeInterface $completedAt): self { $this->completedAt = $completedAt; return $this; }
-
+/**
+ * @return array<int, string>
+ */
     public function getQuestions(): ?array { return $this->questions; }
+    /**
+ * @param array<int, string> $questions
+ */
     public function setQuestions(?array $questions): self { $this->questions = $questions; return $this; }
 }

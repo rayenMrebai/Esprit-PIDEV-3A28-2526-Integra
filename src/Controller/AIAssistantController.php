@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Entity\Project;
@@ -41,29 +43,33 @@ class AIAssistantController extends AbstractController
         foreach ($assignments as $a) {
             $roles[]     = $a->getRole();
             $totalAlloc += $a->getAllocationRate();
-            if ($a->getAllocationRate() > 80) $overloaded++;
+            if ($a->getAllocationRate() > 80) {
+                $overloaded++;
+            }
         }
 
         $uniqueRoles  = array_unique($roles);
-        $avgAlloc     = $nbEmployees > 0 ? round($totalAlloc / $nbEmployees) : 0;
-        $budgetPerEmp = $nbEmployees > 0
-            ? number_format($project->getBudget() / $nbEmployees, 2)
+        $avgAlloc     = $nbEmployees > 0 ? (int) round($totalAlloc / $nbEmployees) : 0;
+
+        $projectBudget = $project->getBudget() ?? 0.0;
+        $budgetPerEmp  = $nbEmployees > 0
+            ? number_format($projectBudget / $nbEmployees, 2)
             : 'N/A';
 
         $duration = '';
         if ($project->getStartDate() && $project->getEndDate()) {
             $days     = $project->getStartDate()->diff($project->getEndDate())->days;
-            $duration = $days . ' jours (' . round($days / 30, 1) . ' mois)';
+            $duration = $days . ' jours (' . round($days / 30.0, 1) . ' mois)';
         }
 
-        $context  = "Nom : "     . $project->getName()   . "\n";
+        $context  = "Nom : "       . $project->getName()   . "\n";
         $context .= "Description : " . ($project->getDescription() ?: 'Non renseignée') . "\n";
-        $context .= "Statut : "  . $project->getStatus() . "\n";
-        $context .= "Début : "   . ($project->getStartDate()?->format('d/m/Y') ?? 'N/A') . "\n";
-        $context .= "Fin : "     . ($project->getEndDate()?->format('d/m/Y')   ?? 'N/A') . "\n";
-        $context .= "Durée : "   . ($duration ?: 'N/A')  . "\n";
-        $context .= "Budget : "  . number_format($project->getBudget(), 2) . " TND\n";
-        $context .= "Équipe : "  . $nbEmployees . " employé(s)\n";
+        $context .= "Statut : "    . $project->getStatus() . "\n";
+        $context .= "Début : "     . ($project->getStartDate()?->format('d/m/Y') ?? 'N/A') . "\n";
+        $context .= "Fin : "       . ($project->getEndDate()?->format('d/m/Y')   ?? 'N/A') . "\n";
+        $context .= "Durée : "     . ($duration ?: 'N/A')  . "\n";
+        $context .= "Budget : "    . number_format($projectBudget, 2) . " TND\n";
+        $context .= "Équipe : "    . $nbEmployees . " employé(s)\n";
 
         if ($nbEmployees > 0) {
             $context .= "Rôles : "               . implode(', ', $uniqueRoles) . "\n";
@@ -74,7 +80,8 @@ class AIAssistantController extends AbstractController
             }
             $context .= "Détail des affectations :\n";
             foreach ($assignments as $a) {
-                $context .= "  • " . ($a->getUserAccount()?->getUsername() ?? 'Inconnu')
+                $username = $a->getUserAccount()?->getUsername() ?? 'Inconnu';
+                $context .= "  • " . $username
                     . " — " . $a->getRole()
                     . " (" . $a->getAllocationRate() . "%)"
                     . ($a->getAssignedFrom() ? " du " . $a->getAssignedFrom()->format('d/m/Y') : '')
@@ -103,8 +110,10 @@ PROMPT;
 
         try {
             $summary = $ollama->generate($prompt);
-            $summary = preg_replace('/^(Paragraphe analytique\s*:?\s*|Voici\s.*?:\s*)/i', '', trim($summary));
-            return $this->json(['summary' => trim($summary)]);
+            // Nettoyage : on utilise trim() sur la chaîne retournée (jamais null car on a une réponse)
+            $clean = trim($summary);
+            $clean = preg_replace('/^(Paragraphe analytique\s*:?\s*|Voici\s.*?:\s*)/i', '', $clean);
+            return $this->json(['summary' => trim($clean)]);
         } catch (\Exception $e) {
             return $this->json(['summary' => 'Erreur : ' . $e->getMessage()], 500);
         }
@@ -116,7 +125,7 @@ PROMPT;
         Project $project,
         OllamaService $ollama
     ): JsonResponse {
-        $currentDesc = trim($project->getDescription() ?: $project->getName());
+        $currentDesc = trim($project->getDescription() ?? $project->getName() ?? '');
 
         $prompt = <<<PROMPT
 Tu es un expert en communication RH. Améliore la description de projet suivante en français.
@@ -136,8 +145,9 @@ PROMPT;
 
         try {
             $improved = $ollama->generate($prompt);
-            $improved = preg_replace('/^(Description améliorée\s*:?\s*|Voici\s.*?:\s*|Bien sûr.*?:\s*)/i', '', trim($improved));
-            return $this->json(['improved' => trim($improved)]);
+            $clean = trim($improved);
+            $clean = preg_replace('/^(Description améliorée\s*:?\s*|Voici\s.*?:\s*|Bien sûr.*?:\s*)/i', '', $clean);
+            return $this->json(['improved' => trim($clean)]);
         } catch (\Exception $e) {
             return $this->json(['improved' => 'Erreur : ' . $e->getMessage()], 500);
         }
@@ -146,11 +156,12 @@ PROMPT;
     #[Route('/translate-text', name: 'ai_translate', methods: ['POST'])]
     public function translate(Request $request, OllamaService $ollama): JsonResponse
     {
-        $data   = json_decode($request->getContent(), true);
-        $text   = $data['text']   ?? $request->getPayload()->get('text', '');
-        $target = $data['target'] ?? $request->getPayload()->get('target', 'fr');
+        /** @var array{text?: string, target?: string} $data */
+        $data   = json_decode((string) $request->getContent(), true) ?? [];
+        $text   = $data['text']   ?? (string) $request->getPayload()->get('text', '');
+        $target = $data['target'] ?? (string) $request->getPayload()->get('target', 'fr');
 
-        if (empty(trim($text))) {
+        if (trim($text) === '') {
             return $this->json(['translated' => '']);
         }
 
@@ -162,8 +173,9 @@ PROMPT;
 
         try {
             $result = $ollama->generate($prompt);
+            $result = trim($result); // result est string
 
-            $lines = explode("\n", trim($result));
+            $lines = explode("\n", $result);
             $clean = '';
             foreach ($lines as $line) {
                 $line = trim($line);
@@ -173,8 +185,7 @@ PROMPT;
                 }
             }
 
-            return $this->json(['translated' => $clean ?: trim($result)]);
-
+            return $this->json(['translated' => $clean !== '' ? $clean : $result]);
         } catch (\Exception $e) {
             return $this->json(['translated' => 'Erreur : ' . $e->getMessage()], 500);
         }
@@ -187,14 +198,19 @@ PROMPT;
         Request $request,
         EntityManagerInterface $em
     ): Response {
-        $newDesc = $request->request->get('description')
+        /** @var string|int|float|bool|null $newDescRaw */
+        $newDescRaw = $request->request->get('description')
             ?? $request->getPayload()->get('description');
 
-        if ($newDesc !== null) {
-            $project->setDescription($newDesc);
-            $em->flush();
-            $this->addFlash('success', '✅ Description mise à jour par l\'IA.');
+        if ($newDescRaw !== null) {
+            $newDesc = (string) $newDescRaw;
+        } else {
+            $newDesc = null;
         }
+
+        $project->setDescription($newDesc);
+        $em->flush();
+        $this->addFlash('success', '✅ Description mise à jour par l\'IA.');
 
         return $this->redirectToRoute('app_project_index');
     }
@@ -207,7 +223,9 @@ PROMPT;
             return $this->json(['text' => '', 'error' => 'Aucun fichier audio'], 400);
         }
 
-        $tmpDir = $this->getParameter('kernel.project_dir') . '/var/';
+        /** @var string $projectDir */
+        $projectDir = $this->getParameter('kernel.project_dir');
+        $tmpDir  = $projectDir . '/var/';
         $tmpName = 'audio_' . uniqid() . '.' . $file->getClientOriginalExtension();
         $tmpPath = $tmpDir . $tmpName;
 

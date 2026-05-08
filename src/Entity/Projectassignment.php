@@ -14,7 +14,7 @@ class Projectassignment
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer', name: 'idAssignment')]
-    private ?int $idAssignment = null;
+    private int $idAssignment = 0;
 
     #[Assert\NotNull(message: "Le projet est obligatoire")]
     #[ORM\ManyToOne(targetEntity: Project::class)]
@@ -78,7 +78,7 @@ class Projectassignment
     }
 
     // Getters et setters
-    public function getIdAssignment(): ?int { return $this->idAssignment; }
+    public function getIdAssignment(): int { return $this->idAssignment; }
 
     public function getProject(): ?Project { return $this->project; }
     public function setProject(?Project $project): self { $this->project = $project; return $this; }
@@ -87,10 +87,10 @@ class Projectassignment
     public function setUserAccount(?UserAccount $userAccount): self { $this->userAccount = $userAccount; return $this; }
 
     public function getRole(): ?string { return $this->role; }
-    public function setRole(?string $role): self { $this->role = $role; return $this; }                    // ✅ ?string
+    public function setRole(?string $role): self { $this->role = $role; return $this; }
 
     public function getAllocationRate(): ?int { return $this->allocationRate; }
-    public function setAllocationRate(?int $allocationRate): self { $this->allocationRate = $allocationRate; return $this; } // ✅ ?int
+    public function setAllocationRate(?int $allocationRate): self { $this->allocationRate = $allocationRate; return $this; }
 
     public function getAssignedFrom(): ?\DateTimeInterface { return $this->assignedFrom; }
     public function setAssignedFrom(?\DateTimeInterface $assignedFrom): self { $this->assignedFrom = $assignedFrom; return $this; }

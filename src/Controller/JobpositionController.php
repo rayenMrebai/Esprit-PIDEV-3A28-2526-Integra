@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Entity\Jobposition;
@@ -71,12 +73,12 @@ final class JobpositionController extends AbstractController
     #[Route('/{idJob}', name: 'app_jobposition_delete', methods: ['POST'])]
     public function delete(Request $request, Jobposition $jobposition, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$jobposition->getIdJob(), $request->request->get('_token'))) {
+        $token = (string) $request->request->get('_token');
+        if ($this->isCsrfTokenValid('delete'.$jobposition->getIdJob(), $token)) {
             $entityManager->remove($jobposition);
             $entityManager->flush();
             $this->addFlash('success', 'Offre supprimée avec succès.');
         }
-        // Redirection vers le dashboard au lieu de l'index
         return $this->redirectToRoute('app_recruitment_dashboard', [], Response::HTTP_SEE_OTHER);
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Entity\Quiz_result;
@@ -17,7 +19,7 @@ class QuizResultController extends AbstractController
     public function index(EntityManagerInterface $entityManager): Response
     {
         $quizResults = $entityManager->getRepository(Quiz_result::class)->findAll();
-        
+
         return $this->render('backoffice/quiz_result/index.html.twig', [
             'quiz_results' => $quizResults,
         ]);
@@ -96,7 +98,8 @@ class QuizResultController extends AbstractController
     #[Route('/{id}', name: 'app_quiz_result_delete', methods: ['POST'])]
     public function delete(Request $request, Quiz_result $quiz, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete' . $quiz->getId(), $request->request->get('_token'))) {
+        $token = (string) $request->request->get('_token');
+        if ($this->isCsrfTokenValid('delete' . $quiz->getId(), $token)) {
             $entityManager->remove($quiz);
             $entityManager->flush();
 

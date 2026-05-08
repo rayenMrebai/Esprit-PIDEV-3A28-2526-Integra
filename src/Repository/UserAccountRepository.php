@@ -20,7 +20,7 @@ class UserAccountRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('u')
             ->where('u.email LIKE :q OR u.username LIKE :q')
-            ->setParameter('q', '%'.$query.'%')
+            ->setParameter('q', '%' . $query . '%')
             ->getQuery()
             ->getResult();
     }
@@ -28,31 +28,36 @@ class UserAccountRepository extends ServiceEntityRepository
     public function findByRoleAndSearch(?string $role, ?string $search): array
     {
         $qb = $this->createQueryBuilder('u');
-        if ($role) {
+        if ($role !== null && $role !== '') {
             $qb->andWhere('u.role = :role')->setParameter('role', $role);
         }
-        if ($search) {
+        if ($search !== null && $search !== '') {
             $qb->andWhere('u.email LIKE :search OR u.username LIKE :search')
-                ->setParameter('search', '%'.$search.'%');
+                ->setParameter('search', '%' . $search . '%');
         }
         return $qb->getQuery()->getResult();
     }
 
     public function countActiveVsInactive(): array
     {
-        $active = $this->createQueryBuilder('u')
+        $active = (int) $this->createQueryBuilder('u')
             ->select('COUNT(u.userId)')
             ->where('u.isActive = true')
             ->getQuery()
             ->getSingleScalarResult();
-        $inactive = $this->createQueryBuilder('u')
+
+        $inactive = (int) $this->createQueryBuilder('u')
             ->select('COUNT(u.userId)')
             ->where('u.isActive = false')
             ->getQuery()
             ->getSingleScalarResult();
-        return ['active' => (int)$active, 'inactive' => (int)$inactive];
+
+        return ['active' => $active, 'inactive' => $inactive];
     }
 
+    /**
+     * Deactivate users who have not logged in for more than 3 days.
+     */
     public function deactivateInactiveUsers(): int
     {
         $threshold = new \DateTime('-3 days');
@@ -68,83 +73,106 @@ class UserAccountRepository extends ServiceEntityRepository
             ->execute();
     }
 
+    /**
+     * Multi-factor inactivity risk scoring.
+     *
+     * Score is 0–100, composed of:
+     *  - 50 pts  days since last login  (main signal)
+     *  - 20 pts  account age factor     (new accounts get lower risk)
+     *  - 20 pts  role weight            (admins matter more)
+     *  - 10 pts  trend bonus            (never logged in = worst case)
+     *
+     * @return array<int, array{
+     *     user: UserAccount,
+     *     riskScore: int,
+     *     riskLevel: string,
+     *     trend: string,
+     *     daysSinceLastLogin: int|string,
+     *     breakdown: array{login: int, age: int, role: int, trend: int}
+     * }>
+     */
     public function findAllWithRisk(): array
     {
-        $now   = new \DateTime();
+        $now = new \DateTime();
         $users = $this->findAll();
         $results = [];
 
         foreach ($users as $user) {
             $lastLogin = $user->getLastLogin();
             $createdAt = $user->getAccountCreatedDate();
-            $role      = strtoupper((string) $user->getRole());
+            $role = strtoupper($user->getRole());
 
-            if (!$lastLogin) {
-                $daysSince  = null;
+            // 1. Days‑since‑login score (0–50)
+            if ($lastLogin === null) {
                 $loginScore = 50;
-                $trend      = 'never';
+                $trend = 'never';
+                $daysSince = 'Jamais';
             } else {
-                $daysSince  = (int) $now->diff($lastLogin)->days;
-                $loginScore = match(true) {
-                    $daysSince > 60 => 50,
-                    $daysSince > 30 => 40,
-                    $daysSince > 14 => 28,
-                    $daysSince > 7  => 18,
-                    $daysSince > 3  => 10,
-                    default         => 0,
+                $daysSinceInt = (int) $now->diff($lastLogin)->days;
+                $daysSince = $daysSinceInt;
+                $loginScore = match (true) {
+                    $daysSinceInt > 60 => 50,
+                    $daysSinceInt > 30 => 40,
+                    $daysSinceInt > 14 => 28,
+                    $daysSinceInt > 7 => 18,
+                    $daysSinceInt > 3 => 10,
+                    default => 0,
                 };
-                $trend = match(true) {
-                    $daysSince > 30 => 'declining',
-                    $daysSince > 7  => 'at_risk',
-                    default         => 'healthy',
+                $trend = match (true) {
+                    $daysSinceInt > 30 => 'declining',
+                    $daysSinceInt > 7 => 'at_risk',
+                    default => 'healthy',
                 };
             }
 
+            // 2. Account age factor (0–20)
             $ageScore = 0;
-            if ($createdAt) {
+            if ($createdAt !== null) {
                 $accountAgeDays = (int) $now->diff($createdAt)->days;
-                $ageScore = match(true) {
+                $ageScore = match (true) {
                     $accountAgeDays > 180 => 20,
-                    $accountAgeDays > 90  => 14,
-                    $accountAgeDays > 30  => 8,
-                    $accountAgeDays > 7   => 4,
-                    default               => 0,
+                    $accountAgeDays > 90 => 14,
+                    $accountAgeDays > 30 => 8,
+                    $accountAgeDays > 7 => 4,
+                    default => 0,
                 };
             }
 
-            $roleScore = match($role) {
+            // 3. Role weight (0–20)
+            $roleScore = match ($role) {
                 'ADMINISTRATEUR' => 20,
-                'MANAGER'        => 12,
-                default          => 5,
+                'MANAGER' => 12,
+                default => 5,
             };
 
-            $trendScore = match($trend) {
-                'never'     => 10,
+            // 4. Trend bonus (0–10)
+            $trendScore = match ($trend) {
+                'never' => 10,
                 'declining' => 6,
-                'at_risk'   => 3,
-                default     => 0,
+                'at_risk' => 3,
+                default => 0,
             };
 
             $riskScore = min(100, $loginScore + $ageScore + $roleScore + $trendScore);
 
-            $riskLevel = match(true) {
+            $riskLevel = match (true) {
                 $riskScore >= 80 => 'Critical',
                 $riskScore >= 55 => 'High',
                 $riskScore >= 30 => 'Medium',
                 $riskScore >= 10 => 'Low',
-                default          => 'Active',
+                default => 'Active',
             };
 
             $results[] = [
-                'user'               => $user,
-                'riskScore'          => $riskScore,
-                'riskLevel'          => $riskLevel,
-                'trend'              => $trend,
-                'daysSinceLastLogin' => $daysSince ?? 'Jamais',
-                'breakdown'          => [
+                'user' => $user,
+                'riskScore' => $riskScore,
+                'riskLevel' => $riskLevel,
+                'trend' => $trend,
+                'daysSinceLastLogin' => $daysSince,
+                'breakdown' => [
                     'login' => $loginScore,
-                    'age'   => $ageScore,
-                    'role'  => $roleScore,
+                    'age' => $ageScore,
+                    'role' => $roleScore,
                     'trend' => $trendScore,
                 ],
             ];

@@ -15,15 +15,15 @@ class Salaire
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(name: 'id', type: 'integer')]
-    private ?int $id = null;
+    private ?int $id = null; //  null avant persist, Doctrine assigne ensuite
 
     #[ORM\Column(name: 'baseAmount', type: 'float')]
     #[Assert\NotBlank(message: "Le salaire de base est obligatoire.")]
     #[Assert\Positive(message: "Le salaire de base doit être supérieur à 0.")]
     private ?float $baseAmount = null;
 
-    #[ORM\Column(name: 'bonusAmount', type: 'float', nullable: true, options: ['default' => 0])]
-    private ?float $bonusAmount = 0;
+    #[ORM\Column(name: 'bonusAmount', type: 'float', options: ['default' => 0])]
+    private float $bonusAmount = 0.0; //  float non-nullable (jamais null dans la logique)
 
     #[ORM\Column(name: 'totalAmount', type: 'float')]
     private ?float $totalAmount = null;
@@ -35,7 +35,7 @@ class Salaire
     )]
     #[Assert\NotBlank(message: "Le statut est obligatoire.")]
     #[Assert\Choice(choices: ['CREÉ', 'EN_COURS', 'PAYÉ'], message: "Le statut sélectionné n'est pas valide.")]
-    private ?string $status = 'CREÉ';
+    private string $status = 'CREÉ'; //  string non-nullable
 
     #[ORM\Column(name: 'datePaiement', type: 'date', nullable: true)]
     #[Assert\NotBlank(message: "La date de paiement est obligatoire.")]
@@ -48,11 +48,18 @@ class Salaire
     #[ORM\Column(name: 'updatedAt', type: 'datetime', options: ['default' => 'CURRENT_TIMESTAMP'])]
     private ?\DateTime $updatedAt = null;
 
-  #[ORM\ManyToOne(inversedBy: 'salaires')]
-#[ORM\JoinColumn(name: "userId", referencedColumnName: "userid", nullable: false)]  // ✅ userid en minuscules
-private ?UserAccount $user = null;
+    #[ORM\ManyToOne(inversedBy: 'salaires')]
+    #[ORM\JoinColumn(name: 'userId', referencedColumnName: 'userId', nullable: false)]
+    #[Assert\NotBlank(message: "L'employé est obligatoire.")]
+    private ?UserAccount $user = null;
 
-    #[ORM\OneToMany(mappedBy: 'salaire', targetEntity: BonusRule::class, cascade: ['persist', 'remove'])]
+    /** @var Collection<int, BonusRule> */  //  generics spécifiés
+    #[ORM\OneToMany(
+        mappedBy: 'salaire',
+        targetEntity: BonusRule::class,
+        cascade: ['persist', 'remove'],
+        orphanRemoval: true  //  ajout orphanRemoval (DoctrineDoctor)
+    )]
     private Collection $bonusRules;
 
     public function __construct()
@@ -60,42 +67,111 @@ private ?UserAccount $user = null;
         $this->bonusRules  = new ArrayCollection();
         $this->createdAt   = new \DateTime();
         $this->updatedAt   = new \DateTime();
-        $this->bonusAmount = 0;
+        $this->bonusAmount = 0.0;
         $this->status      = 'CREÉ';
     }
 
-    public function getId(): ?int { return $this->id; }
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
 
-    public function getBaseAmount(): ?float { return $this->baseAmount; }
+    public function getBaseAmount(): ?float
+    {
+        return $this->baseAmount;
+    }
+
     public function setBaseAmount(float $baseAmount): static
     {
         $this->baseAmount  = $baseAmount;
-        $this->totalAmount = $baseAmount + ($this->bonusAmount ?? 0);
+        $this->totalAmount = $baseAmount + $this->bonusAmount;
         return $this;
     }
 
-    public function getBonusAmount(): ?float { return $this->bonusAmount; }
-    public function setBonusAmount(float $bonusAmount): static { $this->bonusAmount = $bonusAmount; return $this; }
+    public function getBonusAmount(): float //  float non-nullable
+    {
+        return $this->bonusAmount;
+    }
 
-    public function getTotalAmount(): ?float { return $this->totalAmount; }
-    public function setTotalAmount(float $totalAmount): static { $this->totalAmount = $totalAmount; return $this; }
+    public function setBonusAmount(float $bonusAmount): static
+    {
+        $this->bonusAmount = $bonusAmount;
+        return $this;
+    }
 
-    public function getStatus(): ?string { return $this->status; }
-    public function setStatus(string $status): static { $this->status = $status; $this->updatedAt = new \DateTime(); return $this; }
+    public function getTotalAmount(): ?float
+    {
+        return $this->totalAmount;
+    }
 
-    public function getDatePaiement(): ?\DateTimeInterface { return $this->datePaiement; }
-    public function setDatePaiement(?\DateTimeInterface $datePaiement): static { $this->datePaiement = $datePaiement; return $this; }
+    public function setTotalAmount(float $totalAmount): static
+    {
+        $this->totalAmount = $totalAmount;
+        return $this;
+    }
 
-    public function getCreatedAt(): ?\DateTime { return $this->createdAt; }
-    public function setCreatedAt(\DateTime $createdAt): static { $this->createdAt = $createdAt; return $this; }
+    public function getStatus(): string //  string non-nullable
+    {
+        return $this->status;
+    }
 
-    public function getUpdatedAt(): ?\DateTime { return $this->updatedAt; }
-    public function setUpdatedAt(\DateTime $updatedAt): static { $this->updatedAt = $updatedAt; return $this; }
+    public function setStatus(string $status): static
+    {
+        $this->status    = $status;
+        $this->updatedAt = new \DateTime();
+        return $this;
+    }
 
-    public function getUser(): ?UserAccount { return $this->user; }
-    public function setUser(?UserAccount $user): static { $this->user = $user; return $this; }
+    public function getDatePaiement(): ?\DateTimeInterface
+    {
+        return $this->datePaiement;
+    }
 
-    public function getBonusRules(): Collection { return $this->bonusRules; }
+    public function setDatePaiement(?\DateTimeInterface $datePaiement): static
+    {
+        $this->datePaiement = $datePaiement;
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTime
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTime $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTime
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(\DateTime $updatedAt): static
+    {
+        $this->updatedAt = $updatedAt;
+        return $this;
+    }
+
+    public function getUser(): ?UserAccount
+    {
+        return $this->user;
+    }
+
+    public function setUser(?UserAccount $user): static
+    {
+        $this->user = $user;
+        return $this;
+    }
+
+    /** @return Collection<int, BonusRule> */ //  generics
+    public function getBonusRules(): Collection
+    {
+        return $this->bonusRules;
+    }
+
     public function addBonusRule(BonusRule $bonusRule): static
     {
         if (!$this->bonusRules->contains($bonusRule)) {
@@ -104,6 +180,7 @@ private ?UserAccount $user = null;
         }
         return $this;
     }
+
     public function removeBonusRule(BonusRule $bonusRule): static
     {
         if ($this->bonusRules->removeElement($bonusRule)) {

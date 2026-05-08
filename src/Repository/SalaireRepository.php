@@ -17,7 +17,7 @@ class SalaireRepository extends ServiceEntityRepository
     }
 
     /**
-     * ⭐ Recherche par nom d'employé uniquement
+     * @return array<int, Salaire>  // ✅ type itérable spécifié
      */
     public function findByUsernameSearch(string $search): array
     {
@@ -31,7 +31,7 @@ class SalaireRepository extends ServiceEntityRepository
     }
 
     /**
-     * ⭐ Filtrage par statut uniquement
+     * @return array<int, Salaire>  // ✅
      */
     public function findByStatus(string $status): array
     {
@@ -45,7 +45,7 @@ class SalaireRepository extends ServiceEntityRepository
     }
 
     /**
-     * ⭐ Recherche + Filtrage par statut combinés
+     * @return array<int, Salaire>  // ✅
      */
     public function findBySearchAndStatus(string $search, string $status): array
     {

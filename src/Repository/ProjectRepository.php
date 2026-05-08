@@ -16,7 +16,9 @@ class ProjectRepository extends ServiceEntityRepository
         parent::__construct($registry, Project::class);
     }
 
-    // Recherche multi‑critères (nom, ID, statut)
+    /**
+     * @return Project[]
+     */
     public function searchProjects(?string $search, ?string $status, ?\DateTimeInterface $startDateFrom, ?\DateTimeInterface $startDateTo): array
     {
         $qb = $this->createQueryBuilder('p');
@@ -41,7 +43,6 @@ class ProjectRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    // Nombre d'employés par projet (à utiliser dans le contrôleur)
     public function countEmployeesForProject(int $projectId): int
     {
         $conn = $this->getEntityManager()->getConnection();

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Entity\UserAccount;
@@ -25,17 +27,23 @@ class RegistrationController extends AbstractController
         LoginFormAuthenticator $loginFormAuthenticator
     ): Response {
         // Already logged in → redirect away
-        if ($this->getUser()) {
+        /** @var \App\Entity\UserAccount|null $currentUser */
+        $currentUser = $this->getUser();
+        if ($currentUser instanceof UserAccount) {
             return $this->redirectToRoute('app_profile');
         }
 
         $user = new UserAccount();
         $form = $this->createForm(RegistrationFormType::class, $user);
-        // is_admin defaults to false → no role field, role stays 'EMPLOYE'
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            /** @var string|null $plainPassword */
             $plainPassword = $form->get('plainPassword')->getData();
+            if (!\is_string($plainPassword)) {
+                throw new \LogicException('Le mot de passe doit être une chaîne de caractères.');
+            }
+
             $user->setPasswordHash($passwordHasher->hashPassword($user, $plainPassword));
             $user->setAccountStatus('ACTIVE');
             $user->setIsActive(true);
@@ -46,11 +54,18 @@ class RegistrationController extends AbstractController
 
                 $this->addFlash('success', 'Inscription réussie ! Vous êtes maintenant connecté.');
 
-                return $userAuthenticator->authenticateUser(
+                $authResponse = $userAuthenticator->authenticateUser(
                     $user,
                     $loginFormAuthenticator,
                     $request
                 );
+
+                // authenticateUser() peut retourner null, on garantit une Response
+                if ($authResponse === null) {
+                    return $this->redirectToRoute('app_profile');
+                }
+
+                return $authResponse;
             } catch (UniqueConstraintViolationException) {
                 $this->addFlash('error', 'Un compte avec cet email ou ce nom d\'utilisateur existe déjà.');
             }

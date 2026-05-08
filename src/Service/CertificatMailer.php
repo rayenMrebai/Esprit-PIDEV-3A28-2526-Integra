@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Service;
 
 use App\Entity\Quiz_result;
@@ -12,7 +14,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 class CertificatMailer
 {
     public function __construct(
-        private MailerInterface $certificatMailer,  // Changé : nom spécifique
+        private MailerInterface $certificatMailer,
         private CertificatGenerator $certificatGenerator,
         private LoggerInterface $logger,
         private UrlGeneratorInterface $urlGenerator
@@ -20,8 +22,16 @@ class CertificatMailer
 
     public function sendCertificat(Quiz_result $quiz): void
     {
-        $user      = $quiz->getUser();
+        // Correction : utiliser $quiz (pas $quizResult)
+        $user = $quiz->getUser();
+
+        if (!$user) {
+            throw new \RuntimeException('Utilisateur introuvable');
+        }
         $formation = $quiz->getTraining();
+        if (!$formation) {
+            return;
+        }
 
         $this->logger->info('Envoi certificat', [
             'user_email' => $user->getEmail(),
@@ -32,10 +42,15 @@ class CertificatMailer
         // Générer le PDF
         $pdfContent = $this->certificatGenerator->generate($quiz);
 
+        // Sécurisation : valeurs string/null -> string
+        $userName = (string) $user->getUsername();
+        $formationTitle = (string) $formation->getTitle();
+        $percentage = $quiz->getPercentage() ?? 0.0;
+
         $fileName = sprintf(
             'certificat_%s_%s.pdf',
-            $this->slugify($user->getUsername()),
-            $this->slugify($formation->getTitle())
+            $this->slugify($userName),
+            $this->slugify($formationTitle)
         );
 
         // Générer le lien de téléchargement
@@ -47,13 +62,13 @@ class CertificatMailer
 
         // Construire et envoyer l'email
         $email = (new Email())
-            ->from('sarabeji123@gmail.com')  // Expéditeur spécifique certificat
+            ->from('sarabeji123@gmail.com')
             ->to($user->getEmail())
-            ->subject('Félicitations ! Votre certificat pour ' . $formation->getTitle())
+            ->subject('Félicitations ! Votre certificat pour ' . $formationTitle)
             ->html($this->buildEmailHtml(
-                $user->getUsername(),
-                $formation->getTitle(),
-                $quiz->getPercentage(),
+                $userName,
+                $formationTitle,
+                $percentage,
                 $certificatUrl
             ))
             ->addPart(new DataPart($pdfContent, $fileName, 'application/pdf'));
@@ -107,6 +122,7 @@ class CertificatMailer
 
     private function slugify(string $text): string
     {
+        // $text est toujours string, pas de null ici car les appels sont castés
         return strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '_', $text), '_'));
     }
 }

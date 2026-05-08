@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Service;
 
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -7,47 +9,46 @@ use Psr\Log\LoggerInterface;
 
 class AIQuizGenerator
 {
-    private $apiKey;
-    private $apiUrl;
-    private $model;
-    private $httpClient;
-    private $logger;
+    private string $apiKey;
+    private string $apiUrl;
+    private string $model;
+    private HttpClientInterface $httpClient;
+    private ?LoggerInterface $logger = null;
 
     public function __construct(
-        string $apiKey, 
-        string $apiUrl, 
+        string $apiKey,
+        string $apiUrl,
         string $model,
         HttpClientInterface $httpClient
     ) {
-        // FORCE MANUELLE DE LA BONNE CLÉ API
-        // La clé qui fonctionne en PowerShell
-        $this->apiKey = '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';
+        $this->apiKey = $apiKey;
         $this->apiUrl = $apiUrl;
         $this->model = $model;
         $this->httpClient = $httpClient;
     }
 
-    public function setLogger(LoggerInterface $logger)
+    public function setLogger(LoggerInterface $logger): void
     {
         $this->logger = $logger;
     }
 
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     public function generateQuiz(string $formationTitle, string $formationDescription): array
     {
-        // Log pour debug
         if ($this->logger) {
-            $this->logger->info('🔑 Clé API utilisée (forcée manuellement)', [
-                'prefix' => substr($this->apiKey, 0, 20) . '...',
-                'length' => strlen($this->apiKey),
-                'full_key_matches' => $this->apiKey === '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',
-                'url' => $this->apiUrl,
-                'model' => $this->model
+            $this->logger->info('🤖 Génération quiz AI', [
+                'formation' => $formationTitle,
+                'api_url' => $this->apiUrl,
+                'model' => $this->model,
+                'has_api_key' => !empty($this->apiKey)
             ]);
         }
-        
+
         if (empty($this->apiKey) || str_starts_with($this->apiKey, 'your-')) {
             if ($this->logger) {
-                $this->logger->error('AIQuizGenerator: clé API manquante ou invalide');
+                $this->logger->error('AIQuizGenerator: clé API GROQ manquante ou invalide');
             }
             return $this->getFallbackQuiz($formationTitle);
         }
@@ -105,7 +106,7 @@ class AIQuizGenerator
 
             $content = $data['choices'][0]['message']['content'];
             if ($this->logger) {
-                $this->logger->info('AIQuizGenerator: réponse reçue', ['content' => $content]);
+                $this->logger->info('AIQuizGenerator: réponse reçue', ['content_length' => strlen($content)]);
             }
 
             return $this->parseAIResponse($content);
@@ -150,24 +151,27 @@ Règles strictes :
         );
     }
 
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     private function parseAIResponse(string $response): array
     {
-        $response = trim($response);
+        // Nettoyage sécurisé : on travaille toujours avec des chaînes
+        $clean = trim($response);
 
-        // Supprimer les balises markdown
-        $response = preg_replace('/^```json\s*/m', '', $response);
-        $response = preg_replace('/^```\s*$/m', '', $response);
-        $response = trim($response);
+        // Supprimer les balises markdown ```json et ```
+        $clean = (string) preg_replace('/^```json\s*/m', '', $clean);
+        $clean = (string) preg_replace('/^```\s*$/m', '', $clean);
+        $clean = trim($clean);
 
-        // Extraire le tableau JSON
-        $firstBracket = strpos($response, '[');
-        $lastBracket  = strrpos($response, ']');
+        $firstBracket = strpos($clean, '[');
+        $lastBracket  = strrpos($clean, ']');
 
         if ($firstBracket === false || $lastBracket === false || $lastBracket <= $firstBracket) {
-            throw new \Exception('Aucun tableau JSON trouvé : ' . substr($response, 0, 200));
+            throw new \Exception('Aucun tableau JSON trouvé : ' . substr($clean, 0, 200));
         }
 
-        $jsonString = substr($response, $firstBracket, $lastBracket - $firstBracket + 1);
+        $jsonString = substr($clean, $firstBracket, $lastBracket - $firstBracket + 1);
         $questions  = json_decode($jsonString, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
@@ -178,7 +182,6 @@ Règles strictes :
             throw new \Exception('Seulement ' . count($questions ?? []) . ' questions reçues');
         }
 
-        // Valider et corriger chaque question
         $validated = [];
         foreach ($questions as $q) {
             if (!isset($q['question'], $q['options'], $q['correct'])) {
@@ -198,6 +201,9 @@ Règles strictes :
         return $validated;
     }
 
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     private function getFallbackQuiz(string $title): array
     {
         return [

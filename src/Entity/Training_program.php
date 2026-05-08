@@ -65,16 +65,20 @@ class Training_program
         message: "Le statut doit être: PROGRAMMÉ, EN COURS, TERMINÉ ou ANNULÉ."
     )]
     private ?string $status = null;
-
+/**
+ * @var Collection<int, Quiz_result>
+ */
     #[ORM\OneToMany(mappedBy: "training", targetEntity: Quiz_result::class)]
     private Collection $quizResults;
-
+    /**
+ * @var Collection<int, Skill>
+ */
     #[ORM\OneToMany(mappedBy: "trainingProgram", targetEntity: Skill::class)]
     #[Assert\Count(
         min: 1,
         minMessage: "Le programme doit avoir au moins une compétence associée."
     )]
-    private Collection $skills;
+private Collection $skills;
 
     public function __construct()
     {
@@ -179,7 +183,9 @@ class Training_program
         $this->status = $status;
         return $this;
     }
-
+/**
+ * @return Collection<int, Quiz_result>
+ */
     public function getQuizResults(): Collection
     {
         return $this->quizResults;
@@ -203,7 +209,9 @@ class Training_program
         }
         return $this;
     }
-
+/**
+ * @return Collection<int, Skill>
+ */
     public function getSkills(): Collection
     {
         return $this->skills;

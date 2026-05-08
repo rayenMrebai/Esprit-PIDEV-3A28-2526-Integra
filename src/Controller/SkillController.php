@@ -44,9 +44,11 @@ class SkillController extends AbstractController
 
         if ($request->isXmlHttpRequest() && $form->isSubmitted()) {
             $errors = [];
-            foreach ($form->getErrors(true) as $error) {
-                $errors[] = $error->getMessage();
-            }
+foreach ($form->getErrors(true) as $error) {
+    if ($error instanceof \Symfony\Component\Form\FormError) {
+        $this->addFlash('error', $error->getMessage());
+    }
+}
             return $this->json([
                 'success' => false, 
                 'message' => 'Erreur de validation',
@@ -95,9 +97,11 @@ class SkillController extends AbstractController
 
         if ($request->isXmlHttpRequest() && $form->isSubmitted()) {
             $errors = [];
-            foreach ($form->getErrors(true) as $error) {
-                $errors[] = $error->getMessage();
-            }
+foreach ($form->getErrors(true) as $error) {
+    if ($error instanceof \Symfony\Component\Form\FormError) {
+        $this->addFlash('error', $error->getMessage());
+    }
+}
             return $this->json([
                 'success' => false, 
                 'message' => 'Erreur de validation',
@@ -121,7 +125,7 @@ class SkillController extends AbstractController
     #[Route('/{id}', name: 'app_skill_delete', methods: ['POST'])]
     public function delete(Request $request, Skill $skill, EntityManagerInterface $entityManager): Response
     {
-        $token = $request->request->get('_token');
+        $token = (string) $request->request->get('_token');
         
         if ($this->isCsrfTokenValid('delete' . $skill->getId(), $token)) {
             $entityManager->remove($skill);

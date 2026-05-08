@@ -1,6 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
+
 use App\Entity\Inscription;
 use App\Entity\Quiz_result;
 use App\Entity\UserAccount;
@@ -24,8 +27,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 #[Route('/admin')]
 class AdminController extends AbstractController
 {
-        #[Route('/user/{id}/ai-advice', name: 'admin_user_ai_advice')]
-    #[IsGranted('ROLE_MANAGER')]   // Changed from ROLE_ADMIN to ROLE_MANAGER
+    #[Route('/user/{id}/ai-advice', name: 'admin_user_ai_advice')]
+    #[IsGranted('ROLE_MANAGER')]
     public function aiAdvice(UserAccount $user, HuggingFaceService $ai): JsonResponse
     {
         try {
@@ -42,7 +45,6 @@ class AdminController extends AbstractController
             $advice = $ai->generateAdvice($prompt);
             return $this->json(['advice' => $advice]);
         } catch (\Exception $e) {
-            // Return the exact error message for debugging
             return $this->json(['advice' => 'AI error: ' . $e->getMessage()], 500);
         }
     }
@@ -63,13 +65,13 @@ class AdminController extends AbstractController
         $totalUsers = $repo->count([]);
         $activeUsers = $repo->count(['isActive' => true]);
         $stats = $repo->countActiveVsInactive();
-        $riskUsers = $repo->findAllWithRisk();   // includes all users
+        $riskUsers = $repo->findAllWithRisk();
 
         // Weather data (OpenWeatherMap)
         $weather = null;
         try {
             $apiKey = $_ENV['WEATHER_API_KEY'] ?? '';
-            if ($apiKey) {
+            if ($apiKey !== '') {
                 $url = "https://api.openweathermap.org/data/2.5/weather?q=Tunis,tn&appid={$apiKey}&units=metric&lang=fr";
                 $response = $httpClient->request('GET', $url);
                 $data = $response->toArray();
@@ -81,7 +83,6 @@ class AdminController extends AbstractController
             $weather = null;
         }
 
-        // Salaire statistics from su branch
         $salStats = $statsService->getStatistics();
 
         return $this->render('admin/dashboard.html.twig', [
@@ -98,9 +99,16 @@ class AdminController extends AbstractController
     #[IsGranted('ROLE_MANAGER')]
     public function list(UserAccountRepository $repo, Request $request): Response
     {
-        $search = $request->query->get('search', '');
-        $role = $request->query->get('role', '');
-        $users = $repo->findByRoleAndSearch($role ?: null, $search ?: null);
+        $searchRaw = $request->query->get('search', '');
+        $roleRaw = $request->query->get('role', '');
+
+        // Sécurisation : on ne garde que des chaînes non vides pour l'affichage
+        $search = is_string($searchRaw) ? $searchRaw : '';
+        $role = is_string($roleRaw) ? $roleRaw : '';
+
+        // L'appel attend string|null → on passe null si chaîne vide
+        $users = $repo->findByRoleAndSearch($role !== '' ? $role : null, $search !== '' ? $search : null);
+
         return $this->render('admin/user_list.html.twig', [
             'users' => $users,
             'search' => $search,
@@ -143,7 +151,9 @@ class AdminController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $user->setPasswordHash($passwordHasher->hashPassword($user, $form->get('plainPassword')->getData()));
+            /** @var string $plainPassword */
+            $plainPassword = $form->get('plainPassword')->getData();
+            $user->setPasswordHash($passwordHasher->hashPassword($user, $plainPassword));
             $em->persist($user);
             $em->flush();
             $this->addFlash('success', 'User added successfully.');
@@ -166,32 +176,37 @@ class AdminController extends AbstractController
     #[Route('/user/{id}/delete', name: 'admin_user_delete')]
     #[IsGranted('ROLE_ADMIN')]
     public function delete(UserAccount $user, EntityManagerInterface $em, Request $request): Response
-{
-    // ✅ Supprimer les inscriptions liées
-    $inscriptions = $em->getRepository(Inscription::class)->findBy(['user' => $user]);
-    foreach ($inscriptions as $inscription) {
-        $em->remove($inscription);
+    {
+        // Supprimer les inscriptions liées
+        $inscriptions = $em->getRepository(Inscription::class)->findBy(['user' => $user]);
+        foreach ($inscriptions as $inscription) {
+            $em->remove($inscription);
+        }
+
+        // Supprimer les quiz liés
+        $quizResults = $em->getRepository(Quiz_result::class)->findBy(['user' => $user]);
+        foreach ($quizResults as $quiz) {
+            $em->remove($quiz);
+        }
+
+        $em->remove($user);
+        $em->flush();
+
+        $this->addFlash('success', 'Utilisateur supprimé avec succès.');
+        return $this->redirectToRoute('admin_user_list');
     }
 
-    // ✅ Supprimer les quiz liés
-    $quizResults = $em->getRepository(Quiz_result::class)->findBy(['user' => $user]);
-    foreach ($quizResults as $quiz) {
-        $em->remove($quiz);
-    }
-
-    $em->remove($user);
-    $em->flush();
-
-    $this->addFlash('success', 'Utilisateur supprimé avec succès.');
-    return $this->redirectToRoute('admin_user_list');
-}
     #[Route('/users/export-pdf', name: 'admin_export_pdf')]
     #[IsGranted('ROLE_ADMIN')]
     public function exportPdf(UserAccountRepository $repo, Request $request): Response
     {
-        $search = $request->query->get('search', '');
-        $role = $request->query->get('role', '');
-        $users = $repo->findByRoleAndSearch($role ?: null, $search ?: null);
+        $searchRaw = $request->query->get('search', '');
+        $roleRaw = $request->query->get('role', '');
+
+        $search = is_string($searchRaw) ? $searchRaw : '';
+        $role = is_string($roleRaw) ? $roleRaw : '';
+
+        $users = $repo->findByRoleAndSearch($role !== '' ? $role : null, $search !== '' ? $search : null);
 
         $html = $this->renderView('admin/user_list_pdf.html.twig', [
             'users' => $users,
@@ -204,6 +219,7 @@ class AdminController extends AbstractController
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'landscape');
         $dompdf->render();
+
         return new Response($dompdf->output(), 200, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'attachment; filename="users_list.pdf"',

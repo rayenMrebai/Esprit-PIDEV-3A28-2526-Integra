@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Entity\Candidat;
@@ -72,9 +74,7 @@ final class RecruitmentDashboardController extends AbstractController
         $jobEntity = new Jobposition();
         $candidatEntity = new Candidat();
 
-        // ══════════════════════════════════════════════════════════════════
         // PRÉ‑REMPLISSAGE DEPUIS L'ANALYSE IA (paramètres GET)
-        // ══════════════════════════════════════════════════════════════════
         $prefillFirstName = $request->query->get('firstName');
         $prefillLastName  = $request->query->get('lastName');
         $prefillEmail     = $request->query->get('email');
@@ -82,23 +82,23 @@ final class RecruitmentDashboardController extends AbstractController
         $prefillEducation = $request->query->get('educationLevel');
         $prefillSkills    = $request->query->get('skills');
         $prefillStatus    = $request->query->get('status');
-        $prefillJobId     = $request->query->get('job'); // déjà récupéré plus haut, mais on peut le réutiliser
+        $prefillJobId     = $request->query->get('job');
 
-        if ($prefillFirstName) $candidatEntity->setFirstName($prefillFirstName);
-        if ($prefillLastName)  $candidatEntity->setLastName($prefillLastName);
-        if ($prefillEmail)     $candidatEntity->setEmail($prefillEmail);
+        if ($prefillFirstName) $candidatEntity->setFirstName((string) $prefillFirstName);
+        if ($prefillLastName)  $candidatEntity->setLastName((string) $prefillLastName);
+        if ($prefillEmail)     $candidatEntity->setEmail((string) $prefillEmail);
         if ($prefillPhone) {
-            $phoneValue = preg_replace('/\D/', '', $prefillPhone);
+            $phoneStr = (string) $prefillPhone;
+            $phoneValue = preg_replace('/\D/', '', $phoneStr);
             $candidatEntity->setPhone($phoneValue ? (int) $phoneValue : 0);
         }
-        if ($prefillEducation) $candidatEntity->setEducationLevel($prefillEducation);
-        if ($prefillSkills)    $candidatEntity->setSkills($prefillSkills);
-        if ($prefillStatus)    $candidatEntity->setStatus($prefillStatus);
+        if ($prefillEducation) $candidatEntity->setEducationLevel((string) $prefillEducation);
+        if ($prefillSkills)    $candidatEntity->setSkills((string) $prefillSkills);
+        if ($prefillStatus)    $candidatEntity->setStatus((string) $prefillStatus);
         if ($prefillJobId) {
             $job = $jobpositionRepository->find($prefillJobId);
             if ($job) $candidatEntity->setJobposition($job);
         }
-        // ══════════════════════════════════════════════════════════════════
 
         if ($modal === 'job_edit' && $id) {
             $jobEntity = $jobpositionRepository->find($id);
@@ -112,7 +112,7 @@ final class RecruitmentDashboardController extends AbstractController
         $jobForm = $this->createForm(JobpositionType::class, $jobEntity);
         $candidatForm = $this->createForm(CandidatType::class, $candidatEntity);
 
-        // Traitement POST (ajout/modification)
+        // Traitement POST
         if ($request->isMethod('POST')) {
             if ($modal === 'job_new' || $modal === 'job_edit') {
                 $jobForm->handleRequest($request);
@@ -123,7 +123,9 @@ final class RecruitmentDashboardController extends AbstractController
                     return $this->redirectToRoute('app_recruitment_dashboard');
                 } else {
                     foreach ($jobForm->getErrors(true) as $error) {
-                        $this->addFlash('error', $error->getMessage());
+                        // On utilise le message en castant en string via getMessage() ou __toString
+                        $msg = method_exists($error, 'getMessage') ? $error->getMessage() : (string) $error;
+                        $this->addFlash('error', $msg);
                     }
                 }
             }
@@ -136,7 +138,8 @@ final class RecruitmentDashboardController extends AbstractController
                     return $this->redirectToRoute('app_recruitment_dashboard');
                 } else {
                     foreach ($candidatForm->getErrors(true) as $error) {
-                        $this->addFlash('error', $error->getMessage());
+                        $msg = method_exists($error, 'getMessage') ? $error->getMessage() : (string) $error;
+                        $this->addFlash('error', $msg);
                     }
                 }
             }
@@ -145,9 +148,9 @@ final class RecruitmentDashboardController extends AbstractController
         // Routes AJAX
         if ($request->isXmlHttpRequest() && $request->query->has('ajax')) {
             $type = $request->query->get('type');
-            $id = $request->query->get('id');
+            $idAjax = $request->query->get('id');
             if ($type === 'job') {
-                $job = $jobpositionRepository->find($id);
+                $job = $jobpositionRepository->find($idAjax);
                 if (!$job) return new JsonResponse(['error' => 'Not found'], 404);
                 return $this->json([
                     'idJob' => $job->getIdJob(),
@@ -160,7 +163,7 @@ final class RecruitmentDashboardController extends AbstractController
                 ]);
             }
             if ($type === 'candidat') {
-                $candidat = $candidatRepository->find($id);
+                $candidat = $candidatRepository->find($idAjax);
                 if (!$candidat) return new JsonResponse(['error' => 'Not found'], 404);
                 return $this->json([
                     'id' => $candidat->getId(),

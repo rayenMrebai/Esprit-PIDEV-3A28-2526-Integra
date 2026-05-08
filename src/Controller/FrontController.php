@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Entity\Inscription;
@@ -53,8 +55,12 @@ class FrontController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function mesSalaires(SalaireRepository $salaireRepo): Response
     {
-        /** @var UserAccount $user */
+        /** @var UserAccount|null $user */
         $user = $this->getUser();
+        if (!$user instanceof UserAccount) {
+            throw $this->createAccessDeniedException('Utilisateur non connecté.');
+        }
+
         $salaires = $salaireRepo->findBy(['user' => $user], ['datePaiement' => 'DESC']);
 
         $totalPercu = 0;
@@ -91,7 +97,10 @@ class FrontController extends AbstractController
 
         if ($user) {
             foreach ($em->getRepository(Inscription::class)->findBy(['user' => $user]) as $insc) {
-                $inscriptionsExistantes[$insc->getFormation()->getId()] = $insc->getStatus();
+                $formation = $insc->getFormation();
+                if ($formation !== null) {
+                    $inscriptionsExistantes[$formation->getId()] = $insc->getStatus();
+                }
             }
         }
 
@@ -135,8 +144,11 @@ class FrontController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function skills(): Response
     {
-        /** @var UserAccount $user */
+        /** @var UserAccount|null $user */
         $user = $this->getUser();
+        if (!$user instanceof UserAccount) {
+            throw $this->createAccessDeniedException();
+        }
         return $this->render('frontoffice/skills.html.twig', [
             'userSkills' => $user->getSkills(),
         ]);
@@ -165,9 +177,20 @@ class FrontController extends AbstractController
             $this->addFlash('warning', 'Vous avez déjà complété ce quiz.');
             return $this->redirectToRoute('app_frontoffice_quiz');
         }
+
+        // Décodage des questions (si elles sont stockées en JSON)
+        $questionsRaw = $quiz->getQuestions() ?? [];
+        $questions = [];
+        foreach ($questionsRaw as $q) {
+            $decoded = json_decode((string) $q, true);
+            if (is_array($decoded)) {
+                $questions[] = $decoded;
+            }
+        }
+
         return $this->render('frontoffice/quiz/take.html.twig', [
             'quiz'      => $quiz,
-            'questions' => $quiz->getQuestions(),
+            'questions' => $questions,
         ]);
     }
 
@@ -177,9 +200,13 @@ class FrontController extends AbstractController
         Quiz_result $quiz,
         Request $request,
         EntityManagerInterface $em,
-        CertificatMailer $certifMailer  // ← renommé
+        CertificatMailer $certifMailer
     ): Response {
+        /** @var UserAccount|null $user */
         $user = $this->getUser();
+        if (!$user instanceof UserAccount) {
+            throw $this->createAccessDeniedException();
+        }
 
         if ($quiz->getUser() !== $user) {
             throw $this->createAccessDeniedException('Ce quiz ne vous appartient pas.');
@@ -189,12 +216,20 @@ class FrontController extends AbstractController
             return $this->redirectToRoute('app_frontoffice_quiz');
         }
 
-        $questions      = $quiz->getQuestions();
-        $score          = 0;
+        // Décodage des questions
+        $questionsRaw = $quiz->getQuestions() ?? [];
+        $questions = [];
+        foreach ($questionsRaw as $q) {
+            $decoded = json_decode((string) $q, true);
+            if (is_array($decoded)) {
+                $questions[] = $decoded;
+            }
+        }
 
+        $score = 0;
         foreach ($questions as $i => $question) {
             $userAnswer = $request->request->get('question_' . $i);
-            if ($userAnswer !== null && (int)$userAnswer === $question['correct']) {
+            if ($userAnswer !== null && (int) $userAnswer === $question['correct']) {
                 $score++;
             }
         }
@@ -220,7 +255,7 @@ class FrontController extends AbstractController
                 error_log('Score: ' . $score . '/' . $totalQuestions);
                 error_log('Percentage: ' . $percentage);
 
-                $certifMailer->sendCertificat($quiz);  // ← corrigé
+                $certifMailer->sendCertificat($quiz);
 
                 error_log('✅ ENVOI RÉUSSI');
 
@@ -259,7 +294,8 @@ class FrontController extends AbstractController
         }
 
         $pdfContent = $certificatGenerator->generate($quiz);
-        $fileName   = sprintf('certificat_%s.pdf', $this->slugify($quiz->getTraining()->getTitle()));
+        $trainingTitle = $quiz->getTraining()?->getTitle() ?? '';
+        $fileName   = sprintf('certificat_%s.pdf', $this->slugify($trainingTitle));
 
         return new Response($pdfContent, 200, [
             'Content-Type'        => 'application/pdf',
@@ -284,7 +320,10 @@ class FrontController extends AbstractController
 
         $formationsInscrites = [];
         foreach ($em->getRepository(Inscription::class)->findBy(['user' => $user]) as $insc) {
-            $formationsInscrites[$insc->getFormation()->getId()] = $insc->getStatus();
+            $formation = $insc->getFormation();
+            if ($formation !== null) {
+                $formationsInscrites[$formation->getId()] = $insc->getStatus();
+            }
         }
 
         return $this->render('frontoffice/inscription/formations.html.twig', [
@@ -300,7 +339,11 @@ class FrontController extends AbstractController
         Request $request,
         EntityManagerInterface $em
     ): Response {
+        /** @var UserAccount|null $user */
         $user = $this->getUser();
+        if (!$user instanceof UserAccount) {
+            throw $this->createAccessDeniedException();
+        }
 
         $inscriptionExistante = $em->getRepository(Inscription::class)
             ->findOneBy(['user' => $user, 'formation' => $formation]);
@@ -357,6 +400,10 @@ class FrontController extends AbstractController
     // ─── Utilitaire ───────────────────────────────────────────────
     private function slugify(string $text): string
     {
-        return strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '_', $text), '_'));
+        $replaced = preg_replace('/[^A-Za-z0-9-]+/', '_', $text);
+        if ($replaced === null) {
+            return '';
+        }
+        return strtolower(trim($replaced, '_'));
     }
 }

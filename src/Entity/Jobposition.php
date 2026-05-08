@@ -15,7 +15,7 @@ class Jobposition
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(name: 'idJob', type: 'integer')]
-    private ?int $idJob = null;
+    private int $idJob = 0;
 
     #[ORM\Column(name: 'title', type: 'string', length: 255)]
     #[Assert\NotBlank(message: "Le titre est obligatoire.")]
@@ -44,6 +44,7 @@ class Jobposition
     #[Assert\NotNull(message: "La date de publication est obligatoire.")]
     private ?\DateTimeInterface $postedAt = null;
 
+    /** @var Collection<int, Candidat> */
     #[ORM\OneToMany(mappedBy: 'jobposition', targetEntity: Candidat::class)]
     private Collection $candidats;
 
@@ -53,51 +54,23 @@ class Jobposition
     }
 
     // Getters
-    public function getIdJob(): ?int { return $this->idJob; }
+    public function getIdJob(): int { return $this->idJob; }
     public function getTitle(): ?string { return $this->title; }
     public function getDepartement(): ?string { return $this->departement; }
     public function getEmployeeType(): ?string { return $this->employeeType; }
     public function getDescription(): ?string { return $this->description; }
     public function getStatus(): ?string { return $this->status; }
     public function getPostedAt(): ?\DateTimeInterface { return $this->postedAt; }
+    /** @return Collection<int, Candidat> */
     public function getCandidats(): Collection { return $this->candidats; }
 
-    // Setters acceptant null
-    public function setTitle(?string $title): self
-    {
-        $this->title = $title;
-        return $this;
-    }
-
-    public function setDepartement(?string $departement): self
-    {
-        $this->departement = $departement;
-        return $this;
-    }
-
-    public function setEmployeeType(?string $employeeType): self
-    {
-        $this->employeeType = $employeeType;
-        return $this;
-    }
-
-    public function setDescription(?string $description): self
-    {
-        $this->description = $description;
-        return $this;
-    }
-
-    public function setStatus(?string $status): self
-    {
-        $this->status = $status;
-        return $this;
-    }
-
-    public function setPostedAt(?\DateTimeInterface $postedAt): self
-    {
-        $this->postedAt = $postedAt;
-        return $this;
-    }
+    // Setters
+    public function setTitle(?string $title): self { $this->title = $title; return $this; }
+    public function setDepartement(?string $departement): self { $this->departement = $departement; return $this; }
+    public function setEmployeeType(?string $employeeType): self { $this->employeeType = $employeeType; return $this; }
+    public function setDescription(?string $description): self { $this->description = $description; return $this; }
+    public function setStatus(?string $status): self { $this->status = $status; return $this; }
+    public function setPostedAt(?\DateTimeInterface $postedAt): self { $this->postedAt = $postedAt; return $this; }
 
     public function addCandidat(Candidat $candidat): self
     {

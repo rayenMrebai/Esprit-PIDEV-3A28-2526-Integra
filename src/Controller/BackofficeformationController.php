@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 // src/Controller/BackofficeformationController.php
 
 namespace App\Controller;
@@ -10,7 +13,7 @@ use App\Entity\Training_program;
 use App\Entity\Skill;
 use App\Entity\Quiz_result;
 use App\Entity\Inscription;
-use App\Form\SkillType; 
+use App\Form\SkillType;
 use App\Form\ProfileFormType;
 use App\Form\TrainingProgramType;
 use App\Form\UserEditFormType;
@@ -58,7 +61,7 @@ class BackofficeformationController extends AbstractController
         $qb = $repo->createQueryBuilder('u');
         if ($search) {
             $qb->andWhere('u.username LIKE :search OR u.email LIKE :search')
-               ->setParameter('search', '%' . $search . '%');
+                ->setParameter('search', '%' . $search . '%');
         }
         if ($role) {
             $qb->andWhere('u.role = :role')->setParameter('role', $role);
@@ -77,11 +80,17 @@ class BackofficeformationController extends AbstractController
     public function userNew(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher): Response
     {
         if ($request->isMethod('POST')) {
+            // Récupération sécurisée en string
+            $username = (string) $request->request->get('username');
+            $email    = (string) $request->request->get('email');
+            $password = (string) $request->request->get('password');
+            $role     = (string) $request->request->get('role');
+
             $user = new UserAccount();
-            $user->setUsername($request->request->get('username'));
-            $user->setEmail($request->request->get('email'));
-            $user->setPasswordHash($passwordHasher->hashPassword($user, $request->request->get('password')));
-            $user->setRole($request->request->get('role'));
+            $user->setUsername($username);
+            $user->setEmail($email);
+            $user->setPasswordHash($passwordHasher->hashPassword($user, $password));
+            $user->setRole($role);
             $user->setIsActive(true);
             $user->setAccountStatus('ACTIVE');
 
@@ -108,24 +117,25 @@ class BackofficeformationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $skillIds = $request->request->all('skills') ?? [];
+            // all() retourne toujours un tableau, jamais null
+            $skillIds = $request->request->all('skills');
             $skills = $skillRepo->findBy(['id' => $skillIds]);
-            
+
             foreach ($user->getSkills() as $oldSkill) {
                 $user->removeSkill($oldSkill);
             }
-            
+
             foreach ($skills as $skill) {
                 $user->addSkill($skill);
             }
-            
+
             $em->flush();
             $this->addFlash('success', 'Utilisateur modifié avec succès.');
             return $this->redirectToRoute('app_backoffice_users');
         }
-        
+
         $allSkills = $skillRepo->findAll();
-        
+
         return $this->render('backoffice/admin/user_edit.html.twig', [
             'user' => $user,
             'form' => $form->createView(),
@@ -146,7 +156,8 @@ class BackofficeformationController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function userDelete(UserAccount $user, EntityManagerInterface $em, Request $request): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$user->getUserId(), $request->request->get('_token'))) {
+        $token = (string) $request->request->get('_token');
+        if ($this->isCsrfTokenValid('delete'.$user->getUserId(), $token)) {
             $em->remove($user);
             $em->flush();
             $this->addFlash('success', 'Utilisateur supprimé avec succès.');
@@ -161,12 +172,12 @@ class BackofficeformationController extends AbstractController
         $search = $request->query->get('search', '');
         $type = $request->query->get('type', '');
         $status = $request->query->get('status', '');
-        
+
         $qb = $repo->createQueryBuilder('t');
-        
+
         if ($search) {
             $qb->andWhere('t.title LIKE :search OR t.description LIKE :search')
-               ->setParameter('search', '%' . $search . '%');
+                ->setParameter('search', '%' . $search . '%');
         }
         if ($type) {
             $qb->andWhere('t.type = :type')->setParameter('type', $type);
@@ -174,14 +185,14 @@ class BackofficeformationController extends AbstractController
         if ($status) {
             $qb->andWhere('t.status = :status')->setParameter('status', $status);
         }
-        
+
         $formations = $qb->getQuery()->getResult();
-        
+
         return $this->render('backoffice/training_program/index.html.twig', [
             'training_programs' => $formations,
-            'search' => $search,                    
-            'selectedType' => $type,                
-            'selectedStatus' => $status,            
+            'search' => $search,
+            'selectedType' => $type,
+            'selectedStatus' => $status,
         ]);
     }
 
@@ -234,14 +245,15 @@ class BackofficeformationController extends AbstractController
     #[Route('/formation/{id}/delete', name: 'app_backoffice_formations_delete')]
     public function formationDelete(Training_program $formation, EntityManagerInterface $em, Request $request): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$formation->getId(), $request->request->get('_token'))) {
+        $token = (string) $request->request->get('_token');
+        if ($this->isCsrfTokenValid('delete'.$formation->getId(), $token)) {
             $em->remove($formation);
             $em->flush();
             $this->addFlash('success', 'Formation supprimée avec succès.');
         } else {
             $this->addFlash('error', 'Token CSRF invalide.');
         }
-        
+
         return $this->redirectToRoute('app_backoffice_formations');
     }
 
@@ -254,12 +266,12 @@ class BackofficeformationController extends AbstractController
         $level = $request->query->get('level', '');
         $page = max(1, $request->query->getInt('page', 1));
         $limit = 10;
-        
+
         $qb = $repo->createQueryBuilder('s');
-        
+
         if ($search) {
             $qb->andWhere('s.nom LIKE :search OR s.description LIKE :search')
-               ->setParameter('search', '%' . $search . '%');
+                ->setParameter('search', '%' . $search . '%');
         }
         if ($categorie) {
             $qb->andWhere('s.categorie = :categorie')->setParameter('categorie', $categorie);
@@ -267,15 +279,15 @@ class BackofficeformationController extends AbstractController
         if ($level) {
             $qb->andWhere('s.level_required = :level')->setParameter('level', $level);
         }
-        
+
         $total = count($qb->getQuery()->getResult());
-        $totalPages = ceil($total / $limit);
-        
+        $totalPages = (int) ceil($total / $limit);
+
         $skills = $qb->setFirstResult(($page - 1) * $limit)
-                     ->setMaxResults($limit)
-                     ->getQuery()
-                     ->getResult();
-        
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+
         return $this->render('backoffice/skill/index.html.twig', [
             'skills' => $skills,
             'search' => $search,
@@ -354,7 +366,11 @@ class BackofficeformationController extends AbstractController
     {
         if ($request->isMethod('POST')) {
             $quiz = new Quiz_result();
-            $quiz->setScore($request->request->get('score'));
+
+            // score peut être null ou int
+            $scoreRaw = $request->request->get('score');
+            $score = null !== $scoreRaw ? (int) $scoreRaw : null;
+            $quiz->setScore($score);
             $quiz->setCompletedAt(new \DateTime());
 
             $em->persist($quiz);
@@ -378,7 +394,9 @@ class BackofficeformationController extends AbstractController
     public function quizEdit(Quiz_result $quiz, Request $request, EntityManagerInterface $em): Response
     {
         if ($request->isMethod('POST')) {
-            $quiz->setScore($request->request->get('score'));
+            $scoreRaw = $request->request->get('score');
+            $score = null !== $scoreRaw ? (int) $scoreRaw : null;
+            $quiz->setScore($score);
 
             $em->flush();
             $this->addFlash('success', 'Quiz modifié avec succès.');
@@ -433,20 +451,20 @@ class BackofficeformationController extends AbstractController
         $search = $request->query->get('search', '');
         $status = $request->query->get('status', '');
         $month = $request->query->get('month', date('Y-m'));
-        
+
         $qb = $em->getRepository(FormationSession::class)->createQueryBuilder('s')
             ->join('s.formation', 'f');
-        
+
         if ($search) {
             $qb->andWhere('f.title LIKE :search OR s.trainer LIKE :search OR s.location LIKE :search')
-               ->setParameter('search', '%' . $search . '%');
+                ->setParameter('search', '%' . $search . '%');
         }
         if ($status) {
             $qb->andWhere('s.status = :status')->setParameter('status', $status);
         }
-        
+
         $sessions = $qb->getQuery()->getResult();
-        
+
         return $this->render('backoffice/planning/index.html.twig', [
             'sessions' => $sessions,
             'search' => $search,
@@ -509,7 +527,7 @@ class BackofficeformationController extends AbstractController
     public function inscriptionsList(EntityManagerInterface $em, Request $request): Response
     {
         $status = $request->query->get('status', 'EN_ATTENTE');
-        
+
         $inscriptions = $em->getRepository(Inscription::class)
             ->createQueryBuilder('i')
             ->leftJoin('i.user', 'u')
@@ -520,108 +538,120 @@ class BackofficeformationController extends AbstractController
             ->orderBy('i.dateDemande', 'ASC')
             ->getQuery()
             ->getResult();
-        
+
         return $this->render('backoffice/inscription/index.html.twig', [
             'inscriptions' => $inscriptions,
             'currentStatus' => $status,
         ]);
     }
 
-#[Route('/inscription/{id}/accepter', name: 'app_backoffice_inscription_accepter')]
-public function inscriptionAccepter(
-    Inscription $inscription,
-    Request $request,
-    EntityManagerInterface $em,
-    AIQuizGenerator $quizGenerator
-): Response {
-    if (!$this->isCsrfTokenValid('accepter'.$inscription->getId(), $request->request->get('_token'))) {
-        $this->addFlash('error', 'Token CSRF invalide.');
-        return $this->redirectToRoute('app_backoffice_inscriptions', ['status' => 'EN_ATTENTE']);
-    }
-
-    $user = $inscription->getUser();
-    if (!$user) {
-        $this->addFlash('error', 'Aucun utilisateur associé à cette inscription.');
-        return $this->redirectToRoute('app_backoffice_inscriptions', ['status' => 'EN_ATTENTE']);
-    }
-
-    $formation = $inscription->getFormation();
-    if (!$formation) {
-        $this->addFlash('error', 'Aucune formation associée à cette inscription.');
-        return $this->redirectToRoute('app_backoffice_inscriptions', ['status' => 'EN_ATTENTE']);
-    }
-
-    $inscription->setStatus('ACCEPTEE');
-    $inscription->setDateReponse(new \DateTime());
-
-    $quizExistant = $em->getRepository(Quiz_result::class)
-        ->findOneBy(['user' => $user, 'training' => $formation]);
-
-    // ✅ DEBUG
-    file_put_contents('groq_debug.txt',
-        date('H:i:s') . " - quizExistant: " . ($quizExistant ? 'OUI id='.$quizExistant->getId() : 'NON') . "\n",
-        FILE_APPEND
-    );
-
-    if (!$quizExistant) {
-        // ✅ DEBUG
-        file_put_contents('groq_debug.txt',
-            date('H:i:s') . " - AVANT generateQuiz formation: " . $formation->getTitle() . "\n",
-            FILE_APPEND
-        );
-
-        try {
-            $questions = $quizGenerator->generateQuiz(
-                $formation->getTitle(),
-                $formation->getDescription() ?? ''
-            );
-
-            // ✅ DEBUG
-            file_put_contents('groq_debug.txt',
-                date('H:i:s') . " - APRES generateQuiz - nb questions: " . count($questions) . " - q1: " . $questions[0]['question'] . "\n",
-                FILE_APPEND
-            );
-
-            $quizResult = new Quiz_result();
-            $quizResult->setUser($user);
-            $quizResult->setTraining($formation);
-            $quizResult->setScore(null);
-            $quizResult->setTotalQuestions(count($questions));
-            $quizResult->setPercentage(null);
-            $quizResult->setPassed(null);
-            $quizResult->setCompletedAt(null);
-            $quizResult->setQuestions($questions);
-
-            $em->persist($quizResult);
-
-            $this->addFlash('success', sprintf(
-                'Inscription acceptée. Un quiz de %d questions a été généré.',
-                count($questions)
-            ));
-        } catch (\Exception $e) {
-            // ✅ DEBUG
-            file_put_contents('groq_debug.txt',
-                date('H:i:s') . " - EXCEPTION: " . $e->getMessage() . "\n",
-                FILE_APPEND
-            );
-            $this->addFlash('warning', 'Inscription acceptée, mais la génération du quiz a échoué : ' . $e->getMessage());
+    #[Route('/inscription/{id}/accepter', name: 'app_backoffice_inscription_accepter')]
+    public function inscriptionAccepter(
+        Inscription $inscription,
+        Request $request,
+        EntityManagerInterface $em,
+        AIQuizGenerator $quizGenerator
+    ): Response {
+        $token = (string) $request->request->get('_token');
+        if (!$this->isCsrfTokenValid('accepter'.$inscription->getId(), $token)) {
+            $this->addFlash('error', 'Token CSRF invalide.');
+            return $this->redirectToRoute('app_backoffice_inscriptions', ['status' => 'EN_ATTENTE']);
         }
-    } else {
+
+        $user = $inscription->getUser();
+        if (!$user) {
+            $this->addFlash('error', 'Aucun utilisateur associé à cette inscription.');
+            return $this->redirectToRoute('app_backoffice_inscriptions', ['status' => 'EN_ATTENTE']);
+        }
+
+        $formation = $inscription->getFormation();
+        if (!$formation) {
+            $this->addFlash('error', 'Aucune formation associée à cette inscription.');
+            return $this->redirectToRoute('app_backoffice_inscriptions', ['status' => 'EN_ATTENTE']);
+        }
+
+        $inscription->setStatus('ACCEPTEE');
+        $inscription->setDateReponse(new \DateTime());
+
+        $quizExistant = $em->getRepository(Quiz_result::class)
+            ->findOneBy(['user' => $user, 'training' => $formation]);
+
+        // DEBUG
         file_put_contents('groq_debug.txt',
-            date('H:i:s') . " - Quiz existant trouvé, pas de régénération\n",
+            date('H:i:s') . " - quizExistant: " . ($quizExistant ? 'OUI id='.$quizExistant->getId() : 'NON') . "\n",
             FILE_APPEND
         );
+
+        if (!$quizExistant) {
+            file_put_contents('groq_debug.txt',
+                date('H:i:s') . " - AVANT generateQuiz formation: " . ($formation->getTitle() ?? '') . "\n",
+                FILE_APPEND
+            );
+
+            try {
+                $questions = $quizGenerator->generateQuiz(
+                    $formation->getTitle() ?? '', // garantit une chaîne non nulle
+                    $formation->getDescription() ?? ''
+                );
+
+                $nbQuestions = count($questions);
+                // Évite l'accès à un offset inexistant
+                $q1 = '';
+                if ($nbQuestions > 0 && isset($questions[0]['question'])) {
+                    $q1 = $questions[0]['question'];
+                } else {
+                    $q1 = '?';
+                }
+
+                file_put_contents('groq_debug.txt',
+                    date('H:i:s') . " - APRES generateQuiz - nb questions: " . $nbQuestions . " - q1: " . $q1 . "\n",
+                    FILE_APPEND
+                );
+
+                $quizResult = new Quiz_result();
+                $quizResult->setUser($user);
+                $quizResult->setTraining($formation);
+                $quizResult->setScore(null);
+                $quizResult->setTotalQuestions($nbQuestions);
+                $quizResult->setPercentage(null);
+                $quizResult->setPassed(null);
+                $quizResult->setCompletedAt(null);
+
+                // Transforme le tableau de questions en un tableau de chaînes JSON
+                $encodedQuestions = array_map(fn(array $q): string => json_encode($q), $questions);
+                $quizResult->setQuestions($encodedQuestions);
+
+                $em->persist($quizResult);
+
+                $this->addFlash('success', sprintf(
+                    'Inscription acceptée. Un quiz de %d questions a été généré.',
+                    $nbQuestions
+                ));
+            } catch (\Exception $e) {
+                file_put_contents('groq_debug.txt',
+                    date('H:i:s') . " - EXCEPTION: " . $e->getMessage() . "\n",
+                    FILE_APPEND
+                );
+                $this->addFlash('warning', 'Inscription acceptée, mais la génération du quiz a échoué : ' . $e->getMessage());
+            }
+        } else {
+            file_put_contents('groq_debug.txt',
+                date('H:i:s') . " - Quiz existant trouvé, pas de régénération\n",
+                FILE_APPEND
+            );
+        }
+
+        $em->flush();
+
+        return $this->redirectToRoute('app_backoffice_inscriptions', ['status' => 'EN_ATTENTE']);
     }
 
-    $em->flush();
-
-    return $this->redirectToRoute('app_backoffice_inscriptions', ['status' => 'EN_ATTENTE']);
-}
     #[Route('/inscription/{id}/refuser', name: 'app_backoffice_inscription_refuser')]
     public function inscriptionRefuser(Inscription $inscription, Request $request, EntityManagerInterface $em): Response
     {
-        if ($this->isCsrfTokenValid('refuser'.$inscription->getId(), $request->request->get('_token'))) {
-            $commentaire = $request->request->get('commentaire', '');
+        $token = (string) $request->request->get('_token');
+        if ($this->isCsrfTokenValid('refuser'.$inscription->getId(), $token)) {
+            $commentaire = (string) $request->request->get('commentaire', '');
 
             $inscription->setStatus('REFUSEE');
             $inscription->setDateReponse(new \DateTime());

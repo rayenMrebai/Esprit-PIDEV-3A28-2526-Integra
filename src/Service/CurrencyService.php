@@ -9,7 +9,7 @@ class CurrencyService
 {
     private const API_PRIMARY = 'https://open.er-api.com/v6/latest/TND';
     private const API_FALLBACK = 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/tnd.min.json';
-    private const CACHE_TTL = 1800; // 30 minutes
+    private const CACHE_TTL = 1800;
 
     private HttpClientInterface $httpClient;
     private FilesystemAdapter $cache;
@@ -21,8 +21,7 @@ class CurrencyService
     }
 
     /**
-     * Retourne les taux USD et EUR (par rapport au TND).
-     * Utilise un cache de 30 minutes.
+     * @return array{USD: string, EUR: string}|array{USD: null, EUR: null, error: string}
      */
     public function getRates(): array
     {
@@ -37,17 +36,25 @@ class CurrencyService
             try {
                 $rates = $this->fetchFromFallback();
             } catch (\Exception $e) {
-                return ['USD' => null, 'EUR' => null, 'error' => 'Indisponible'];
+                $rates = ['USD' => null, 'EUR' => null, 'error' => 'Indisponible'];
             }
         }
 
-        $cacheItem->set($rates);
+        $displayRates = [
+            'USD' => $rates['USD'] ?? '--',
+            'EUR' => $rates['EUR'] ?? '--',
+        ];
+
+        $cacheItem->set($displayRates);
         $cacheItem->expiresAfter(self::CACHE_TTL);
         $this->cache->save($cacheItem);
 
-        return $rates;
+        return $displayRates;
     }
 
+    /**
+     * @return array{USD: float|null, EUR: float|null}
+     */
     private function fetchFromPrimary(): array
     {
         $response = $this->httpClient->request('GET', self::API_PRIMARY);
@@ -63,6 +70,9 @@ class CurrencyService
         ];
     }
 
+    /**
+     * @return array{USD: float|null, EUR: float|null}
+     */
     private function fetchFromFallback(): array
     {
         $response = $this->httpClient->request('GET', self::API_FALLBACK);
@@ -78,13 +88,10 @@ class CurrencyService
         ];
     }
 
-    /**
-     * Formatte les taux pour un affichage direct.
-     */
     public function getDisplayRates(): string
     {
         $rates = $this->getRates();
-        if (isset($rates['error']) || $rates['USD'] === null || $rates['EUR'] === null) {
+        if (isset($rates['error']) || $rates['USD'] === '--' || $rates['EUR'] === '--') {
             return '⚠️ Taux indisponible';
         }
         return sprintf('%.4f USD  •  %.4f EUR', $rates['USD'], $rates['EUR']);

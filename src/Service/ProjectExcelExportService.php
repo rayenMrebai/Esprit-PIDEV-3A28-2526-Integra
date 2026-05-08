@@ -2,12 +2,16 @@
 
 namespace App\Service;
 
+use App\Entity\Project;
+use App\Entity\Projectassignment;
+use App\Entity\UserAccount;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Conditional;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Chart\Chart;
 use PhpOffice\PhpSpreadsheet\Chart\Title;
 use PhpOffice\PhpSpreadsheet\Chart\Legend;
@@ -19,7 +23,6 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProjectExcelExportService
 {
-    // ===== COULEURS INTEGRA =====
     private const C_BLUE       = 'FF0B63CE';
     private const C_GREEN      = 'FF0FA36B';
     private const C_RED        = 'FFEF4444';
@@ -28,16 +31,21 @@ class ProjectExcelExportService
     private const C_LIGHT_BLUE = 'FFDBEAFE';
     private const C_WHITE      = 'FFFFFFFF';
     private const C_GRAY       = 'FF6B7280';
-    private const C_BG         = 'FFF8FAFC';
-    private const C_LIGHT_GRN  = 'FFD1FAE5';
 
-    private array $employeeNameMap        = [];
-    private array $assignmentsByProject   = [];
-    private array $totalAllocByEmployee   = [];
+    /** @var array<int, string> */
+    private array $employeeNameMap = [];
 
-    // ================================================================
-    //  EXPORT GLOBAL
-    // ================================================================
+    /** @var array<int, Projectassignment[]> */
+    private array $assignmentsByProject = [];
+
+    /** @var array<int, float> */
+    private array $totalAllocByEmployee = [];
+
+    /**
+     * @param Project[]              $projects
+     * @param Projectassignment[]    $assignments
+     * @param UserAccount[]          $employees
+     */
     public function exportAllData(array $projects, array $assignments, array $employees): StreamedResponse
     {
         $this->buildMaps($assignments, $employees);
@@ -54,9 +62,11 @@ class ProjectExcelExportService
         return $this->stream($wb, 'INTEGRA_rapport_global_' . date('Ymd_His') . '.xlsx');
     }
 
-    // ================================================================
-    //  EXPORT UN PROJET
-    // ================================================================
+    /**
+     * @param Project              $project
+     * @param Projectassignment[]  $assignments
+     * @param UserAccount[]        $employees
+     */
     public function exportSingleProject($project, array $assignments, array $employees): StreamedResponse
     {
         $this->buildMaps($assignments, $employees);
@@ -71,9 +81,10 @@ class ProjectExcelExportService
         return $this->stream($wb, 'INTEGRA_projet_' . $project->getProjectId() . '_' . date('Ymd_His') . '.xlsx');
     }
 
-    // ================================================================
-    //  MAPS UTILITAIRES
-    // ================================================================
+    /**
+     * @param Projectassignment[] $assignments
+     * @param UserAccount[]       $employees
+     */
     private function buildMaps(array $assignments, array $employees): void
     {
         $this->employeeNameMap = [];
@@ -91,16 +102,16 @@ class ProjectExcelExportService
         }
     }
 
-    // ================================================================
-    //  FEUILLE 1 — EXECUTIVE DASHBOARD
-    // ================================================================
+    /**
+     * @param Project[]           $projects
+     * @param Projectassignment[] $assignments
+     */
     private function sheetDashboard(Spreadsheet $wb, array $projects, array $assignments): void
     {
         $sh = $wb->createSheet();
         $sh->setTitle('📊 Dashboard');
         $sh->getTabColor()->setARGB('FF0B63CE');
 
-        // ---- Bannière titre ----
         $sh->mergeCells('A1:H1');
         $sh->setCellValue('A1', '🏢  INTEGRA HR — RAPPORT ANALYTIQUE');
         $this->style($sh, 'A1:H1', [
@@ -118,7 +129,6 @@ class ProjectExcelExportService
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
         ]);
 
-        // ---- KPIs globaux ----
         $row = 4;
         $kpiLabels = ['A' => '📁 Total Projets', 'B' => '👥 Total Affectations',
             'C' => '💰 Budget Total (TND)', 'D' => '📈 Alloc. Moyenne %',
@@ -163,7 +173,6 @@ class ProjectExcelExportService
             $sh->getRowDimension($row)->setRowHeight(35);
         }
 
-        // ---- Tableau répartition par statut ----
         $row = 7;
         $sh->mergeCells("A{$row}:C{$row}");
         $sh->setCellValue("A{$row}", '📌 Répartition par Statut');
@@ -215,7 +224,6 @@ class ProjectExcelExportService
         }
         $chartDataEnd = $row;
 
-        // ---- Top 5 budgets ----
         $row += 2;
         $sh->mergeCells("A{$row}:C{$row}");
         $sh->setCellValue("A{$row}", '💰 Top 5 Projets par Budget');
@@ -251,7 +259,6 @@ class ProjectExcelExportService
         }
         $budgetChartEnd = $row;
 
-        // ---- Employés surchargés ----
         $row += 2;
         $sh->mergeCells("A{$row}:C{$row}");
         $sh->setCellValue("A{$row}", '⚠️ Employés Surchargés (> 100%)');
@@ -286,7 +293,6 @@ class ProjectExcelExportService
             ]);
         }
 
-        // ---- Graphique camembert statuts ----
         if (count($statusCount) > 1) {
             $this->addPieChart($sh, 'chart_status',
                 'Répartition des projets par statut',
@@ -295,7 +301,6 @@ class ProjectExcelExportService
             );
         }
 
-        // ---- Graphique barres budgets ----
         if (count($top5) > 1) {
             $this->addBarChart($sh, 'chart_budget',
                 'Top 5 Projets par Budget (TND)',
@@ -309,16 +314,15 @@ class ProjectExcelExportService
         }
     }
 
-    // ================================================================
-    //  FEUILLE 2 — PROJETS
-    // ================================================================
+    /**
+     * @param Project[] $projects
+     */
     private function sheetProjects(Spreadsheet $wb, array $projects): void
     {
         $sh = $wb->createSheet();
         $sh->setTitle('📁 Projets');
         $sh->getTabColor()->setARGB('FF0FA36B');
 
-        // Titre
         $sh->mergeCells('A1:N1');
         $sh->setCellValue('A1', '📁  LISTE COMPLÈTE DES PROJETS RH');
         $this->style($sh, 'A1:N1', [
@@ -335,7 +339,6 @@ class ProjectExcelExportService
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
         ]);
 
-        // En-têtes
         $headers = ['ID', 'Nom du projet', 'Description', 'Date début', 'Date fin',
             'Statut', 'Budget (TND)', 'Durée (j)', 'Nb Employés',
             'Alloc. totale %', 'Alloc. moy. %', 'Budget/Emp.', 'Budget/Jour', 'Efficacité'];
@@ -395,7 +398,6 @@ class ProjectExcelExportService
             $row++;
         }
 
-        // Formatage conditionnel : budget/emp < 1000 → orange
         if ($row > 4) {
             $cond = new Conditional();
             $cond->setConditionType(Conditional::CONDITION_CELLIS)
@@ -411,9 +413,10 @@ class ProjectExcelExportService
         }
     }
 
-    // ================================================================
-    //  FEUILLE 3 — AFFECTATIONS
-    // ================================================================
+    /**
+     * @param Projectassignment[] $assignments
+     * @param Project[]           $projects
+     */
     private function sheetAssignments(Spreadsheet $wb, array $assignments, array $projects): void
     {
         $sh = $wb->createSheet();
@@ -482,7 +485,6 @@ class ProjectExcelExportService
             $row++;
         }
 
-        // Formatage conditionnel allocation > 100 → rouge gras
         if ($row > 3) {
             $cond = new Conditional();
             $cond->setConditionType(Conditional::CONDITION_CELLIS)
@@ -498,9 +500,10 @@ class ProjectExcelExportService
         }
     }
 
-    // ================================================================
-    //  FEUILLE 4 — STATISTIQUES GLOBALES
-    // ================================================================
+    /**
+     * @param Project[]           $projects
+     * @param Projectassignment[] $assignments
+     */
     private function sheetStats(Spreadsheet $wb, array $projects, array $assignments): void
     {
         $sh = $wb->createSheet();
@@ -518,9 +521,8 @@ class ProjectExcelExportService
 
         $row = 3;
 
-        // -- Répartition statuts --
         $row = $this->statsSection($sh, $row, '📌 Projets par Statut', ['Statut', 'Nb', '%'],
-            function () use ($projects) {
+            function () use ($projects): array {
                 $sc = array_count_values(array_map(fn($p) => $p->getStatus(), $projects));
                 $data = [];
                 foreach ($sc as $s => $n) {
@@ -531,9 +533,8 @@ class ProjectExcelExportService
 
         $row++;
 
-        // -- Budget par statut --
         $row = $this->statsSection($sh, $row, '💰 Budget Total par Statut (TND)', ['Statut', 'Budget total', 'Budget moy.'],
-            function () use ($projects) {
+            function () use ($projects): array {
                 $budgets = [];
                 foreach ($projects as $p) {
                     $budgets[$p->getStatus()][] = $p->getBudget();
@@ -547,9 +548,8 @@ class ProjectExcelExportService
 
         $row++;
 
-        // -- Tranches allocation --
         $row = $this->statsSection($sh, $row, '📊 Tranches d\'Allocation Employés', ['Tranche', 'Nb employés', '%'],
-            function () use ($assignments) {
+            function () use ($assignments): array {
                 $bands = ['🟢 0–50%' => 0, '🟡 51–80%' => 0, '🟠 81–100%' => 0, '🔴 >100%' => 0];
                 foreach ($assignments as $a) {
                     $r = $a->getAllocationRate();
@@ -568,9 +568,8 @@ class ProjectExcelExportService
 
         $row++;
 
-        // -- Projets par mois de début --
         $row = $this->statsSection($sh, $row, '📅 Projets par Mois de Début', ['Mois', 'Nb projets'],
-            function () use ($projects) {
+            function () use ($projects): array {
                 $months = [];
                 foreach ($projects as $p) {
                     if ($p->getStartDate()) {
@@ -590,7 +589,6 @@ class ProjectExcelExportService
             $sh->getColumnDimension($c)->setAutoSize(true);
         }
 
-        // Graphique barres : allocation par tranche (E1:H20)
         $this->addBarChart($sh, 'chart_alloc',
             'Tranches d\'Allocation Employés',
             '📈 Statistiques', 3, 6,
@@ -598,16 +596,16 @@ class ProjectExcelExportService
         );
     }
 
-    // ================================================================
-    //  FEUILLE — DÉTAIL UN PROJET
-    // ================================================================
+    /**
+     * @param Project             $project
+     * @param Projectassignment[] $assignments
+     */
     private function sheetSingleProject(Spreadsheet $wb, $project, array $assignments): void
     {
         $sh = $wb->createSheet();
         $sh->setTitle('📋 Projet');
         $sh->getTabColor()->setARGB('FF0B63CE');
 
-        // Bannière
         $sh->mergeCells('A1:H1');
         $sh->setCellValue('A1', '📋  RAPPORT DE PROJET : ' . strtoupper($project->getName()));
         $this->style($sh, 'A1:H1', [
@@ -624,7 +622,6 @@ class ProjectExcelExportService
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
         ]);
 
-        // Section : Informations générales
         $row = 4;
         $sh->mergeCells("A{$row}:H{$row}");
         $sh->setCellValue("A{$row}", 'ℹ️  INFORMATIONS GÉNÉRALES');
@@ -678,7 +675,6 @@ class ProjectExcelExportService
             ]);
         }
 
-        // Section : Affectations
         $row += 2;
         $sh->mergeCells("A{$row}:H{$row}");
         $sh->setCellValue("A{$row}", '👥  AFFECTATIONS DES EMPLOYÉS');
@@ -735,7 +731,6 @@ class ProjectExcelExportService
             }
         }
 
-        // Formatage conditionnel
         if ($row >= $allocStartRow) {
             $cond = new Conditional();
             $cond->setConditionType(Conditional::CONDITION_CELLIS)
@@ -751,9 +746,9 @@ class ProjectExcelExportService
         }
     }
 
-    // ================================================================
-    //  FEUILLE — STATS UN PROJET
-    // ================================================================
+    /**
+     * @param Projectassignment[] $assignments
+     */
     private function sheetSingleStats(Spreadsheet $wb, array $assignments): void
     {
         $sh = $wb->createSheet();
@@ -771,7 +766,7 @@ class ProjectExcelExportService
         $row = 3;
 
         $row = $this->statsSection($sh, $row, '👔 Employés par Rôle', ['Rôle', 'Nb'],
-            function () use ($assignments) {
+            function () use ($assignments): array {
                 $roles = [];
                 foreach ($assignments as $a) {
                     $roles[$a->getRole()] = ($roles[$a->getRole()] ?? 0) + 1;
@@ -786,7 +781,7 @@ class ProjectExcelExportService
         $row++;
 
         $row = $this->statsSection($sh, $row, '📊 Tranches d\'Allocation', ['Tranche', 'Nb', '%'],
-            function () use ($assignments) {
+            function () use ($assignments): array {
                 $bands = ['🟢 0–50%' => 0, '🟡 51–80%' => 0, '🟠 81–100%' => 0, '🔴 >100%' => 0];
                 foreach ($assignments as $a) {
                     $r = $a->getAllocationRate();
@@ -808,17 +803,16 @@ class ProjectExcelExportService
         }
     }
 
-    // ================================================================
-    //  HELPERS
-    // ================================================================
-
-    /** Section avec titre + tableau de données */
-    private function statsSection($sh, int $row, string $title, array $headers, callable $dataFn, string $colorHex): int
+    /**
+     * @param Worksheet $sh
+     * @param string[]  $headers
+     * @return int
+     */
+    private function statsSection(Worksheet $sh, int $row, string $title, array $headers, callable $dataFn, string $colorHex): int
     {
         $nbCols = count($headers);
         $lastCol = $this->colLetter($nbCols - 1);
 
-        // Titre section
         $sh->mergeCells("A{$row}:{$lastCol}{$row}");
         $sh->setCellValue("A{$row}", $title);
         $this->style($sh, "A{$row}:{$lastCol}{$row}", [
@@ -829,7 +823,6 @@ class ProjectExcelExportService
         $sh->getRowDimension($row)->setRowHeight(20);
         $row++;
 
-        // En-têtes colonnes
         foreach ($headers as $i => $h) {
             $col = $this->colLetter($i);
             $sh->setCellValue($col . $row, $h);
@@ -859,7 +852,7 @@ class ProjectExcelExportService
         return $row;
     }
 
-    private function addPieChart($sheet, string $name, string $title, string $sheetTitle, int $start, int $end, string $tl, string $br): void
+    private function addPieChart(Worksheet $sheet, string $name, string $title, string $sheetTitle, int $start, int $end, string $tl, string $br): void
     {
         $labels = [new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, "'{$sheetTitle}'!\$A\${$start}:\$A\${$end}", null, $end - $start + 1)];
         $values = [new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_NUMBER, "'{$sheetTitle}'!\$B\${$start}:\$B\${$end}", null, $end - $start + 1)];
@@ -874,7 +867,7 @@ class ProjectExcelExportService
         $sheet->addChart($chart);
     }
 
-    private function addBarChart($sheet, string $name, string $title, string $sheetTitle, int $start, int $end, string $tl, string $br): void
+    private function addBarChart(Worksheet $sheet, string $name, string $title, string $sheetTitle, int $start, int $end, string $tl, string $br): void
     {
         $labels = [new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, "'{$sheetTitle}'!\$A\${$start}:\$A\${$end}", null, $end - $start + 1)];
         $values = [new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_NUMBER, "'{$sheetTitle}'!\$B\${$start}:\$B\${$end}", null, $end - $start + 1)];
@@ -886,16 +879,22 @@ class ProjectExcelExportService
         $sheet->addChart($chart);
     }
 
-    private function style($sheet, string $range, array $styles): void
+    /**
+     * @param Worksheet $sheet
+     * @param array<string, mixed> $styles
+     */
+    private function style(Worksheet $sheet, string $range, array $styles): void
     {
         $sheet->getStyle($range)->applyFromArray($styles);
     }
 
+    /** @return array{fillType: string, startColor: array{argb: string}} */
     private function solidFill(string $argb): array
     {
         return ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => $argb]];
     }
 
+    /** @return array{allBorders: array{borderStyle: string, color: array{argb: string}}} */
     private function allBorders(): array
     {
         return ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['argb' => 'FFE2E8F0']]];
@@ -913,7 +912,7 @@ class ProjectExcelExportService
         $writer = new Xlsx($wb);
         $writer->setIncludeCharts(true);
 
-        $response = new StreamedResponse(function () use ($writer) {
+        $response = new StreamedResponse(function () use ($writer): void {
             $writer->save('php://output');
         });
 

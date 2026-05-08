@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -15,6 +17,7 @@ class Skill
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
+    /** @phpstan-ignore property.unusedType */
     private ?int $id = null;
 
     #[ORM\Column(type: "string", length: 100, nullable: true)]
@@ -57,8 +60,9 @@ class Skill
     #[Assert\NotBlank(message: "Le programme de formation est obligatoire.")]
     private ?Training_program $trainingProgram = null;
 
-    // Relation ManyToMany avec UserAccount (côté propriétaire ou inverse)
-    // Puisque UserAccount a déjà inversedBy="skills", ici c'est mappedBy
+    /**
+     * @var Collection<int, UserAccount>
+     */
     #[ORM\ManyToMany(targetEntity: UserAccount::class, mappedBy: "skills")]
     private Collection $users;
 
@@ -128,26 +132,28 @@ class Skill
         return $this;
     }
 
+    /**
+     * @return Collection<int, UserAccount>
+     */
     public function getUsers(): Collection
     {
         return $this->users;
     }
 
-   // Skill.php
-public function addUser(UserAccount $user): self
-{
-    if (!$this->users->contains($user)) {
-        $this->users->add($user);
-        $user->addSkill($this);  // Synchronisation
+    public function addUser(UserAccount $user): self
+    {
+        if (!$this->users->contains($user)) {
+            $this->users->add($user);
+            $user->addSkill($this);
+        }
+        return $this;
     }
-    return $this;
-}
 
-public function removeUser(UserAccount $user): self
-{
-    if ($this->users->removeElement($user)) {
-        $user->removeSkill($this);  // Synchronisation
+    public function removeUser(UserAccount $user): self
+    {
+        if ($this->users->removeElement($user)) {
+            $user->removeSkill($this);
+        }
+        return $this;
     }
-    return $this;
-}
 }

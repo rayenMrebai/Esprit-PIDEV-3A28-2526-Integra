@@ -13,7 +13,7 @@ class Candidat
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(name: 'id', type: 'integer')]
-    private ?int $id = null;
+    private int $id = 0;                     // ← int au lieu de ?int
 
     #[ORM\Column(name: 'firstName', type: 'string', length: 255)]
     #[Assert\NotBlank(message: "Le prénom est obligatoire.")]
@@ -52,7 +52,7 @@ class Candidat
     private ?Jobposition $jobposition = null;
 
     // Getters
-    public function getId(): ?int { return $this->id; }
+    public function getId(): int { return $this->id; }
     public function getFirstName(): ?string { return $this->firstName; }
     public function getLastName(): ?string { return $this->lastName; }
     public function getEmail(): ?string { return $this->email; }
@@ -62,52 +62,13 @@ class Candidat
     public function getStatus(): ?string { return $this->status; }
     public function getJobposition(): ?Jobposition { return $this->jobposition; }
 
-    // Setters acceptant null
-    public function setFirstName(?string $firstName): self
-    {
-        $this->firstName = $firstName;
-        return $this;
-    }
-
-    public function setLastName(?string $lastName): self
-    {
-        $this->lastName = $lastName;
-        return $this;
-    }
-
-    public function setEmail(?string $email): self
-    {
-        $this->email = $email;
-        return $this;
-    }
-
-    public function setPhone(?int $phone): self
-    {
-        $this->phone = $phone;
-        return $this;
-    }
-
-    public function setEducationLevel(?string $educationLevel): self
-    {
-        $this->educationLevel = $educationLevel;
-        return $this;
-    }
-
-    public function setSkills(?string $skills): self
-    {
-        $this->skills = $skills;
-        return $this;
-    }
-
-    public function setStatus(?string $status): self
-    {
-        $this->status = $status;
-        return $this;
-    }
-
-    public function setJobposition(?Jobposition $jobposition): self
-    {
-        $this->jobposition = $jobposition;
-        return $this;
-    }
+    // Setters
+    public function setFirstName(?string $firstName): self { $this->firstName = $firstName; return $this; }
+    public function setLastName(?string $lastName): self { $this->lastName = $lastName; return $this; }
+    public function setEmail(?string $email): self { $this->email = $email; return $this; }
+    public function setPhone(?int $phone): self { $this->phone = $phone; return $this; }
+    public function setEducationLevel(?string $educationLevel): self { $this->educationLevel = $educationLevel; return $this; }
+    public function setSkills(?string $skills): self { $this->skills = $skills; return $this; }
+    public function setStatus(?string $status): self { $this->status = $status; return $this; }
+    public function setJobposition(?Jobposition $jobposition): self { $this->jobposition = $jobposition; return $this; }
 }

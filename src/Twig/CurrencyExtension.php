@@ -23,6 +23,9 @@ class CurrencyExtension extends AbstractExtension
         ];
     }
 
+    /**
+     * @return array{USD: string, EUR: string}|array{USD: null, EUR: null, error: string}
+     */
     public function getRates(): array
     {
         return $this->currencyService->getRates();

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Entity\Projectassignment;
@@ -16,20 +18,19 @@ use Symfony\Component\Routing\Attribute\Route;
 final class ProjectassignmentController extends AbstractController
 {
     public function __construct(
-            private ProjectassignmentRepository $assignmentRepository,
-            private ProjectRepository $projectRepository
+        private ProjectassignmentRepository $assignmentRepository,
+        private ProjectRepository $projectRepository
     ) {
     }
 
     #[Route(name: 'app_projectassignment_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
-        // Récupération des paramètres GET
-        $searchTerm = $request->query->get('search', '');
+        // Récupération des paramètres GET avec cast pour garantir le type string
+        $searchTerm = (string) $request->query->get('search', '');
         $selectedProject = $request->query->get('project') ? (int) $request->query->get('project') : null;
-        $selectedRole = $request->query->get('role', '');
+        $selectedRole = (string) $request->query->get('role', '');
 
-        // Utilisation de la méthode de recherche personnalisée du repository
         $assignments = $this->assignmentRepository->findByFilters($searchTerm, $selectedProject, $selectedRole);
 
         // Récupération de tous les projets pour le filtre déroulant
@@ -39,12 +40,12 @@ final class ProjectassignmentController extends AbstractController
         $roles = $this->assignmentRepository->findDistinctRoles();
 
         return $this->render('projectassignment/index.html.twig', [
-                'assignments' => $assignments,
-                'projects' => $projects,
-                'roles' => $roles,
-                'searchTerm' => $searchTerm,
-                'selectedProject' => $selectedProject,
-                'selectedRole' => $selectedRole,
+            'assignments' => $assignments,
+            'projects' => $projects,
+            'roles' => $roles,
+            'searchTerm' => $searchTerm,
+            'selectedProject' => $selectedProject,
+            'selectedRole' => $selectedRole,
         ]);
     }
 
@@ -63,8 +64,8 @@ final class ProjectassignmentController extends AbstractController
         }
 
         return $this->render('projectassignment/new.html.twig', [
-                'assignment' => $assignment,
-                'form' => $form,
+            'assignment' => $assignment,
+            'form' => $form,
         ]);
     }
 
@@ -72,7 +73,7 @@ final class ProjectassignmentController extends AbstractController
     public function show(Projectassignment $assignment): Response
     {
         return $this->render('projectassignment/show.html.twig', [
-                'assignment' => $assignment,
+            'assignment' => $assignment,
         ]);
     }
 
@@ -89,8 +90,8 @@ final class ProjectassignmentController extends AbstractController
         }
 
         return $this->render('projectassignment/edit.html.twig', [
-                'assignment' => $assignment,
-                'form' => $form,
+            'assignment' => $assignment,
+            'form' => $form,
         ]);
     }
 

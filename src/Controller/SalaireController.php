@@ -97,8 +97,17 @@ class SalaireController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             if ($salaire->getStatus() === 'PAYÉ') {
+                $datePaiement = $salaire->getDatePaiement();
+                // ✅ Vérification null avant format()
+                if ($datePaiement === null) {
+                    $this->addFlash('error', "La date de paiement est obligatoire pour le statut PAYÉ.");
+                    return $this->render('backoffice/salaires/salaire/edit.html.twig', [
+                        'form'    => $form->createView(),
+                        'salaire' => $salaire,
+                    ]);
+                }
                 $today = new \DateTime('today');
-                if ($salaire->getDatePaiement()->format('Y-m-d') !== $today->format('Y-m-d')) {
+                if ($datePaiement->format('Y-m-d') !== $today->format('Y-m-d')) {
                     $this->addFlash('error', "Quand le statut est 'PAYÉ', la date de paiement doit être aujourd'hui.");
                     return $this->render('backoffice/salaires/salaire/edit.html.twig', [
                         'form'    => $form->createView(),
@@ -139,7 +148,8 @@ class SalaireController extends AbstractController
             return $this->redirectToRoute('app_backoffice_salaires_index');
         }
 
-        if (!$this->isCsrfTokenValid('delete' . $salaire->getId(), $request->request->get('_token'))) {
+        $token = (string) $request->request->get('_token'); // ✅ cast string
+        if (!$this->isCsrfTokenValid('delete' . $salaire->getId(), $token)) {
             $this->addFlash('error', 'Token de sécurité invalide.');
             return $this->redirectToRoute('app_backoffice_salaires_index');
         }

@@ -30,7 +30,7 @@ class CandidatValidator
 
         // Règle 4 : Le téléphone (optionnel) doit être un nombre positif s'il est renseigné
         $phone = $candidat->getPhone();
-        if ($phone !== null && $phone !== 0 && (!is_numeric($phone) || $phone < 0)) {
+        if (null !== $phone && $phone < 0) {
             throw new \InvalidArgumentException('Le téléphone doit être un nombre valide.');
         }
 

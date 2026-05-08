@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Entity\Candidat;
@@ -73,7 +75,8 @@ final class CandidatController extends AbstractController
     #[Route('/{id}', name: 'app_candidat_delete', methods: ['POST'])]
     public function delete(Request $request, Candidat $candidat, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$candidat->getId(), $request->request->get('_token'))) {
+        $token = (string) $request->request->get('_token');
+        if ($this->isCsrfTokenValid('delete'.$candidat->getId(), $token)) {
             $entityManager->remove($candidat);
             $entityManager->flush();
             $this->addFlash('success', 'Candidat supprimé avec succès.');
@@ -84,7 +87,8 @@ final class CandidatController extends AbstractController
     #[Route('/{id}/reject', name: 'app_candidat_reject', methods: ['POST'])]
     public function reject(Request $request, Candidat $candidat, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('reject'.$candidat->getId(), $request->request->get('_token'))) {
+        $token = (string) $request->request->get('_token');
+        if ($this->isCsrfTokenValid('reject'.$candidat->getId(), $token)) {
             $candidat->setStatus('Rejeté');
             $entityManager->flush();
             $this->addFlash('success', 'Candidat rejeté avec succès.');

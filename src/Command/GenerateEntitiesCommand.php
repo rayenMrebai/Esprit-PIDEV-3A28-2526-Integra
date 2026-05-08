@@ -1,17 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Command;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\Column;
+use Doctrine\DBAL\Schema\SchemaManager;
 use Doctrine\DBAL\Schema\Table;
 use Symfony\Component\Console\Attribute\AsCommand;
-use Doctrine\DBAL\Schema\AbstractSchemaManager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Filesystem\Filesystem;
 
 #[AsCommand(
     name: 'app:generate:entities',
@@ -20,10 +21,12 @@ use Symfony\Component\Filesystem\Filesystem;
 class GenerateEntitiesCommand extends Command
 {
     private Connection $connection;
-    private ?AbstractSchemaManager $schemaManager = null;
+    private ?SchemaManager $schemaManager = null;
+
+    /** @var array<string, true> */
     private array $generatedRelations = [];
 
-    public function __construct(Connection $connection, Filesystem $filesystem)
+    public function __construct(Connection $connection)
     {
         parent::__construct();
         $this->connection = $connection;
@@ -42,17 +45,21 @@ class GenerateEntitiesCommand extends Command
             return Command::FAILURE;
         }
 
+        /** @var array<string, array<string, mixed>> $oneToManyRelations */
         $oneToManyRelations = [];
+        /** @var array<string, string> $manyToOneRelationsName */
         $manyToOneRelationsName = [];
+        /** @var array<string, string> $oneToManyRelationsName */
         $oneToManyRelationsName = [];
 
+        /** @var array<string, int> $tableRelationsCount */
         $tableRelationsCount = [];
         foreach ($tables as $table) {
             $foreignKeys = $this->getForeignKeys([$table->getName()]);
             $tableRelationsCount[$table->getName()] = count($foreignKeys);
         }
 
-        usort($tables, function (Table $a, Table $b) use ($tableRelationsCount) {
+        usort($tables, function (Table $a, Table $b) use ($tableRelationsCount): int {
             return $tableRelationsCount[$a->getName()] <=> $tableRelationsCount[$b->getName()];
         });
 
@@ -70,14 +77,17 @@ class GenerateEntitiesCommand extends Command
         return Command::SUCCESS;
     }
 
-    private function getSchemaManager(): AbstractSchemaManager
+    private function getSchemaManager(): SchemaManager
     {
-        if ($this->schemaManager === null) {
-            $this->schemaManager = $this->connection->createSchemaManager();
-        }
+        $this->schemaManager ??= $this->connection->createSchemaManager();
         return $this->schemaManager;
     }
 
+    /**
+     * @param array<string, array<mixed>> $oneToManyRelations
+     * @param array<string, string> $manyToOneRelationsName
+     * @param array<string, string> $oneToManyRelationsName
+     */
     private function generateEntity(Table $table, array &$oneToManyRelations, array &$manyToOneRelationsName, array &$oneToManyRelationsName): void
     {
         $className = ucfirst($table->getName());
@@ -102,16 +112,21 @@ class GenerateEntitiesCommand extends Command
         if (isset($oneToManyRelations[$className])) {
             $processedRelations = [];
             foreach ($oneToManyRelations[$className] as $relation) {
-                if (!in_array($relation, $processedRelations)) {
+                if (!in_array($relation, $processedRelations, true)) {
                     $entityCode .= $relation;
                     $processedRelations[] = $relation;
 
                     $relationArray = $this->parseRelationAnnotation($relation);
-                    $relationKey = "$className-{$relationArray['mappedBy']}";
+                    $mappedBy = $relationArray['mappedBy'];
+                    $targetEntity = $relationArray['targetEntity'];
 
-                    if (!isset($this->generatedRelations[$relationKey])) {
-                        $entityCode .= $this->generateRelationMethods($className, $relationArray['mappedBy'], $relationArray['targetEntity']);
-                        $this->generatedRelations[$relationKey] = true;
+                    if ($mappedBy !== null && $targetEntity !== null) {
+                        $relationKey = "$className-$mappedBy";
+
+                        if (!isset($this->generatedRelations[$relationKey])) {
+                            $entityCode .= $this->generateRelationMethods($className, $mappedBy, $targetEntity);
+                            $this->generatedRelations[$relationKey] = true;
+                        }
                     }
                 }
             }
@@ -119,12 +134,17 @@ class GenerateEntitiesCommand extends Command
 
         $entityCode .= "}\n";
 
-        $filePath = __DIR__ . "/../../src/Entity/$className.php";
+        $filePath = __DIR__ . "/../Entity/$className.php";
         file_put_contents($filePath, $entityCode);
     }
 
+    /**
+     * @param array<string, string> $manyToOneRelationsName
+     * @param array<string, string> $oneToManyRelationsName
+     */
     private function generateImports(array $manyToOneRelationsName, array $oneToManyRelationsName, string $className): string
     {
+        /** @var string[] $imports */
         $imports = [];
 
         foreach ($manyToOneRelationsName as $key => $value) {
@@ -135,19 +155,22 @@ class GenerateEntitiesCommand extends Command
 
         foreach ($oneToManyRelationsName as $key => $value) {
             if ($key === $className) {
-                $imports[] = "Doctrine\Common\Collections\Collection";
+                $imports[] = "Doctrine\\Common\\Collections\\Collection";
                 $imports[] = "App\\Entity\\$value";
             }
         }
 
         $imports = array_unique($imports);
-
-        if (count($imports) == 0) {
+        if (count($imports) === 0) {
             return "";
         }
         return "use " . implode(";\nuse ", $imports) . ";\n";
     }
 
+    /**
+     * @param string[] $tables
+     * @return array<string, array{referencedTable: string, referencedColumn: string}>
+     */
     public function getForeignKeys(array $tables): array
     {
         $foreignKeys = [];
@@ -155,7 +178,8 @@ class GenerateEntitiesCommand extends Command
         $dbTables = $schemaManager->listTables();
 
         foreach ($tables as $tableName) {
-            if (in_array($tableName, array_map(fn($table) => $table->getName(), $dbTables))) {
+            $tableNames = array_map(fn(Table $table): string => $table->getName(), $dbTables);
+            if (in_array($tableName, $tableNames, true)) {
                 $sql = "
                 SELECT 
                     COLUMN_NAME, 
@@ -170,6 +194,7 @@ class GenerateEntitiesCommand extends Command
 
                 $stmt = $this->connection->prepare($sql);
                 $stmt->bindValue(':tableName', $tableName);
+                /** @var array<int, array{COLUMN_NAME: string, REFERENCED_TABLE_NAME: string, REFERENCED_COLUMN_NAME: string}> $fks */
                 $fks = $stmt->executeQuery()->fetchAllAssociative();
 
                 foreach ($fks as $fk) {
@@ -218,12 +243,19 @@ class GenerateEntitiesCommand extends Command
         }\n";
     }
 
+    /**
+     * @param string[] $primaryKeys
+     * @param array<string, array{referencedTable: string, referencedColumn: string}> $foreignKeys
+     * @param array<string, array<mixed>> $oneToManyRelations
+     * @param array<string, string> $manyToOneRelationsName
+     * @param array<string, string> $oneToManyRelationsName
+     */
     private function generateProperty(Column $column, array $primaryKeys, array $foreignKeys, string $className, array &$oneToManyRelations, array &$manyToOneRelationsName, array &$oneToManyRelationsName): string
     {
         $columnName  = $column->getName();
         $typeClass   = get_class($column->getType());
         $length      = $column->getLength();
-        $isPrimaryKey = in_array($columnName, $primaryKeys);
+        $isPrimaryKey = in_array($columnName, $primaryKeys, true);
         $isForeignKey = isset($foreignKeys[$columnName]);
 
         $doctrineType = match ($typeClass) {
@@ -243,16 +275,16 @@ class GenerateEntitiesCommand extends Command
             default => 'string',
         };
 
-        $lengthAnnotation = ($doctrineType === 'string' && $length) ? ", length: $length" : "";
+        $lengthAnnotation = ($doctrineType === 'string' && $length !== null && $length > 0) ? ", length: $length" : "";
         $propertyCode = "\n    " . ($isPrimaryKey ? "#[ORM\\Id]\n    " : "");
 
         if ($isForeignKey) {
             $relatedEntity    = $foreignKeys[$columnName]['referencedTable'];
             $relatedClassName = ucfirst($relatedEntity);
             $primaryKeyColumns = $this->getPrimaryKeyColumns($relatedEntity);
-            $primaryKeyColumn  = $primaryKeyColumns ? $primaryKeyColumns[0] : null;
+            $primaryKeyColumn  = count($primaryKeyColumns) > 0 ? $primaryKeyColumns[0] : null;
 
-            if ($primaryKeyColumn) {
+            if ($primaryKeyColumn !== null) {
                 $propertyCode .= "    #[ORM\\ManyToOne(targetEntity: $relatedClassName::class, inversedBy: \"" . strtolower($className) . "s\")]\n";
                 $propertyCode .= "    #[ORM\\JoinColumn(name: '$columnName', referencedColumnName: '$primaryKeyColumn', onDelete: 'CASCADE')]\n";
                 $propertyCode .= "    private $relatedClassName \$$columnName;\n";
@@ -271,6 +303,7 @@ class GenerateEntitiesCommand extends Command
 
     private function getPHPTypeFromDoctrine(string $doctrineType): string
     {
+        /** @var array<string, string> $mapping */
         $mapping = [
             'integer'    => 'int',
             'smallint'   => 'int',
@@ -295,6 +328,9 @@ class GenerateEntitiesCommand extends Command
         return $mapping[$doctrineType] ?? 'mixed';
     }
 
+    /**
+     * @return string[]
+     */
     private function getPrimaryKeyColumns(string $tableName): array
     {
         $schemaManager = $this->connection->createSchemaManager();
@@ -324,6 +360,9 @@ class GenerateEntitiesCommand extends Command
     }\n";
     }
 
+    /**
+     * @return array{mappedBy: string|null, targetEntity: string|null}
+     */
     private function parseRelationAnnotation(string $relation): array
     {
         $pattern = '/mappedBy:\s*"([^"]+)",\s*targetEntity:\s*([^\s:]+)::class/';
