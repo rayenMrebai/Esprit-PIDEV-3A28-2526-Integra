@@ -1,4 +1,8 @@
-# Integra RH – Plateforme Intelligente de Gestion des Ressources Humaines (Symfony)
+# Integra RH – Plateforme Intelligente de Gestion des Ressources Humaines 
+
+<p align="center">
+  <img src="https://github.com/rayenMrebai/Esprit-PIDEV-3A28-2526-Integra/blob/5e05d9eb07c4c800d8bd0bb78f71b60c761801a8/symf.png?raw=true" alt="Symfony Logo" width="400">
+</p>
 
 [![Symfony Version](https://img.shields.io/badge/Symfony-6.4-000000.svg)](https://symfony.com)
 [![PHP Version](https://img.shields.io/badge/PHP-8.1-777BB4.svg)](https://php.net)
