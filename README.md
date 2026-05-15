@@ -1,7 +1,7 @@
-# Integra RH – Plateforme Intelligente de Gestion des Ressources Humaines 
+# Integra RH – Plateforme Intelligente de Gestion des Ressources Humaines
 
 <p align="center">
-  <img src="https://github.com/rayenMrebai/Esprit-PIDEV-3A28-2526-Integra/blob/5e05d9eb07c4c800d8bd0bb78f71b60c761801a8/symf.png?raw=true" alt="Symfony Logo" width="400">
+  <img src="https://github.com/rayenMrebai/Esprit-PIDEV-3A28-2526-Integra/blob/5e05d9eb07c4c800d8bd0bb78f71b60c761801a8/symf.png?raw=true" alt="Symfony Logo" width="600">
 </p>
 
 [![Symfony Version](https://img.shields.io/badge/Symfony-6.4-000000.svg)](https://symfony.com)
@@ -12,6 +12,12 @@
 
 - [Description](#description)
 - [Fonctionnalités principales](#fonctionnalités-principales)
+  - [👥 Gestion des utilisateurs](#-gestion-des-utilisateurs)
+  - [📢 Gestion du recrutement](#-gestion-du-recrutement)
+  - [🎓 Gestion des formations](#-gestion-des-formations)
+  - [💰 Gestion des salaires](#-gestion-des-salaires)
+  - [📁 Gestion de projets et affectations](#-gestion-de-projets-et-affectations)
+  - [📊 Dashboard & Statistiques](#-dashboard--statistiques)
 - [Fonctionnalités IA](#fonctionnalités-ia)
 - [Technologies utilisées](#technologies-utilisées)
 - [Architecture](#architecture)
@@ -26,16 +32,17 @@
 
 **Integra RH** est une plateforme web intelligente de gestion des ressources humaines développée avec **Symfony** dans le cadre d’un projet intégré d’ingénierie à **ESPRIT**.
 
-La plateforme permet de centraliser et automatiser plusieurs processus RH grâce à des fonctionnalités modernes, des tableaux de bord interactifs et des intégrations d’intelligence artificielle.
+La plateforme centralise et automatise de nombreux processus RH grâce à des fonctionnalités modernes, des tableaux de bord interactifs et des intégrations d’intelligence artificielle.
 
-Cette version web couvre principalement :
+Cette version web couvre l’ensemble des besoins RH :
 
 - Gestion des utilisateurs
 - Gestion du recrutement
 - Gestion des formations
 - Gestion des salaires
+- **Gestion de projets et des affectations d’employés**
 
-Le système offre une interface moderne, sécurisée et responsive destinée aux administrateurs et managers RH.
+Le système offre une interface moderne, sécurisée et responsive, adaptée aux administrateurs, managers et employés.
 
 ---
 
@@ -85,6 +92,18 @@ Le système offre une interface moderne, sécurisée et responsive destinée aux
 - Dashboard statistique avec Chart.js
 - Prédiction salariale via régression linéaire
 
+### 📁 Gestion de projets et affectations
+
+- CRUD des projets et des affectations d’employés
+- Recherche et filtrage avancés (statut, dates, projet, rôle)
+- Validation métier côté serveur (contraintes Symfony)
+- Exports PDF et Excel avec graphiques et tableaux de bord
+- Assistant IA intégré (résumé, amélioration de description, traduction)
+- Recommandation d’employés par similarité sémantique (IA)
+- Dictée vocale pour la description des projets
+- API REST pour les données projets et affectations
+- Taux de change en direct (USD, EUR)
+
 ### 📊 Dashboard & Statistiques
 
 - KPIs RH interactifs
@@ -98,7 +117,7 @@ Le système offre une interface moderne, sécurisée et responsive destinée aux
 
 ## Fonctionnalités IA
 
-La plateforme intègre plusieurs services d’intelligence artificielle :
+La plateforme intègre plusieurs services d’intelligence artificielle, répartis sur les différents modules :
 
 - 🤖 Analyse automatique des CV
 - 🧠 Extraction intelligente des compétences
@@ -107,6 +126,9 @@ La plateforme intègre plusieurs services d’intelligence artificielle :
 - 💡 Génération de recommandations RH
 - ✉️ Génération de lettres de refus
 - 📊 Modèle de prédiction salariale basé sur la régression linéaire
+- 🧠 Assistant de projet (résumé, amélioration, traduction)
+- 🧑‍💼 Recommandation d’employés pour un projet
+- 🎤 Dictée vocale pour les descriptions de projet
 
 ---
 
@@ -124,11 +146,13 @@ La plateforme intègre plusieurs services d’intelligence artificielle :
 ### Frontend
 
 - Twig
-- Bootstrap
+- Bootstrap (4 et 5)
 - JavaScript
 - Chart.js
 - Symfony UX Turbo
 - Stimulus
+- AdminLTE 3.2 (backoffice projets & affectations)
+- Clean Blog (frontoffice public)
 
 ### Base de données
 
@@ -136,26 +160,29 @@ La plateforme intègre plusieurs services d’intelligence artificielle :
 
 ### APIs & Services externes
 
-- Hugging Face API
-- Groq API
-- Telegram Bot API
+- Hugging Face API (embeddings + chat completions)
+- Groq API (génération de quiz)
+- Ollama (LLM local)
+- Vosk (reconnaissance vocale offline)
+- Open Exchange Rates API (taux de change)
 - OpenWeatherMap API
+- Telegram Bot API
 - Brevo Mailer
 - Gmail Mailer
 
 ### Bibliothèques & Bundles
 
 - Dompdf
+- PhpSpreadsheet
 - FPDI
 - Smalot PDF Parser
-- PhpSpreadsheet
-- AdminLTE Bundle
 - Symfony Mailer
 - Symfony Security Bundle
 - Symfony Notifier
-- Webpack Encore
-- Asset Mapper
-- GTranslate Bundle
+- Symfony Cache
+- Symfony HttpClient
+- Symfony Asset Mapper
+- Twig Extra Bundle
 - Monolog Bundle
 
 ### Tests & Qualité
@@ -169,18 +196,21 @@ La plateforme intègre plusieurs services d’intelligence artificielle :
 
 ## Architecture
 
-Le projet suit une architecture **MVC** :
+Le projet suit une architecture **MVC** classique :
 
 - **Models** : Entités Doctrine
 - **Views** : Templates Twig
 - **Controllers** : Contrôleurs Symfony
 
-Le système intègre également :
+L’architecture est enrichie de :
 
-- APIs REST
-- Services IA
-- Notifications temps réel
-- Dashboards interactifs
+- Services dédiés (logique métier, exports, IA, taux de change)
+- Repository personnalisés avec QueryBuilder pour les filtres
+- API REST pour les données projets/affectations
+- Extension Twig pour les taux de change
+- Notifications asynchrones (emails, Telegram)
+- Dashboards interactifs avec graphiques
+- Layouts séparés (AdminLTE pour le backoffice, Clean Blog pour le frontoffice)
 
 ---
 
@@ -192,9 +222,14 @@ Le système intègre également :
 - Composer
 - MySQL
 - Symfony CLI (recommandé)
+- Node.js et npm (pour Webpack Encore, le cas échéant)
+- Python 3.11+ avec `vosk`, `wave` (pour la dictée vocale)
+- FFmpeg (pour la conversion audio)
+- Ollama (pour l’assistant IA local)
 
 ### Cloner le projet
 
 ```bash
 git clone https://github.com/rayenMrebai/Esprit-PIDEV-3A28-2526-Integra.git
 cd Esprit-PIDEV-3A28-2526-Integra
+composer install
